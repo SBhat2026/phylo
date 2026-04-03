@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taxondle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  /* Run with python -m http.server 8080 */
+  :root {
+    --ink: #0f1623;
+    --cream: #f7f8fc;
+    --parchment: #eef0f7;
+    --worn: #d0d5e8;
+    --gold: #4f6ef7;
+    --gold-light: #7b93f9;
+    --forest: #1a2a5e;
+    --sage: #3d5a9e;
+    --rust: #c0392b;
+    --steel: #5a6582;
+    --match-full: #1a7a4a;
+    --match-partial: #9a6c00;
+    --match-none: #b02a2a;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-mono: 'Courier Prime', 'Courier New', monospace;
+    --font-body: 'Crimson Pro', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at 20% 0%, #e8eeff 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 100%, #e4e9ff 0%, transparent 55%);
+  }
+
+  .page-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+
+  header {
+    text-align: center;
+    padding: 36px 0 24px;
+    border-bottom: 2px solid var(--worn);
+    margin-bottom: 28px;
+    position: relative;
+  }
+  header::before {
+    content: '⬡ ⬡ ⬡';
+    display: block;
+    color: var(--gold);
+    font-size: 10px;
+    letter-spacing: 8px;
+    margin-bottom: 10px;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--forest);
+    line-height: 1;
+  }
+  .subtitle {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--steel);
+    font-size: 1.05rem;
+    margin-top: 6px;
+  }
+  .date-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+
+  .game-layout {
+    display: grid;
+    grid-template-columns: 1fr 290px;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 620px) {
+    .game-layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--parchment);
+    border: 1px solid var(--worn);
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.08);
+  }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--worn);
+  }
+
+  .search-wrap {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .search-input {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    padding: 10px 14px;
+    background: var(--cream);
+    border: 1.5px solid var(--worn);
+    border-radius: 3px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--gold); }
+  .search-input::placeholder { color: #a09070; font-style: italic; }
+
+  .guess-btn {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 10px 18px;
+    background: var(--forest);
+    color: var(--cream);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .guess-btn:hover { background: var(--sage); }
+  .guess-btn:disabled { background: var(--worn); cursor: default; }
+
+  .autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--cream);
+    border: 1.5px solid var(--gold);
+    border-top: none;
+    border-radius: 0 0 3px 3px;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: none;
+  }
+  .autocomplete-list.open { display: block; }
+  .autocomplete-item {
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--worn);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.1s;
+  }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover, .autocomplete-item.selected { background: var(--parchment); }
+  .autocomplete-item .sci { font-style: italic; color: var(--steel); font-size: 0.82rem; }
+  .search-hint { font-size: 0.82rem; color: var(--steel); font-style: italic; margin-bottom: 14px; }
+
+  .guess-list { display: flex; flex-direction: column; gap: 10px; }
+  .guess-card {
+    background: var(--cream);
+    border: 1px solid var(--worn);
+    border-radius: 3px;
+    padding: 12px 14px;
+    animation: slide-in 0.2s ease;
+  }
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .guess-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .guess-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .guess-sci { font-style: italic; color: var(--steel); font-size: 0.82rem; }
+  .proximity-badge {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .prox-high { background: #d4eddf; color: #145a30; border: 1px solid #6fcf97; }
+  .prox-mid  { background: #fff0cc; color: #7a4f00; border: 1px solid #f0bc45; }
+  .prox-low  { background: #fde8e8; color: #7b1d1d; border: 1px solid #e57373; }
+
+  .tax-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .tax-chip {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.3px;
+  }
+  .tax-match   { background: #d4f0e2; color: #145a30; border: 1px solid #6fcf97; }
+  .tax-nomatch { background: #fde8e8; color: #7b1d1d; border: 1px solid #e57373; }
+  .tax-label { font-size: 0.62rem; opacity: 0.7; display: block; }
+
+  /* ── LINEAR TREE ──────────────────────────────────────────────────────── */
+  .tree-panel { position: sticky; top: 16px; }
+  .tree-node {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-left: 2px solid var(--worn);
+    padding-left: 12px;
+    margin-left: 8px;
+    transition: all 0.3s;
+  }
+  .tree-node:first-child { border-left: none; margin-left: 0; padding-left: 0; }
+  .tree-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--worn);
+    background: var(--cream);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .tree-node.revealed .tree-dot { background: var(--gold); border-color: var(--gold); }
+  .tree-node.revealed { border-left-color: var(--gold); }
+  .tree-level { font-size: 0.62rem; color: var(--steel); letter-spacing: 1px; text-transform: uppercase; }
+  .tree-value { color: var(--ink); font-style: italic; }
+  .tree-value.hidden { color: var(--worn); font-style: normal; }
+
+  /* ── HINTS ────────────────────────────────────────────────────────────── */
+  .hint-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--worn);
+  }
+  .hint-item:last-child { border-bottom: none; }
+  .hint-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--steel);
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .hint-value { font-size: 0.9rem; color: var(--ink); }
+  .hint-locked { font-style: italic; color: var(--worn); font-size: 0.85rem; }
+  .hint-unlock-note { font-size: 0.75rem; color: var(--steel); font-style: italic; margin-top: 2px; }
+  .continent-pip {
+    display: inline-block;
+    background: var(--sage);
+    color: var(--cream);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin: 1px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── WIN / LOSE ───────────────────────────────────────────────────────── */
+  .result-banner {
+    text-align: center;
+    padding: 28px;
+    border: 2px solid var(--gold);
+    border-radius: 4px;
+    background: var(--parchment);
+    margin-bottom: 20px;
+    display: none;
+    animation: slide-in 0.3s ease;
+  }
+  .result-banner.show { display: block; }
+  .result-banner h2 { font-family: var(--font-display); font-size: 1.8rem; color: var(--forest); margin-bottom: 8px; }
+  .result-banner p { font-size: 0.95rem; color: var(--steel); margin-bottom: 4px; }
+  .result-sci { font-style: italic; color: var(--gold); font-family: var(--font-mono); font-size: 0.9rem; }
+  .result-fact { font-style: italic; margin-top: 12px; font-size: 1rem; color: var(--ink); border-left: 3px solid var(--gold); padding-left: 12px; text-align: left; }
+
+  .guess-counter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .guess-counter-left {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--steel);
+    letter-spacing: 0.5px;
+  }
+  .guess-counter-left .remaining { font-weight: 700; color: var(--ink); }
+  .guess-counter-left .remaining.low { color: #c0392b; }
+
+  .guess-progress-track {
+    height: 3px;
+    background: var(--worn);
+    border-radius: 2px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .guess-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .give-up-btn {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid #d0d5e8;
+    color: var(--steel);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.15s;
+    margin-top: 8px;
+    display: inline-block;
+  }
+  .give-up-btn:hover:not(:disabled) { border-color: var(--rust); color: var(--rust); }
+  .give-up-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .empty-state {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--steel);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  .howto {
+    margin-top: 28px;
+    padding: 16px 20px;
+    border: 1px dashed var(--worn);
+    border-radius: 3px;
+    font-size: 0.88rem;
+    color: var(--steel);
+    line-height: 1.6;
+  }
+  .howto strong { color: var(--ink); font-family: var(--font-display); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--cream); }
+  ::-webkit-scrollbar-thumb { background: var(--worn); border-radius: 3px; }
+
+  .tree-toggle-btn {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    background: transparent;
+    border: 1px solid var(--worn);
+    color: var(--steel);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    float: right;
+    margin-top: -2px;
+  }
+  .tree-toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .new-game-btn {
+    display: none;
+    margin-top: 14px;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 10px 24px;
+    background: var(--forest);
+    color: var(--cream);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .new-game-btn:hover { background: var(--sage); transform: translateY(-1px); }
+
+  .taxon-badge {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--steel);
+    background: var(--parchment);
+    border: 1px solid var(--worn);
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-left: 5px;
+    vertical-align: middle;
+    letter-spacing: 0.5px;
+  }
+  .tax-unknown {
+    background: var(--parchment);
+    color: var(--steel);
+    border: 1px dashed var(--worn);
+    opacity: 0.6;
+  }
+  .autocomplete-taxon { background: color-mix(in srgb, var(--parchment) 60%, var(--cream)); }
+  .autocomplete-taxon:hover, .autocomplete-taxon.selected { background: var(--parchment); }
+
+  /* ── TAXONOMY POPUP ───────────────────────────────────────────────────── */
+  .tax-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 22, 35, 0.55);
+    backdrop-filter: blur(3px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    animation: fade-in 0.15s ease;
+  }
+  .tax-popup-overlay.open { display: flex; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .tax-popup {
+    background: var(--cream);
+    border: 1px solid var(--worn);
+    border-radius: 8px;
+    padding: 28px 32px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(15,22,35,0.25);
+    animation: popup-in 0.2s ease;
+    position: relative;
+  }
+  @keyframes popup-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .tax-popup-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--forest); margin-bottom: 4px; }
+  .tax-popup-sci { font-style: italic; color: var(--steel); font-size: 0.85rem; margin-bottom: 20px; }
+  .tax-popup-tree { display: flex; flex-direction: column; gap: 0; }
+  .tax-popup-row { display: flex; align-items: stretch; min-height: 32px; }
+  .tax-popup-connector { width: 28px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+  .tax-popup-connector .vert { width: 2px; flex: 1; background: var(--worn); }
+  .tax-popup-connector .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); border: 2px solid var(--gold-light); flex-shrink: 0; margin: 4px 0; }
+  .tax-popup-row:first-child .tax-popup-connector .vert:first-child { background: transparent; }
+  .tax-popup-row:last-child  .tax-popup-connector .vert:last-child  { background: transparent; }
+  .tax-popup-cell { padding: 3px 0 3px 10px; display: flex; flex-direction: column; justify-content: center; }
+  .tax-popup-level { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--steel); }
+  .tax-popup-value { font-family: var(--font-body); font-size: 0.95rem; font-style: italic; color: var(--ink); font-weight: 600; }
+  .tax-popup-close { position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.2rem; color: var(--steel); cursor: pointer; padding: 4px 6px; border-radius: 3px; transition: background 0.1s; }
+  .tax-popup-close:hover { background: var(--parchment); }
+  .tax-popup-note { margin-top: 16px; padding: 10px 12px; background: var(--parchment); border-radius: 4px; font-style: italic; font-size: 0.87rem; color: var(--steel); border-left: 3px solid var(--gold); }
+
+  .tree-reveal-hint {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+    margin-top: 12px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.15s;
+    display: none;
+  }
+  .tree-reveal-hint:hover { opacity: 1; }
+  .tree-reveal-hint.visible { display: block; }
+
+  /* ── BRANCH TREE ──────────────────────────────────────────────────────── */
+  #treeContainer.branch-mode {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+
+  /* The spine: confirmed path rows */
+  .bt-spine {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0 3px 0;
+    line-height: 1.3;
+  }
+  .bt-spine-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 14px;
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+  .bt-spine-connector .v { width: 2px; flex: 1; min-height: 6px; background: var(--gold); }
+  .bt-spine-connector .d {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--cream);
+    outline: 1.5px solid var(--gold);
+    flex-shrink: 0;
+  }
+  .bt-spine-row {
+    display: flex;
+    align-items: stretch;
+    min-height: 24px;
+  }
+  .bt-spine-row:first-child .bt-spine-connector .v:first-child { visibility: hidden; }
+  .bt-spine-row:last-child  .bt-spine-connector .v:last-child  { visibility: hidden; }
+  .bt-spine-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1px; color: var(--steel); }
+  .bt-spine-val { font-style: italic; color: var(--forest); font-weight: 700; }
+  .bt-spine-count {
+    font-size: 0.6rem;
+    background: #dde3ff;
+    color: var(--forest);
+    border-radius: 8px;
+    padding: 1px 5px;
+    margin-left: 4px;
+    border: 1px solid var(--worn);
+  }
+
+  /* Branch rows at the leaf */
+  .bt-branches {
+    margin-left: 14px; /* align with spine dot center */
+    border-left: 2px solid var(--worn);
+    margin-top: 0;
+    padding-bottom: 8px;
+  }
+  .bt-branch-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0 3px 8px;
+    position: relative;
+    transition: opacity 0.15s;
+  }
+  /* Horizontal connector line from border to dot */
+  .bt-branch-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 8px;
+    height: 2px;
+    background: var(--worn);
+  }
+  .bt-branch-row.status-eliminated { opacity: 0.45; }
+  .bt-branch-row.status-confirmed  { }
+
+  .bt-branch-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1.5px solid;
+  }
+  .bt-branch-dot.possible    { background: var(--cream); border-color: var(--steel); }
+  .bt-branch-dot.eliminated  { background: #e57373; border-color: #c0392b; }
+  .bt-branch-dot.confirmed   { background: var(--gold); border-color: var(--gold); }
+
+  .bt-branch-val {
+    font-style: italic;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bt-branch-row.status-eliminated .bt-branch-val {
+    text-decoration: line-through;
+    color: var(--steel);
+  }
+  .bt-branch-row.status-confirmed .bt-branch-val { color: var(--forest); font-weight: 700; }
+  .bt-branch-row.status-possible  .bt-branch-val { color: var(--ink); }
+
+  .bt-branch-level {
+    font-size: 0.56rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--steel);
+    opacity: 0.65;
+  }
+  .bt-branch-count {
+    font-size: 0.6rem;
+    background: var(--worn);
+    color: var(--steel);
+    border-radius: 8px;
+    padding: 1px 5px;
+    min-width: 18px;
+    text-align: center;
+    border: 1px solid transparent;
+  }
+  .bt-branch-row.status-confirmed .bt-branch-count { background: #d4f0e2; color: #145a30; border-color: #6fcf97; }
+  .bt-branch-row.status-eliminated .bt-branch-count { background: #fde8e8; color: #7b1d1d; border-color: #e57373; }
+
+  .bt-more {
+    padding: 3px 0 3px 8px;
+    font-size: 0.68rem;
+    color: var(--steel);
+    font-style: italic;
+    border-top: 1px dashed var(--worn);
+    margin-top: 2px;
+  }
+
+  .bt-empty {
+    font-size: 0.8rem;
+    color: var(--steel);
+    font-style: italic;
+    padding: 8px 0;
+  }
+
+  .bt-pregame-hint {
+    font-size: 0.75rem;
+    color: var(--steel);
+    font-style: italic;
+    text-align: center;
+    padding: 10px 0;
+    line-height: 1.5;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--steel);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <header>
+    <div class="title">Taxondle</div>
+    <div class="subtitle">Identify today's animal through the tree of life &bull; Created by Siddhant Bhat</div>
+    <div class="date-badge" id="dateBadge"></div>
+  </header>
+
+  <div id="resultBanner" class="result-banner">
+    <h2 id="resultTitle"></h2>
+    <p id="resultSubtitle"></p>
+    <p class="result-sci" id="resultSci"></p>
+    <p class="result-fact" id="resultFact"></p>
+    <button class="new-game-btn" id="newGameBtn">↺ New Animal</button>
+  </div>
+
+  <div class="game-layout">
+    <div>
+      <div class="panel" id="searchPanel">
+        <div class="panel-title">Make a Guess</div>
+        <div class="search-wrap" id="searchWrap">
+          <input type="text" class="search-input" id="searchInput"
+            placeholder="Type a common or scientific name…" autocomplete="off"/>
+          <button class="guess-btn" id="guessBtn">Guess</button>
+          <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+        <div class="search-hint">Guesses fill in the taxonomic tree. Hints unlock after 3 and 5 guesses.</div>
+        <div class="guess-counter-row">
+          <div class="guess-counter-left">
+            <span class="remaining" id="remainingCount">30</span> guesses remaining
+          </div>
+          <div id="guessCountText" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--steel);">0 / 30</div>
+        </div>
+        <div class="guess-progress-track">
+          <div class="guess-progress-fill" id="guessProgressFill" style="width:0%"></div>
+        </div>
+        <button class="give-up-btn" id="giveUpBtn">Give Up</button>
+      </div>
+
+      <div class="panel" style="margin-top: 16px;">
+        <div class="panel-title">Guess History</div>
+        <div class="guess-list" id="guessList">
+          <div class="empty-state">Your guesses will appear here.</div>
+        </div>
+      </div>
+
+      <div class="howto">
+        <strong>How to play:</strong> Guess any animal to reveal how its taxonomy compares to today's target.
+        Green chips = matching taxonomic level. Red = no match.
+        The <em>Tree of Life</em> panel fills in as you identify each level.
+        <br><br>
+        <strong>Branch view</strong> allows you to scroll through and see all possible sub-groups at each confirmed level, helping you narrow down the target. Eliminated branches are shown faded.
+      </div>
+    </div>
+
+    <div>
+      <div class="panel tree-panel">
+        <div class="panel-title">Tree of Life
+          <button class="tree-toggle-btn" id="treeToggleBtn">⬡ Branch view</button>
+        </div>
+        <div id="treeContainer"></div>
+
+        <div style="margin-top: 20px;">
+          <div class="panel-title">Field Notes</div>
+          <div id="hintsContainer">
+            <div class="hint-item">
+              <span class="hint-label">Name</span>
+              <span class="hint-value" id="hintName"></span>
+            </div>
+            <div class="hint-item">
+              <span class="hint-label">Diet</span>
+              <span class="hint-value" id="hintDiet"><span class="hint-locked">?????</span></span>
+            </div>
+            <div class="hint-item">
+              <span class="hint-label">Range</span>
+              <span class="hint-value" id="hintContinents"><span class="hint-locked">?????</span></span>
+            </div>
+          </div>
+          <div class="hint-unlock-note" id="hintNote">Diet unlocks after 3 guesses · Range after 5</div>
+        </div>
+        <div id="treeRevealHint" class="tree-reveal-hint">▸ View full taxonomy path</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="tax-popup-overlay" id="taxPopupOverlay">
+  <div class="tax-popup">
+    <button class="tax-popup-close" id="taxPopupClose">✕</button>
+    <div class="tax-popup-title" id="taxPopupName"></div>
+    <div class="tax-popup-sci" id="taxPopupSci"></div>
+    <div class="tax-popup-tree" id="taxPopupTree"></div>
+    <div class="tax-popup-note" id="taxPopupNote" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const LEVELS       = ['kingdom','phylum','class','order','family','genus','species'];
+const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
+const DIET_UNLOCK  = 3;
+const RANGE_UNLOCK = 5;
+const MAX_GUESSES  = 30;
+const MAX_BRANCHES = 8;
+const SAVE_KEY     = 'taxon_session_v2';
+
+// ── SPECIES COUNTS (for proximity scoring) ────────────────────────────────────
+const SPECIES_COUNTS = {
+  'animalia':1500000,
+  'chordata':69000,'arthropoda':1170000,'mollusca':85000,
+  'annelida':22000,'echinodermata':7000,'cnidaria':10000,
+  'platyhelminthes':20000,'nematoda':25000,'porifera':10000,
+  'mammalia':6500,'aves':11000,'reptilia':11000,'amphibia':8000,
+  'actinopterygii':34000,'chondrichthyes':1200,
+  'insecta':1000000,'arachnida':48000,'malacostraca':40000,
+  'cephalopoda':800,'gastropoda':65000,'bivalvia':20000,
+  'rodentia':2500,'chiroptera':1400,'eulipotyphla':500,
+  'carnivora':300,'primates':500,'artiodactyla':300,
+  'cetacea':90,'lagomorpha':92,'proboscidea':3,
+  'perissodactyla':17,'pilosa':9,'tubulidentata':1,
+  'passeriformes':6500,'apodiformes':450,'psittaciformes':400,
+  'falconiformes':290,'piciformes':440,'columbiformes':350,
+  'charadriiformes':380,'strigiformes':250,'anseriformes':180,
+  'galliformes':290,
+  'squamata':10000,'testudines':360,'crocodylia':27,
+  'anura':7000,'caudata':700,
+  'perciformes':10000,'cypriniformes':4200,'siluriformes':3700,
+  'coleoptera':400000,'lepidoptera':180000,'hymenoptera':150000,
+  'diptera':125000,'hemiptera':80000,
+};
+const LOG_MAX = Math.log(1500000);
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let animals        = [];
+let target         = null;
+let guesses        = [];
+let penaltyGuesses = 0;
+let nameHintRevealed = false;
+let selectedIndex  = -1;
+let filteredList   = [];
+let revealedLevels = new Set();
+let gameOver       = false;
+let taxonIndex     = {};
+let branchViewActive = false;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function pickRandom(arr, exclude = null) {
+  const pool = exclude ? arr.filter(a => a !== exclude) : arr;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ── TAXON INDEX ───────────────────────────────────────────────────────────────
+function buildTaxonIndex(arr) {
+  const idx = {};
+  arr.forEach(a => {
+    LEVELS.forEach(lvl => {
+      const val = a[lvl];
+      if (val && val.trim()) idx[val.toLowerCase()] = { level: lvl, value: val };
+    });
+  });
+  return idx;
+}
+
+function buildTaxonGuess(level, value) {
+  const rep = animals.find(a => a[level] && a[level].toLowerCase() === value.toLowerCase());
+  if (!rep) return null;
+  const lvlIdx = LEVELS.indexOf(level);
+  const obj = {
+    common_name: value, scientific_name: '',
+    _isTaxon: true, _taxonLevel: level,
+    _taxonLabelSuffix: ` (${LEVEL_LABELS[lvlIdx]})`,
+  };
+  for (let i = 0; i <= lvlIdx; i++) obj[LEVELS[i]] = rep[LEVELS[i]];
+  for (let i = lvlIdx + 1; i < LEVELS.length; i++) obj[LEVELS[i]] = '';
+  return obj;
+}
+
+// ── PROXIMITY ─────────────────────────────────────────────────────────────────
+function calcProximity(guess, tgt) {
+  let deepest = -1;
+  for (let i = 0; i < LEVELS.length; i++) {
+    const gv = guess[LEVELS[i]];
+    if (!gv) break;
+    if (gv.toLowerCase() === tgt[LEVELS[i]].toLowerCase()) deepest = i;
+    else break;
+  }
+  if (deepest === LEVELS.length - 1) return 100;
+  if (deepest === -1) return 0;
+  const matchedVal = tgt[LEVELS[deepest]].toLowerCase();
+  const knownCount = SPECIES_COUNTS[matchedVal] || null;
+  let score;
+  if (knownCount) {
+    const specificity = 1 - (Math.log(knownCount) / LOG_MAX);
+    score = 0.5 * ((deepest + 1) / LEVELS.length) + 0.5 * specificity;
+  } else {
+    score = (deepest + 1) / LEVELS.length;
+  }
+  return Math.min(99, Math.round(score * 100));
+}
+
+function levelMatchMap(guess, tgt) {
+  const map = {};
+  let sequential = true;
+  for (const lvl of LEVELS) {
+    const gv = guess[lvl];
+    if (!gv) { map[lvl] = null; continue; }
+    const match = sequential && gv.toLowerCase() === tgt[lvl].toLowerCase();
+    map[lvl] = match;
+    if (!match) sequential = false;
+  }
+  return map;
+}
+
+// ── BRANCH TREE ───────────────────────────────────────────────────────────────
+function getBranchStatus(level, value, pathUpToHere) {
+  let isEliminated = false;
+  for (const g of guesses) {
+    const gVal = (g[level] || '').toLowerCase();
+    if (!gVal) continue;
+    
+    // check if guess is in the same subtree
+    const inSubtree = pathUpToHere.every(({ level: cl, value: cv }) =>
+      (g[cl] || '').toLowerCase() === cv.toLowerCase()
+    );
+    if (!inSubtree) continue;
+
+    if (gVal === value.toLowerCase()) {
+       const mm = levelMatchMap(g, target);
+       if (mm[level] === true) return 'confirmed';
+       if (mm[level] === false) isEliminated = true;
+    }
+  }
+  return isEliminated ? 'eliminated' : 'possible';
+}
+
+function renderBranchTree() {
+  const container = document.getElementById('treeContainer');
+  container.classList.add('branch-mode');
+  container.innerHTML = '';
+
+  const confirmedPath = [];
+  for (const lvl of LEVELS) {
+    if (revealedLevels.has(lvl)) {
+      confirmedPath.push({ level: lvl, value: target[lvl] });
+    } else break;
+  }
+
+  if (guesses.length === 0 && confirmedPath.length === 0) {
+    container.innerHTML = '<div class="bt-pregame-hint">Make a guess to start mapping<br>the tree of life.</div>';
+    return;
+  }
+
+  const maxLevelIdx = confirmedPath.length;
+
+  for (let i = 0; i <= maxLevelIdx; i++) {
+    const currentLevel = LEVELS[i];
+    if (!currentLevel) break;
+
+    // Render the confirmed spine node for i-1 if applicable
+    if (i > 0) {
+      const prevLevel = LEVELS[i-1];
+      const prevVal = confirmedPath[i-1].value;
+      const pathToPrev = confirmedPath.slice(0, i);
+      const cnt = animals.filter(a => pathToPrev.every(p => (a[p.level]||'').toLowerCase() === p.value.toLowerCase())).length;
+
+      const row = document.createElement('div');
+      row.className = 'bt-spine-row';
+      row.innerHTML = `
+        <div class="bt-spine-connector">
+          <div class="v" ${i === 1 ? 'style="visibility:hidden"' : ''}></div>
+          <div class="d"></div>
+          <div class="v"></div>
+        </div>
+        <div style="padding:3px 0 3px 8px">
+          <div class="bt-spine-label">${LEVEL_LABELS[i-1]}</div>
+          <div class="bt-spine-val">${prevVal} <span class="bt-spine-count">${cnt}</span></div>
+        </div>`;
+      container.appendChild(row);
+    }
+
+    // Render branches for current level
+    const pathUpToHere = confirmedPath.slice(0, i);
+    const candidates = animals.filter(a => pathUpToHere.every(p => (a[p.level]||'').toLowerCase() === p.value.toLowerCase()));
+
+    const branchMap = {};
+    candidates.forEach(a => {
+      const val = a[currentLevel] || '';
+      if (val) branchMap[val] = (branchMap[val] || 0) + 1;
+    });
+
+    const branches = Object.entries(branchMap).sort(([,a],[,b]) => b - a);
+    if (branches.length > 0) {
+      const branchWrap = document.createElement('div');
+      branchWrap.className = 'bt-branches';
+      
+      const MAX_VIS = i === maxLevelIdx ? MAX_BRANCHES : 3;
+      const visible = branches.slice(0, MAX_VIS);
+      const hidden = branches.length - visible.length;
+
+      const statusOrder = { confirmed: 0, possible: 1, eliminated: 2 };
+      visible.sort(([va], [vb]) => {
+        const sa = getBranchStatus(currentLevel, va, pathUpToHere);
+        const sb = getBranchStatus(currentLevel, vb, pathUpToHere);
+        return (statusOrder[sa] ?? 1) - (statusOrder[sb] ?? 1);
+      });
+
+      visible.forEach(([value, count]) => {
+        const status = getBranchStatus(currentLevel, value, pathUpToHere);
+        const row = document.createElement('div');
+        row.className = `bt-branch-row status-${status}`;
+        row.innerHTML = `
+          <div class="bt-branch-dot ${status}"></div>
+          <span class="bt-branch-val">${value}</span>
+          <span class="bt-branch-level">${LEVEL_LABELS[i]}</span>
+          <span class="bt-branch-count">${count}</span>`;
+        branchWrap.appendChild(row);
+      });
+
+      if (hidden > 0) {
+        const more = document.createElement('div');
+        more.className = 'bt-more';
+        more.textContent = `+ ${hidden} more not shown`;
+        branchWrap.appendChild(more);
+      }
+
+      container.appendChild(branchWrap);
+    }
+  }
+
+  const hint = document.getElementById('treeRevealHint');
+  if (gameOver) hint.classList.add('visible');
+
+  // Automatically scroll down to reveal the newest expanded branches
+  setTimeout(() => { container.scrollTop = container.scrollHeight; }, 10);
+}
+
+// ── LINEAR TREE ───────────────────────────────────────────────────────────────
+function renderLinearTree() {
+  const container = document.getElementById('treeContainer');
+  container.classList.remove('branch-mode');
+  container.innerHTML = '';
+  container.style.maxHeight = ''; // Remove scroll boundary for linear mode
+  LEVELS.forEach((lvl, i) => {
+    const node = document.createElement('div');
+    node.className = 'tree-node' + (revealedLevels.has(lvl) ? ' revealed' : '');
+    node.style.paddingLeft = (i === 0 ? 0 : 12) + 'px';
+    node.innerHTML = `
+      <span class="tree-dot"></span>
+      <span>
+        <span class="tree-level">${LEVEL_LABELS[i]}</span>
+        <span class="tree-value ${revealedLevels.has(lvl) ? '' : 'hidden'}">
+          ${revealedLevels.has(lvl) ? target[lvl] : '━━━━━'}
+        </span>
+      </span>`;
+    container.appendChild(node);
+  });
+  const hint = document.getElementById('treeRevealHint');
+  if (gameOver) hint.classList.add('visible');
+}
+
+function renderTree() {
+  branchViewActive ? renderBranchTree() : renderLinearTree();
+}
+
+// ── HINTS ─────────────────────────────────────────────────────────────────────
+function renderHints() {
+  const n = guesses.length;
+  
+  // Name Hint
+  const hintNameEl = document.getElementById('hintName');
+  if (gameOver || nameHintRevealed) {
+    const words = target.common_name.split(' ');
+    let hintStr = '';
+    if (words.length > 1) {
+        hintStr = words[0] + ' ' + words.slice(1).join(' ').replace(/[a-zA-Z0-9]/g, '_');
+    } else {
+        const half = Math.ceil(target.common_name.length / 2);
+        hintStr = target.common_name.substring(0, half) + target.common_name.substring(half).replace(/[a-zA-Z0-9]/g, '_');
+    }
+    hintNameEl.innerHTML = `<strong style="letter-spacing:1px">${hintStr}</strong>`;
+  } else {
+    const btn = document.createElement('button');
+    btn.className = 'give-up-btn';
+    btn.style.marginTop = '0';
+    btn.textContent = 'Reveal (Cost: 5 Guesses)';
+    const totalG = guesses.length + penaltyGuesses;
+    if (totalG + 5 >= MAX_GUESSES) {
+        btn.disabled = true;
+    }
+    btn.onclick = () => {
+        if (guesses.length + penaltyGuesses + 5 < MAX_GUESSES) {
+            penaltyGuesses += 5;
+            nameHintRevealed = true;
+            saveSession();
+            updateGuessCounter();
+            renderHints();
+        }
+    };
+    hintNameEl.innerHTML = '';
+    hintNameEl.appendChild(btn);
+  }
+
+  // Diet Hint
+  document.getElementById('hintDiet').innerHTML =
+    (n >= DIET_UNLOCK || gameOver)
+      ? `<strong>${target.diet || '—'}</strong>`
+      : `<span class="hint-locked">?????</span>`;
+      
+  // Range Hint
+  const pips = (target.continents || []).map(c => `<span class="continent-pip">${c}</span>`).join('');
+  document.getElementById('hintContinents').innerHTML =
+    (n >= RANGE_UNLOCK || gameOver)
+      ? (pips || '<em style="color:var(--steel)">—</em>')
+      : `<span class="hint-locked">?????</span>`;
+      
+  const parts = [];
+  if (n < DIET_UNLOCK  && !gameOver) parts.push(`Diet in ${DIET_UNLOCK-n} guess${DIET_UNLOCK-n===1?'':'es'}`);
+  if (n < RANGE_UNLOCK && !gameOver) parts.push(`Range in ${RANGE_UNLOCK-n}`);
+  document.getElementById('hintNote').textContent = parts.join(' · ');
+}
+
+// ── GUESS CARD ────────────────────────────────────────────────────────────────
+function renderGuessCard(animal, matchMap, proximity) {
+  const proxClass = proximity >= 70 ? 'prox-high' : proximity >= 40 ? 'prox-mid' : 'prox-low';
+  const chips = LEVELS.map((lvl, i) => {
+    const m = matchMap[lvl];
+    if (m === null)
+      return `<div><span class="tax-chip tax-unknown"><span class="tax-label">${LEVEL_LABELS[i]}</span>?</span></div>`;
+    return `<div><span class="tax-chip ${m ? 'tax-match' : 'tax-nomatch'}">
+      <span class="tax-label">${LEVEL_LABELS[i]}</span>${animal[lvl] || '?'}</span></div>`;
+  }).join('');
+
+  const displayName = animal._isTaxon
+    ? `${animal.common_name}<span class="taxon-badge">${animal._taxonLabelSuffix}</span>`
+    : animal.common_name;
+
+  const card = document.createElement('div');
+  card.className = 'guess-card' + (animal._isTaxon ? ' taxon-guess-card' : '');
+  card.innerHTML = `
+    <div class="guess-card-header">
+      <div>
+        <div class="guess-name">${displayName}</div>
+        ${!animal._isTaxon ? `<div class="guess-sci">${animal.scientific_name}</div>` : ''}
+      </div>
+      <span class="proximity-badge ${proxClass}">${proximity}%</span>
+    </div>
+    <div class="tax-row">${chips}</div>`;
+  return card;
+}
+
+// ── CORE GUESS APPLICATION ────────────────────────────────────────────────────
+function _applyGuess(animal, render = true) {
+  guesses.unshift(animal);
+  const matchMap  = levelMatchMap(animal, target);
+  const proximity = calcProximity(animal, target);
+
+  for (const lvl of LEVELS) {
+    if (matchMap[lvl] === true) revealedLevels.add(lvl);
+    else break;
+  }
+
+  if (render) {
+    const list = document.getElementById('guessList');
+    if (guesses.length === 1) list.innerHTML = '';
+    list.insertBefore(renderGuessCard(animal, matchMap, proximity), list.firstChild);
+    updateGuessCounter();
+    renderTree();
+    renderHints();
+  }
+  return matchMap;
+}
+
+// ── SUBMIT GUESS ──────────────────────────────────────────────────────────────
+function submitGuess(animal) {
+  if (gameOver) return;
+  const key = animal._isTaxon ? `__taxon__${animal.common_name}` : animal.scientific_name;
+  if (guesses.some(g => (g._isTaxon ? `__taxon__${g.common_name}` : g.scientific_name) === key)) {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('autocompleteList').classList.remove('open');
+    return;
+  }
+
+  _applyGuess(animal, true);
+
+  if (!animal._isTaxon &&
+      animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
+    endGame(true); return;
+  }
+  if (guesses.length + penaltyGuesses >= MAX_GUESSES) { endGame(false); return; }
+
+  saveSession();
+  document.getElementById('searchInput').value = '';
+  document.getElementById('autocompleteList').classList.remove('open');
+  filteredList = []; selectedIndex = -1;
+}
+
+// ── END GAME ──────────────────────────────────────────────────────────────────
+function endGame(won) {
+  gameOver = true;
+  LEVELS.forEach(l => revealedLevels.add(l));
+  renderTree(); renderHints(); updateGuessCounter();
+
+  const banner = document.getElementById('resultBanner');
+  banner.classList.add('show');
+  document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
+  document.getElementById('resultSubtitle').textContent = won
+    ? `You identified it using ${guesses.length + penaltyGuesses} total guesses.`
+    : 'Better luck on the next one.';
+  document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
+  document.getElementById('resultFact').textContent = target.notes || '';
+  document.getElementById('newGameBtn').style.display = 'inline-block';
+  document.getElementById('searchInput').disabled = true;
+  document.getElementById('guessBtn').disabled    = true;
+  document.getElementById('giveUpBtn').disabled   = true;
+
+  saveSession();
+  setTimeout(() => renderTaxPopup(target), 600);
+}
+
+// ── COUNTER ───────────────────────────────────────────────────────────────────
+function updateGuessCounter() {
+  const n = guesses.length + penaltyGuesses, rem = MAX_GUESSES - n;
+  document.getElementById('remainingCount').textContent = rem;
+  document.getElementById('remainingCount').classList.toggle('low', rem <= 5);
+  document.getElementById('guessCountText').textContent = `${n} / ${MAX_GUESSES}`;
+  document.getElementById('guessProgressFill').style.width = `${(n/MAX_GUESSES)*100}%`;
+}
+
+// ── TAXONOMY POPUP ────────────────────────────────────────────────────────────
+function renderTaxPopup(animal) {
+  document.getElementById('taxPopupName').textContent = animal.common_name;
+  document.getElementById('taxPopupSci').textContent  = animal.scientific_name;
+  const treeEl = document.getElementById('taxPopupTree');
+  treeEl.innerHTML = '';
+  LEVELS.forEach((lvl, i) => {
+    const row = document.createElement('div');
+    row.className = 'tax-popup-row';
+    row.innerHTML = `
+      <div class="tax-popup-connector">
+        <div class="vert"></div><div class="dot"></div><div class="vert"></div>
+      </div>
+      <div class="tax-popup-cell">
+        <span class="tax-popup-level">${LEVEL_LABELS[i]}</span>
+        <span class="tax-popup-value">${animal[lvl] || '—'}</span>
+      </div>`;
+    treeEl.appendChild(row);
+  });
+  const noteEl = document.getElementById('taxPopupNote');
+  if (animal.notes) { noteEl.textContent = animal.notes; noteEl.style.display = 'block'; }
+  else noteEl.style.display = 'none';
+  document.getElementById('taxPopupOverlay').classList.add('open');
+}
+
+// ── AUTOCOMPLETE ──────────────────────────────────────────────────────────────
+const TAXON_SEARCHABLE = new Set(['phylum','class','order','family','genus']);
+
+function updateAutocomplete(query) {
+  const q = query.trim().toLowerCase();
+  if (q.length < 2) {
+    filteredList = [];
+    document.getElementById('autocompleteList').classList.remove('open');
+    return;
+  }
+  const animalMatches = animals.filter(a =>
+    a.common_name.toLowerCase().includes(q) || a.scientific_name.toLowerCase().includes(q)
+  ).slice(0, 6);
+
+  const taxonMatches = [], seen = new Set();
+  for (const [key, entry] of Object.entries(taxonIndex)) {
+    if (!TAXON_SEARCHABLE.has(entry.level) || !key.includes(q) || seen.has(key)) continue;
+    seen.add(key);
+    const tg = buildTaxonGuess(entry.level, entry.value);
+    if (tg) { taxonMatches.push(tg); if (taxonMatches.length >= 3) break; }
+  }
+  filteredList = [...animalMatches, ...taxonMatches].slice(0, 9);
+
+  const list = document.getElementById('autocompleteList');
+  list.innerHTML = '';
+  if (!filteredList.length) { list.classList.remove('open'); return; }
+  filteredList.forEach(a => {
+    const item = document.createElement('div');
+    item.className = 'autocomplete-item' + (a._isTaxon ? ' autocomplete-taxon' : '');
+    if (a._isTaxon) {
+      item.innerHTML = `<span>${a.common_name} <em style="color:var(--steel);font-size:0.78rem">${a._taxonLabelSuffix}</em></span>
+                        <span class="sci">${LEVEL_LABELS[LEVELS.indexOf(a._taxonLevel)]}</span>`;
+    } else {
+      item.innerHTML = `<span>${a.common_name}</span><span class="sci">${a.scientific_name}</span>`;
+    }
+    item.addEventListener('mousedown', e => { e.preventDefault(); submitGuess(a); });
+    list.appendChild(item);
+  });
+  list.classList.add('open');
+  selectedIndex = -1;
+}
+
+// ── SESSION PERSISTENCE ───────────────────────────────────────────────────────
+function sessionKey() {
+  if (!target) return null;
+  const d = new Date();
+  return `${SAVE_KEY}__${target.scientific_name}__${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+function saveSession() {
+  const key = sessionKey();
+  if (!key) return;
+  try {
+    localStorage.setItem(key, JSON.stringify({
+      target: target.scientific_name,
+      guesses: guesses.map(g => g._isTaxon ? `__taxon__${g.common_name}` : g.scientific_name),
+      penaltyGuesses,
+      nameHintRevealed,
+      gameOver,
+      branchViewActive,
+    }));
+  } catch(e) {}
+}
+
+function loadSession(savedTarget) {
+  const d = new Date();
+  const prefix = `${SAVE_KEY}__${savedTarget.scientific_name}__${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  try {
+    const raw = localStorage.getItem(prefix);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (data.target !== savedTarget.scientific_name) return false;
+    
+    penaltyGuesses = data.penaltyGuesses || 0;
+    nameHintRevealed = data.nameHintRevealed || false;
+
+    for (const key of data.guesses) {
+      let animal;
+      if (key.startsWith('__taxon__')) {
+        const val = key.replace('__taxon__', '');
+        for (const lvl of ['phylum','class','order','family','genus']) {
+          const tg = buildTaxonGuess(lvl, val);
+          if (tg) { animal = tg; break; }
+        }
+      } else {
+        animal = animals.find(a => a.scientific_name === key);
+      }
+      if (animal) _applyGuess(animal, false);
+    }
+    if (data.gameOver) {
+      gameOver = true;
+      LEVELS.forEach(l => revealedLevels.add(l));
+      document.getElementById('searchInput').disabled = true;
+      document.getElementById('guessBtn').disabled    = true;
+      document.getElementById('giveUpBtn').disabled   = true;
+      document.getElementById('newGameBtn').style.display = 'inline-block';
+      const banner = document.getElementById('resultBanner');
+      banner.classList.add('show');
+      const won = guesses.length > 0 && !guesses[0]._isTaxon &&
+                  guesses[0].scientific_name.toLowerCase() === target.scientific_name.toLowerCase();
+      document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
+      document.getElementById('resultSubtitle').textContent = won
+        ? `You identified it using ${guesses.length + penaltyGuesses} total guesses.`
+        : 'Better luck on the next one.';
+      document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
+      document.getElementById('resultFact').textContent = target.notes || '';
+    }
+    branchViewActive = data.branchViewActive || false;
+    if (branchViewActive) document.getElementById('treeToggleBtn').textContent = '≡ List view';
+    return true;
+  } catch(e) { return false; }
+}
+
+// ── NEW GAME ──────────────────────────────────────────────────────────────────
+function startNewGame() {
+  const prev = target;
+  target = pickRandom(animals, prev);
+  guesses = []; revealedLevels = new Set(); gameOver = false;
+  penaltyGuesses = 0; nameHintRevealed = false;
+  filteredList = []; selectedIndex = -1; branchViewActive = false;
+
+  document.getElementById('resultBanner').classList.remove('show');
+  document.getElementById('newGameBtn').style.display  = 'none';
+  document.getElementById('guessList').innerHTML       = '<div class="empty-state">Your guesses will appear here.</div>';
+  document.getElementById('searchInput').disabled      = false;
+  document.getElementById('guessBtn').disabled         = false;
+  document.getElementById('giveUpBtn').disabled        = false;
+  document.getElementById('treeRevealHint').classList.remove('visible');
+  document.getElementById('taxPopupOverlay').classList.remove('open');
+  document.getElementById('treeToggleBtn').textContent = '⬡ Branch view';
+  document.getElementById('searchInput').value         = '';
+
+  updateGuessCounter(); renderTree(); renderHints();
+  document.getElementById('searchInput').focus();
+}
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+function wireEvents() {
+  const input = document.getElementById('searchInput');
+  const list  = document.getElementById('autocompleteList');
+
+  input.addEventListener('input', () => updateAutocomplete(input.value));
+  input.addEventListener('keydown', e => {
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = Math.min(selectedIndex + 1, items.length - 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = Math.max(selectedIndex - 1, -1); }
+    else if (e.key === 'Enter') {
+      if (selectedIndex >= 0 && filteredList[selectedIndex]) submitGuess(filteredList[selectedIndex]);
+      else if (filteredList.length === 1) submitGuess(filteredList[0]);
+      return;
+    } else if (e.key === 'Escape') { list.classList.remove('open'); return; }
+    items.forEach((el, i) => el.classList.toggle('selected', i === selectedIndex));
+  });
+  input.addEventListener('blur', () => setTimeout(() => list.classList.remove('open'), 150));
+
+  document.getElementById('guessBtn').addEventListener('click', () => {
+    if (filteredList.length > 0) submitGuess(filteredList[selectedIndex >= 0 ? selectedIndex : 0]);
+  });
+  document.getElementById('giveUpBtn').addEventListener('click', () => {
+    if (gameOver) return;
+    if (!confirm('Give up and reveal the answer?')) return;
+    endGame(false);
+  });
+  document.getElementById('newGameBtn').addEventListener('click', startNewGame);
+  document.getElementById('treeRevealHint').addEventListener('click', () => renderTaxPopup(target));
+  document.getElementById('treeToggleBtn').addEventListener('click', () => {
+    branchViewActive = !branchViewActive;
+    document.getElementById('treeToggleBtn').textContent = branchViewActive ? '≡ List view' : '⬡ Branch view';
+    saveSession();
+    renderTree();
+  });
+  document.getElementById('taxPopupClose').addEventListener('click', () =>
+    document.getElementById('taxPopupOverlay').classList.remove('open'));
+  document.getElementById('taxPopupOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) document.getElementById('taxPopupOverlay').classList.remove('open');
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('taxPopupOverlay').classList.remove('open');
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init() {
+  const d = new Date();
+  document.getElementById('dateBadge').textContent =
+    d.toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  try {
+    const resp = await fetch('animals.json');
+    animals = await resp.json();
+  } catch(e) {
+    document.body.innerHTML = '<div style="padding:40px;font-family:serif;color:#600">Could not load animals.json — run: <code>python -m http.server 8080</code></div>';
+    return;
+  }
+
+  taxonIndex = buildTaxonIndex(animals);
+
+  // Try to restore saved session
+  let restored = false;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(SAVE_KEY)) continue;
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const data = JSON.parse(raw);
+      const candidate = animals.find(a => a.scientific_name === data.target);
+      if (!candidate) continue;
+      const d2 = new Date();
+      const today = `${d2.getFullYear()}-${d2.getMonth()}-${d2.getDate()}`;
+      if (!k.includes(today)) continue;
+      target   = candidate;
+      restored = loadSession(candidate);
+      break;
+    }
+  } catch(e) {}
+
+  if (!restored || !target) target = pickRandom(animals);
+
+  updateGuessCounter();
+
+  if (restored && guesses.length > 0) {
+    const list = document.getElementById('guessList');
+    list.innerHTML = '';
+    [...guesses].reverse().forEach(g => {
+      const mm   = levelMatchMap(g, target);
+      const prox = calcProximity(g, target);
+      list.insertBefore(renderGuessCard(g, mm, prox), list.firstChild);
+    });
+  }
+
+  renderTree(); renderHints(); wireEvents();
+}
+
+init();
+</script>
+</body>
+</html>
