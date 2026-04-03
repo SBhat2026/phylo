@@ -358,8 +358,7 @@
     margin-top: 8px;
     display: inline-block;
   }
-  .give-up-btn:hover:not(:disabled) { border-color: var(--rust); color: var(--rust); }
-  .give-up-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .give-up-btn:hover { border-color: var(--rust); color: var(--rust); }
 
   .empty-state {
     text-align: center;
@@ -503,9 +502,6 @@
   #treeContainer.branch-mode {
     font-family: var(--font-mono);
     font-size: 0.78rem;
-    max-height: 480px;
-    overflow-y: auto;
-    padding-right: 8px;
   }
 
   /* The spine: confirmed path rows */
@@ -522,7 +518,7 @@
     align-items: center;
     width: 14px;
     flex-shrink: 0;
-    align-self: stretch;
+    self-align: stretch;
   }
   .bt-spine-connector .v { width: 2px; flex: 1; min-height: 6px; background: var(--gold); }
   .bt-spine-connector .d {
@@ -557,7 +553,7 @@
     margin-left: 14px; /* align with spine dot center */
     border-left: 2px solid var(--worn);
     margin-top: 0;
-    padding-bottom: 8px;
+    padding-bottom: 2px;
   }
   .bt-branch-row {
     display: flex;
@@ -648,16 +644,6 @@
     padding: 10px 0;
     line-height: 1.5;
   }
-
-  footer {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--steel);
-    letter-spacing: 1px;
-  }
 </style>
 </head>
 <body>
@@ -665,7 +651,7 @@
 
   <header>
     <div class="title">Taxondle</div>
-    <div class="subtitle">Identify today's animal through the tree of life &bull; Created by Siddhant Bhat</div>
+    <div class="subtitle">Identify today's animal through the tree of life</div>
     <div class="date-badge" id="dateBadge"></div>
   </header>
 
@@ -678,6 +664,7 @@
   </div>
 
   <div class="game-layout">
+    <!-- LEFT -->
     <div>
       <div class="panel" id="searchPanel">
         <div class="panel-title">Make a Guess</div>
@@ -712,10 +699,11 @@
         Green chips = matching taxonomic level. Red = no match.
         The <em>Tree of Life</em> panel fills in as you identify each level.
         <br><br>
-        <strong>Branch view</strong> allows you to scroll through and see all possible sub-groups at each confirmed level, helping you narrow down the target. Eliminated branches are shown faded.
+        <strong>Branch view</strong> shows all possible sub-groups at each confirmed level — helping you narrow down the target. Eliminated branches (from your guesses) are shown faded.
       </div>
     </div>
 
+    <!-- RIGHT -->
     <div>
       <div class="panel tree-panel">
         <div class="panel-title">Tree of Life
@@ -726,10 +714,6 @@
         <div style="margin-top: 20px;">
           <div class="panel-title">Field Notes</div>
           <div id="hintsContainer">
-            <div class="hint-item">
-              <span class="hint-label">Name</span>
-              <span class="hint-value" id="hintName"></span>
-            </div>
             <div class="hint-item">
               <span class="hint-label">Diet</span>
               <span class="hint-value" id="hintDiet"><span class="hint-locked">?????</span></span>
@@ -745,9 +729,9 @@
       </div>
     </div>
   </div>
-
 </div>
 
+<!-- TAXONOMY POPUP -->
 <div class="tax-popup-overlay" id="taxPopupOverlay">
   <div class="tax-popup">
     <button class="tax-popup-close" id="taxPopupClose">✕</button>
@@ -765,8 +749,8 @@ const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Speci
 const DIET_UNLOCK  = 3;
 const RANGE_UNLOCK = 5;
 const MAX_GUESSES  = 30;
-const MAX_BRANCHES = 8;
-const SAVE_KEY     = 'taxon_session_v2';
+const MAX_BRANCHES = 8;   // Max branches shown per node in branch view
+const SAVE_KEY     = 'taxon_session_v1';
 
 // ── SPECIES COUNTS (for proximity scoring) ────────────────────────────────────
 const SPECIES_COUNTS = {
@@ -798,8 +782,6 @@ const LOG_MAX = Math.log(1500000);
 let animals        = [];
 let target         = null;
 let guesses        = [];
-let penaltyGuesses = 0;
-let nameHintRevealed = false;
 let selectedIndex  = -1;
 let filteredList   = [];
 let revealedLevels = new Set();
@@ -876,25 +858,38 @@ function levelMatchMap(guess, tgt) {
 }
 
 // ── BRANCH TREE ───────────────────────────────────────────────────────────────
-function getBranchStatus(level, value, pathUpToHere) {
-  let isEliminated = false;
+// Shows the "solution space": the confirmed sequential path as a spine,
+// then fans out at the deepest confirmed level to show ALL possible next-level
+// values from the dataset. Branches are marked:
+//   • confirmed  — a guess matched this exact value at this level
+//   • eliminated — a guess shared the confirmed path but had a different value here
+//   • possible   — not yet tested
+
+function getBranchStatus(level, value) {
+  // Get the confirmed path so far
+  const confirmedPath = [];
+  for (const lvl of LEVELS) {
+    if (revealedLevels.has(lvl)) confirmedPath.push({ level: lvl, value: target[lvl] });
+    else break;
+  }
+
   for (const g of guesses) {
     const gVal = (g[level] || '').toLowerCase();
     if (!gVal) continue;
-    
-    // check if guess is in the same subtree
-    const inSubtree = pathUpToHere.every(({ level: cl, value: cv }) =>
+    if (gVal !== value.toLowerCase()) continue;
+
+    // Does this guess match ALL confirmed levels above this branch?
+    // (i.e., the guess is "in the same subtree" as the confirmed path)
+    const inSubtree = confirmedPath.every(({ level: cl, value: cv }) =>
       (g[cl] || '').toLowerCase() === cv.toLowerCase()
     );
     if (!inSubtree) continue;
 
-    if (gVal === value.toLowerCase()) {
-       const mm = levelMatchMap(g, target);
-       if (mm[level] === true) return 'confirmed';
-       if (mm[level] === false) isEliminated = true;
-    }
+    const mm = levelMatchMap(g, target);
+    if (mm[level] === true)  return 'confirmed';
+    if (mm[level] === false) return 'eliminated';
   }
-  return isEliminated ? 'eliminated' : 'possible';
+  return 'possible';
 }
 
 function renderBranchTree() {
@@ -902,6 +897,7 @@ function renderBranchTree() {
   container.classList.add('branch-mode');
   container.innerHTML = '';
 
+  // Build confirmed sequential path
   const confirmedPath = [];
   for (const lvl of LEVELS) {
     if (revealedLevels.has(lvl)) {
@@ -909,93 +905,129 @@ function renderBranchTree() {
     } else break;
   }
 
+  // Next level to branch at
+  const nextLevelIdx = confirmedPath.length;
+  const nextLevel    = LEVELS[nextLevelIdx];
+
   if (guesses.length === 0 && confirmedPath.length === 0) {
     container.innerHTML = '<div class="bt-pregame-hint">Make a guess to start mapping<br>the tree of life.</div>';
     return;
   }
 
-  const maxLevelIdx = confirmedPath.length;
+  // Filter dataset to animals matching the confirmed path
+  const candidates = animals.filter(a =>
+    confirmedPath.every(({ level, value }) =>
+      (a[level] || '').toLowerCase() === value.toLowerCase()
+    )
+  );
 
-  for (let i = 0; i <= maxLevelIdx; i++) {
-    const currentLevel = LEVELS[i];
-    if (!currentLevel) break;
+  // Count candidates per branch value at next level
+  const branchMap = {};
+  if (nextLevel) {
+    candidates.forEach(a => {
+      const val = a[nextLevel] || '';
+      if (val) branchMap[val] = (branchMap[val] || 0) + 1;
+    });
+  }
 
-    // Render the confirmed spine node for i-1 if applicable
-    if (i > 0) {
-      const prevLevel = LEVELS[i-1];
-      const prevVal = confirmedPath[i-1].value;
-      const pathToPrev = confirmedPath.slice(0, i);
-      const cnt = animals.filter(a => pathToPrev.every(p => (a[p.level]||'').toLowerCase() === p.value.toLowerCase())).length;
+  // ── Render confirmed spine ──────────────────────────────────────────────
+  if (confirmedPath.length === 0) {
+    // No confirmed levels yet — show a placeholder spine row
+    const wrap = document.createElement('div');
+    wrap.className = 'bt-spine-row';
+    wrap.innerHTML = `
+      <div class="bt-spine-connector">
+        <div class="v" style="visibility:hidden"></div>
+        <div class="d" style="background:var(--worn);outline-color:var(--worn)"></div>
+        <div class="v"></div>
+      </div>
+      <div style="padding:3px 0 3px 8px">
+        <div class="bt-spine-label">Kingdom</div>
+        <div class="bt-spine-val">Animalia</div>
+      </div>`;
+    container.appendChild(wrap);
+  } else {
+    confirmedPath.forEach(({ level, value }, i) => {
+      // Count animals matching path up to this level
+      const pathToHere = confirmedPath.slice(0, i + 1);
+      const cnt = animals.filter(a =>
+        pathToHere.every(({ level: cl, value: cv }) =>
+          (a[cl] || '').toLowerCase() === cv.toLowerCase()
+        )
+      ).length;
 
       const row = document.createElement('div');
       row.className = 'bt-spine-row';
       row.innerHTML = `
         <div class="bt-spine-connector">
-          <div class="v" ${i === 1 ? 'style="visibility:hidden"' : ''}></div>
+          <div class="v" ${i === 0 ? 'style="visibility:hidden"' : ''}></div>
           <div class="d"></div>
           <div class="v"></div>
         </div>
         <div style="padding:3px 0 3px 8px">
-          <div class="bt-spine-label">${LEVEL_LABELS[i-1]}</div>
-          <div class="bt-spine-val">${prevVal} <span class="bt-spine-count">${cnt}</span></div>
+          <div class="bt-spine-label">${LEVEL_LABELS[LEVELS.indexOf(level)]}</div>
+          <div class="bt-spine-val">${value} <span class="bt-spine-count">${cnt}</span></div>
         </div>`;
       container.appendChild(row);
-    }
-
-    // Render branches for current level
-    const pathUpToHere = confirmedPath.slice(0, i);
-    const candidates = animals.filter(a => pathUpToHere.every(p => (a[p.level]||'').toLowerCase() === p.value.toLowerCase()));
-
-    const branchMap = {};
-    candidates.forEach(a => {
-      const val = a[currentLevel] || '';
-      if (val) branchMap[val] = (branchMap[val] || 0) + 1;
     });
-
-    const branches = Object.entries(branchMap).sort(([,a],[,b]) => b - a);
-    if (branches.length > 0) {
-      const branchWrap = document.createElement('div');
-      branchWrap.className = 'bt-branches';
-      
-      const MAX_VIS = i === maxLevelIdx ? MAX_BRANCHES : 3;
-      const visible = branches.slice(0, MAX_VIS);
-      const hidden = branches.length - visible.length;
-
-      const statusOrder = { confirmed: 0, possible: 1, eliminated: 2 };
-      visible.sort(([va], [vb]) => {
-        const sa = getBranchStatus(currentLevel, va, pathUpToHere);
-        const sb = getBranchStatus(currentLevel, vb, pathUpToHere);
-        return (statusOrder[sa] ?? 1) - (statusOrder[sb] ?? 1);
-      });
-
-      visible.forEach(([value, count]) => {
-        const status = getBranchStatus(currentLevel, value, pathUpToHere);
-        const row = document.createElement('div');
-        row.className = `bt-branch-row status-${status}`;
-        row.innerHTML = `
-          <div class="bt-branch-dot ${status}"></div>
-          <span class="bt-branch-val">${value}</span>
-          <span class="bt-branch-level">${LEVEL_LABELS[i]}</span>
-          <span class="bt-branch-count">${count}</span>`;
-        branchWrap.appendChild(row);
-      });
-
-      if (hidden > 0) {
-        const more = document.createElement('div');
-        more.className = 'bt-more';
-        more.textContent = `+ ${hidden} more not shown`;
-        branchWrap.appendChild(more);
-      }
-
-      container.appendChild(branchWrap);
-    }
   }
 
+  // ── Render branches at next level ─────────────────────────────────────────
+  if (!nextLevel) {
+    // All levels confirmed — game should be over
+    return;
+  }
+
+  const branches = Object.entries(branchMap).sort(([,a],[,b]) => b - a);
+  if (branches.length === 0) {
+    const el = document.createElement('div');
+    el.className = 'bt-empty';
+    el.textContent = 'No further branches in dataset.';
+    container.appendChild(el);
+    return;
+  }
+
+  const lvlLabel = LEVEL_LABELS[nextLevelIdx];
+
+  const branchWrap = document.createElement('div');
+  branchWrap.className = 'bt-branches';
+
+  const MAX_VIS = MAX_BRANCHES;
+  const visible = branches.slice(0, MAX_VIS);
+  const hidden  = branches.length - visible.length;
+
+  // Sort: put confirmed first, then possible, then eliminated
+  const statusOrder = { confirmed: 0, possible: 1, eliminated: 2 };
+  visible.sort(([va], [vb]) => {
+    const sa = getBranchStatus(nextLevel, va);
+    const sb = getBranchStatus(nextLevel, vb);
+    return (statusOrder[sa] ?? 1) - (statusOrder[sb] ?? 1);
+  });
+
+  visible.forEach(([value, count]) => {
+    const status = getBranchStatus(nextLevel, value);
+    const row = document.createElement('div');
+    row.className = `bt-branch-row status-${status}`;
+    row.innerHTML = `
+      <div class="bt-branch-dot ${status}"></div>
+      <span class="bt-branch-val">${value}</span>
+      <span class="bt-branch-level">${lvlLabel}</span>
+      <span class="bt-branch-count">${count}</span>`;
+    branchWrap.appendChild(row);
+  });
+
+  if (hidden > 0) {
+    const more = document.createElement('div');
+    more.className = 'bt-more';
+    more.textContent = `+ ${hidden} more ${lvlLabel.toLowerCase()}${hidden === 1 ? '' : 's'} not shown`;
+    branchWrap.appendChild(more);
+  }
+
+  container.appendChild(branchWrap);
+
+  // Reveal hint after game ends
   const hint = document.getElementById('treeRevealHint');
   if (gameOver) hint.classList.add('visible');
-
-  // Automatically scroll down to reveal the newest expanded branches
-  setTimeout(() => { container.scrollTop = container.scrollHeight; }, 10);
 }
 
 // ── LINEAR TREE ───────────────────────────────────────────────────────────────
@@ -1003,7 +1035,6 @@ function renderLinearTree() {
   const container = document.getElementById('treeContainer');
   container.classList.remove('branch-mode');
   container.innerHTML = '';
-  container.style.maxHeight = ''; // Remove scroll boundary for linear mode
   LEVELS.forEach((lvl, i) => {
     const node = document.createElement('div');
     node.className = 'tree-node' + (revealedLevels.has(lvl) ? ' revealed' : '');
@@ -1029,54 +1060,15 @@ function renderTree() {
 // ── HINTS ─────────────────────────────────────────────────────────────────────
 function renderHints() {
   const n = guesses.length;
-  
-  // Name Hint
-  const hintNameEl = document.getElementById('hintName');
-  if (gameOver || nameHintRevealed) {
-    const words = target.common_name.split(' ');
-    let hintStr = '';
-    if (words.length > 1) {
-        hintStr = words[0] + ' ' + words.slice(1).join(' ').replace(/[a-zA-Z0-9]/g, '_');
-    } else {
-        const half = Math.ceil(target.common_name.length / 2);
-        hintStr = target.common_name.substring(0, half) + target.common_name.substring(half).replace(/[a-zA-Z0-9]/g, '_');
-    }
-    hintNameEl.innerHTML = `<strong style="letter-spacing:1px">${hintStr}</strong>`;
-  } else {
-    const btn = document.createElement('button');
-    btn.className = 'give-up-btn';
-    btn.style.marginTop = '0';
-    btn.textContent = 'Reveal (Cost: 5 Guesses)';
-    const totalG = guesses.length + penaltyGuesses;
-    if (totalG + 5 >= MAX_GUESSES) {
-        btn.disabled = true;
-    }
-    btn.onclick = () => {
-        if (guesses.length + penaltyGuesses + 5 < MAX_GUESSES) {
-            penaltyGuesses += 5;
-            nameHintRevealed = true;
-            saveSession();
-            updateGuessCounter();
-            renderHints();
-        }
-    };
-    hintNameEl.innerHTML = '';
-    hintNameEl.appendChild(btn);
-  }
-
-  // Diet Hint
   document.getElementById('hintDiet').innerHTML =
     (n >= DIET_UNLOCK || gameOver)
       ? `<strong>${target.diet || '—'}</strong>`
       : `<span class="hint-locked">?????</span>`;
-      
-  // Range Hint
   const pips = (target.continents || []).map(c => `<span class="continent-pip">${c}</span>`).join('');
   document.getElementById('hintContinents').innerHTML =
     (n >= RANGE_UNLOCK || gameOver)
       ? (pips || '<em style="color:var(--steel)">—</em>')
       : `<span class="hint-locked">?????</span>`;
-      
   const parts = [];
   if (n < DIET_UNLOCK  && !gameOver) parts.push(`Diet in ${DIET_UNLOCK-n} guess${DIET_UNLOCK-n===1?'':'es'}`);
   if (n < RANGE_UNLOCK && !gameOver) parts.push(`Range in ${RANGE_UNLOCK-n}`);
@@ -1150,7 +1142,7 @@ function submitGuess(animal) {
       animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
     endGame(true); return;
   }
-  if (guesses.length + penaltyGuesses >= MAX_GUESSES) { endGame(false); return; }
+  if (guesses.length >= MAX_GUESSES) { endGame(false); return; }
 
   saveSession();
   document.getElementById('searchInput').value = '';
@@ -1168,7 +1160,7 @@ function endGame(won) {
   banner.classList.add('show');
   document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
   document.getElementById('resultSubtitle').textContent = won
-    ? `You identified it using ${guesses.length + penaltyGuesses} total guesses.`
+    ? `You identified it in ${guesses.length} guess${guesses.length===1?'':'es'}.`
     : 'Better luck on the next one.';
   document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
   document.getElementById('resultFact').textContent = target.notes || '';
@@ -1183,7 +1175,7 @@ function endGame(won) {
 
 // ── COUNTER ───────────────────────────────────────────────────────────────────
 function updateGuessCounter() {
-  const n = guesses.length + penaltyGuesses, rem = MAX_GUESSES - n;
+  const n = guesses.length, rem = MAX_GUESSES - n;
   document.getElementById('remainingCount').textContent = rem;
   document.getElementById('remainingCount').classList.toggle('low', rem <= 5);
   document.getElementById('guessCountText').textContent = `${n} / ${MAX_GUESSES}`;
@@ -1271,8 +1263,6 @@ function saveSession() {
     localStorage.setItem(key, JSON.stringify({
       target: target.scientific_name,
       guesses: guesses.map(g => g._isTaxon ? `__taxon__${g.common_name}` : g.scientific_name),
-      penaltyGuesses,
-      nameHintRevealed,
       gameOver,
       branchViewActive,
     }));
@@ -1287,10 +1277,6 @@ function loadSession(savedTarget) {
     if (!raw) return false;
     const data = JSON.parse(raw);
     if (data.target !== savedTarget.scientific_name) return false;
-    
-    penaltyGuesses = data.penaltyGuesses || 0;
-    nameHintRevealed = data.nameHintRevealed || false;
-
     for (const key of data.guesses) {
       let animal;
       if (key.startsWith('__taxon__')) {
@@ -1317,7 +1303,7 @@ function loadSession(savedTarget) {
                   guesses[0].scientific_name.toLowerCase() === target.scientific_name.toLowerCase();
       document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
       document.getElementById('resultSubtitle').textContent = won
-        ? `You identified it using ${guesses.length + penaltyGuesses} total guesses.`
+        ? `You identified it in ${guesses.length} guess${guesses.length===1?'':'es'}.`
         : 'Better luck on the next one.';
       document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
       document.getElementById('resultFact').textContent = target.notes || '';
@@ -1333,7 +1319,6 @@ function startNewGame() {
   const prev = target;
   target = pickRandom(animals, prev);
   guesses = []; revealedLevels = new Set(); gameOver = false;
-  penaltyGuesses = 0; nameHintRevealed = false;
   filteredList = []; selectedIndex = -1; branchViewActive = false;
 
   document.getElementById('resultBanner').classList.remove('show');
