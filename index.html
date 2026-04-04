@@ -8,19 +8,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #0f1623;
-    --cream: #f7f8fc;
-    --parchment: #eef0f7;
-    --worn: #d0d5e8;
-    --gold: #4f6ef7;
-    --gold-light: #7b93f9;
-    --forest: #1a2a5e;
-    --sage: #3d5a9e;
-    --rust: #c0392b;
-    --steel: #5a6582;
-    --match-full: #1a7a4a;
-    --match-partial: #9a6c00;
-    --match-none: #b02a2a;
+    --ink: #1c1a14;
+    --cream: #f4eed8;
+    --parchment: #ede6c8;
+    --worn: #d8ceac;
+    --gold: #b8921a;
+    --gold-light: #d4a843;
+    --forest: #2a4030;
+    --sage: #5a7a5e;
+    --rust: #8b3a2a;
+    --steel: #4a5568;
+    --match-full: #2d6a3f;
+    --match-partial: #7a5c0a;
+    --match-none: #6b2a1e;
     --font-display: 'Playfair Display', Georgia, serif;
     --font-mono: 'Courier Prime', 'Courier New', monospace;
     --font-body: 'Crimson Pro', Georgia, serif;
@@ -34,8 +34,8 @@
     font-family: var(--font-body);
     font-size: 17px;
     min-height: 100vh;
-    background-image: radial-gradient(ellipse at 20% 0%, #e8eeff 0%, transparent 60%),
-                      radial-gradient(ellipse at 80% 100%, #e4e9ff 0%, transparent 55%);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   }
 
   .page-wrap {
@@ -44,6 +44,7 @@
     padding: 0 16px 60px;
   }
 
+  /* HEADER */
   header {
     text-align: center;
     padding: 36px 0 24px;
@@ -83,9 +84,10 @@
     margin-top: 10px;
   }
 
+  /* TWO COLUMN LAYOUT */
   .game-layout {
     display: grid;
-    grid-template-columns: 1fr 290px;
+    grid-template-columns: 1fr 280px;
     gap: 24px;
     align-items: start;
   }
@@ -93,6 +95,7 @@
     .game-layout { grid-template-columns: 1fr; }
   }
 
+  /* PANELS */
   .panel {
     background: var(--parchment);
     border: 1px solid var(--worn);
@@ -112,6 +115,7 @@
     border-bottom: 1px solid var(--worn);
   }
 
+  /* SEARCH */
   .search-wrap {
     position: relative;
     display: flex;
@@ -150,6 +154,7 @@
   .guess-btn:hover { background: var(--sage); }
   .guess-btn:disabled { background: var(--worn); cursor: default; }
 
+  /* AUTOCOMPLETE */
   .autocomplete-list {
     position: absolute;
     top: 100%;
@@ -181,6 +186,7 @@
   .autocomplete-item .sci { font-style: italic; color: var(--steel); font-size: 0.82rem; }
   .search-hint { font-size: 0.82rem; color: var(--steel); font-style: italic; margin-bottom: 14px; }
 
+  /* GUESS HISTORY */
   .guess-list { display: flex; flex-direction: column; gap: 10px; }
   .guess-card {
     background: var(--cream);
@@ -213,10 +219,11 @@
     border-radius: 20px;
     letter-spacing: 0.5px;
   }
-  .prox-high { background: #d4eddf; color: #145a30; border: 1px solid #6fcf97; }
-  .prox-mid  { background: #fff0cc; color: #7a4f00; border: 1px solid #f0bc45; }
-  .prox-low  { background: #fde8e8; color: #7b1d1d; border: 1px solid #e57373; }
+  .prox-high { background: #d4edda; color: #1a4a28; border: 1px solid #7cba8f; }
+  .prox-mid  { background: #fff3cd; color: #5a3e00; border: 1px solid #c9a227; }
+  .prox-low  { background: #f8d7da; color: #5a1a1a; border: 1px solid #c47070; }
 
+  /* TAXONOMY DOTS */
   .tax-row {
     display: flex;
     flex-wrap: wrap;
@@ -230,11 +237,11 @@
     border-radius: 2px;
     letter-spacing: 0.3px;
   }
-  .tax-match   { background: #d4f0e2; color: #145a30; border: 1px solid #6fcf97; }
-  .tax-nomatch { background: #fde8e8; color: #7b1d1d; border: 1px solid #e57373; }
+  .tax-match   { background: #c8e6c9; color: #1b5e20; border: 1px solid #81c784; }
+  .tax-nomatch { background: #ffcdd2; color: #7f0000; border: 1px solid #e57373; }
   .tax-label { font-size: 0.62rem; opacity: 0.7; display: block; }
 
-  /* ── LINEAR TREE ──────────────────────────────────────────────────────── */
+  /* TREE OF LIFE PANEL */
   .tree-panel { position: sticky; top: 16px; }
   .tree-node {
     font-family: var(--font-mono);
@@ -257,13 +264,16 @@
     flex-shrink: 0;
     transition: all 0.3s;
   }
-  .tree-node.revealed .tree-dot { background: var(--gold); border-color: var(--gold); }
+  .tree-node.revealed .tree-dot {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
   .tree-node.revealed { border-left-color: var(--gold); }
   .tree-level { font-size: 0.62rem; color: var(--steel); letter-spacing: 1px; text-transform: uppercase; }
   .tree-value { color: var(--ink); font-style: italic; }
   .tree-value.hidden { color: var(--worn); font-style: normal; }
 
-  /* ── HINTS ────────────────────────────────────────────────────────────── */
+  /* HINTS PANEL */
   .hint-item {
     display: flex;
     align-items: center;
@@ -281,9 +291,79 @@
     width: 80px;
     flex-shrink: 0;
   }
-  .hint-value { font-size: 0.9rem; color: var(--ink); }
-  .hint-locked { font-style: italic; color: var(--worn); font-size: 0.85rem; }
-  .hint-unlock-note { font-size: 0.75rem; color: var(--steel); font-style: italic; margin-top: 2px; }
+  .hint-value {
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+  .hint-locked {
+    font-style: italic;
+    color: var(--worn);
+    font-size: 0.85rem;
+  }
+  .hint-unlock-note {
+    font-size: 0.75rem;
+    color: var(--steel);
+    font-style: italic;
+    margin-top: 2px;
+  }
+  .reveal-btn {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .reveal-btn:hover { background: var(--gold); color: var(--cream); }
+
+  /* WIN / LOSE STATES */
+  .result-banner {
+    text-align: center;
+    padding: 28px;
+    border: 2px solid var(--gold);
+    border-radius: 4px;
+    background: var(--parchment);
+    margin-bottom: 20px;
+    display: none;
+    animation: slide-in 0.3s ease;
+  }
+  .result-banner.show { display: block; }
+  .result-banner h2 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--forest);
+    margin-bottom: 8px;
+  }
+  .result-banner p {
+    font-size: 0.95rem;
+    color: var(--steel);
+    margin-bottom: 4px;
+  }
+  .result-sci { font-style: italic; color: var(--gold); font-family: var(--font-mono); font-size: 0.9rem; }
+  .result-fact { font-style: italic; margin-top: 12px; font-size: 1rem; color: var(--ink); border-left: 3px solid var(--gold); padding-left: 12px; text-align: left; }
+
+  .max-guesses-note {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--steel);
+    text-align: right;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--steel);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
   .continent-pip {
     display: inline-block;
     background: var(--sage);
@@ -296,77 +376,7 @@
     letter-spacing: 0.3px;
   }
 
-  /* ── WIN / LOSE ───────────────────────────────────────────────────────── */
-  .result-banner {
-    text-align: center;
-    padding: 28px;
-    border: 2px solid var(--gold);
-    border-radius: 4px;
-    background: var(--parchment);
-    margin-bottom: 20px;
-    display: none;
-    animation: slide-in 0.3s ease;
-  }
-  .result-banner.show { display: block; }
-  .result-banner h2 { font-family: var(--font-display); font-size: 1.8rem; color: var(--forest); margin-bottom: 8px; }
-  .result-banner p { font-size: 0.95rem; color: var(--steel); margin-bottom: 4px; }
-  .result-sci { font-style: italic; color: var(--gold); font-family: var(--font-mono); font-size: 0.9rem; }
-  .result-fact { font-style: italic; margin-top: 12px; font-size: 1rem; color: var(--ink); border-left: 3px solid var(--gold); padding-left: 12px; text-align: left; }
-
-  .guess-counter-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .guess-counter-left {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--steel);
-    letter-spacing: 0.5px;
-  }
-  .guess-counter-left .remaining { font-weight: 700; color: var(--ink); }
-  .guess-counter-left .remaining.low { color: #c0392b; }
-
-  .guess-progress-track {
-    height: 3px;
-    background: var(--worn);
-    border-radius: 2px;
-    margin-bottom: 12px;
-    overflow: hidden;
-  }
-  .guess-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--gold), var(--gold-light));
-    border-radius: 2px;
-    transition: width 0.3s ease;
-  }
-
-  .give-up-btn {
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    background: transparent;
-    border: 1px solid #d0d5e8;
-    color: var(--steel);
-    cursor: pointer;
-    border-radius: 3px;
-    transition: all 0.15s;
-    margin-top: 8px;
-    display: inline-block;
-  }
-  .give-up-btn:hover { border-color: var(--rust); color: var(--rust); }
-
-  .empty-state {
-    text-align: center;
-    padding: 24px 0;
-    color: var(--steel);
-    font-style: italic;
-    font-size: 0.95rem;
-  }
-
+  /* HOW TO PLAY */
   .howto {
     margin-top: 28px;
     padding: 16px 20px;
@@ -378,271 +388,10 @@
   }
   .howto strong { color: var(--ink); font-family: var(--font-display); }
 
+  /* SCROLLBAR */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--cream); }
   ::-webkit-scrollbar-thumb { background: var(--worn); border-radius: 3px; }
-
-  .tree-toggle-btn {
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    background: transparent;
-    border: 1px solid var(--worn);
-    color: var(--steel);
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 0.15s;
-    float: right;
-    margin-top: -2px;
-  }
-  .tree-toggle-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-  .new-game-btn {
-    display: none;
-    margin-top: 14px;
-    font-family: var(--font-display);
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 10px 24px;
-    background: var(--forest);
-    color: var(--cream);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .new-game-btn:hover { background: var(--sage); transform: translateY(-1px); }
-
-  .taxon-badge {
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    color: var(--steel);
-    background: var(--parchment);
-    border: 1px solid var(--worn);
-    border-radius: 3px;
-    padding: 1px 5px;
-    margin-left: 5px;
-    vertical-align: middle;
-    letter-spacing: 0.5px;
-  }
-  .tax-unknown {
-    background: var(--parchment);
-    color: var(--steel);
-    border: 1px dashed var(--worn);
-    opacity: 0.6;
-  }
-  .autocomplete-taxon { background: color-mix(in srgb, var(--parchment) 60%, var(--cream)); }
-  .autocomplete-taxon:hover, .autocomplete-taxon.selected { background: var(--parchment); }
-
-  /* ── TAXONOMY POPUP ───────────────────────────────────────────────────── */
-  .tax-popup-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 22, 35, 0.55);
-    backdrop-filter: blur(3px);
-    z-index: 200;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    animation: fade-in 0.15s ease;
-  }
-  .tax-popup-overlay.open { display: flex; }
-  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-  .tax-popup {
-    background: var(--cream);
-    border: 1px solid var(--worn);
-    border-radius: 8px;
-    padding: 28px 32px;
-    max-width: 420px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(15,22,35,0.25);
-    animation: popup-in 0.2s ease;
-    position: relative;
-  }
-  @keyframes popup-in {
-    from { opacity: 0; transform: translateY(10px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .tax-popup-title { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--forest); margin-bottom: 4px; }
-  .tax-popup-sci { font-style: italic; color: var(--steel); font-size: 0.85rem; margin-bottom: 20px; }
-  .tax-popup-tree { display: flex; flex-direction: column; gap: 0; }
-  .tax-popup-row { display: flex; align-items: stretch; min-height: 32px; }
-  .tax-popup-connector { width: 28px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
-  .tax-popup-connector .vert { width: 2px; flex: 1; background: var(--worn); }
-  .tax-popup-connector .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); border: 2px solid var(--gold-light); flex-shrink: 0; margin: 4px 0; }
-  .tax-popup-row:first-child .tax-popup-connector .vert:first-child { background: transparent; }
-  .tax-popup-row:last-child  .tax-popup-connector .vert:last-child  { background: transparent; }
-  .tax-popup-cell { padding: 3px 0 3px 10px; display: flex; flex-direction: column; justify-content: center; }
-  .tax-popup-level { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--steel); }
-  .tax-popup-value { font-family: var(--font-body); font-size: 0.95rem; font-style: italic; color: var(--ink); font-weight: 600; }
-  .tax-popup-close { position: absolute; top: 12px; right: 14px; background: none; border: none; font-size: 1.2rem; color: var(--steel); cursor: pointer; padding: 4px 6px; border-radius: 3px; transition: background 0.1s; }
-  .tax-popup-close:hover { background: var(--parchment); }
-  .tax-popup-note { margin-top: 16px; padding: 10px 12px; background: var(--parchment); border-radius: 4px; font-style: italic; font-size: 0.87rem; color: var(--steel); border-left: 3px solid var(--gold); }
-
-  .tree-reveal-hint {
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    color: var(--gold);
-    letter-spacing: 0.5px;
-    margin-top: 12px;
-    text-align: center;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.15s;
-    display: none;
-  }
-  .tree-reveal-hint:hover { opacity: 1; }
-  .tree-reveal-hint.visible { display: block; }
-
-  /* ── BRANCH TREE ──────────────────────────────────────────────────────── */
-  #treeContainer.branch-mode {
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-  }
-
-  /* The spine: confirmed path rows */
-  .bt-spine {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 0 3px 0;
-    line-height: 1.3;
-  }
-  .bt-spine-connector {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 14px;
-    flex-shrink: 0;
-    self-align: stretch;
-  }
-  .bt-spine-connector .v { width: 2px; flex: 1; min-height: 6px; background: var(--gold); }
-  .bt-spine-connector .d {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    background: var(--gold);
-    border: 2px solid var(--cream);
-    outline: 1.5px solid var(--gold);
-    flex-shrink: 0;
-  }
-  .bt-spine-row {
-    display: flex;
-    align-items: stretch;
-    min-height: 24px;
-  }
-  .bt-spine-row:first-child .bt-spine-connector .v:first-child { visibility: hidden; }
-  .bt-spine-row:last-child  .bt-spine-connector .v:last-child  { visibility: hidden; }
-  .bt-spine-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1px; color: var(--steel); }
-  .bt-spine-val { font-style: italic; color: var(--forest); font-weight: 700; }
-  .bt-spine-count {
-    font-size: 0.6rem;
-    background: #dde3ff;
-    color: var(--forest);
-    border-radius: 8px;
-    padding: 1px 5px;
-    margin-left: 4px;
-    border: 1px solid var(--worn);
-  }
-
-  /* Branch rows at the leaf */
-  .bt-branches {
-    margin-left: 14px; /* align with spine dot center */
-    border-left: 2px solid var(--worn);
-    margin-top: 0;
-    padding-bottom: 2px;
-  }
-  .bt-branch-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 3px 0 3px 8px;
-    position: relative;
-    transition: opacity 0.15s;
-  }
-  /* Horizontal connector line from border to dot */
-  .bt-branch-row::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    width: 8px;
-    height: 2px;
-    background: var(--worn);
-  }
-  .bt-branch-row.status-eliminated { opacity: 0.45; }
-  .bt-branch-row.status-confirmed  { }
-
-  .bt-branch-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    border: 1.5px solid;
-  }
-  .bt-branch-dot.possible    { background: var(--cream); border-color: var(--steel); }
-  .bt-branch-dot.eliminated  { background: #e57373; border-color: #c0392b; }
-  .bt-branch-dot.confirmed   { background: var(--gold); border-color: var(--gold); }
-
-  .bt-branch-val {
-    font-style: italic;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .bt-branch-row.status-eliminated .bt-branch-val {
-    text-decoration: line-through;
-    color: var(--steel);
-  }
-  .bt-branch-row.status-confirmed .bt-branch-val { color: var(--forest); font-weight: 700; }
-  .bt-branch-row.status-possible  .bt-branch-val { color: var(--ink); }
-
-  .bt-branch-level {
-    font-size: 0.56rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--steel);
-    opacity: 0.65;
-  }
-  .bt-branch-count {
-    font-size: 0.6rem;
-    background: var(--worn);
-    color: var(--steel);
-    border-radius: 8px;
-    padding: 1px 5px;
-    min-width: 18px;
-    text-align: center;
-    border: 1px solid transparent;
-  }
-  .bt-branch-row.status-confirmed .bt-branch-count { background: #d4f0e2; color: #145a30; border-color: #6fcf97; }
-  .bt-branch-row.status-eliminated .bt-branch-count { background: #fde8e8; color: #7b1d1d; border-color: #e57373; }
-
-  .bt-more {
-    padding: 3px 0 3px 8px;
-    font-size: 0.68rem;
-    color: var(--steel);
-    font-style: italic;
-    border-top: 1px dashed var(--worn);
-    margin-top: 2px;
-  }
-
-  .bt-empty {
-    font-size: 0.8rem;
-    color: var(--steel);
-    font-style: italic;
-    padding: 8px 0;
-  }
-
-  .bt-pregame-hint {
-    font-size: 0.75rem;
-    color: var(--steel);
-    font-style: italic;
-    text-align: center;
-    padding: 10px 0;
-    line-height: 1.5;
-  }
 </style>
 </head>
 <body>
@@ -659,31 +408,26 @@
     <p id="resultSubtitle"></p>
     <p class="result-sci" id="resultSci"></p>
     <p class="result-fact" id="resultFact"></p>
-    <button class="new-game-btn" id="newGameBtn">↺ New Animal</button>
   </div>
 
   <div class="game-layout">
-    <!-- LEFT -->
+    <!-- LEFT: SEARCH + GUESSES -->
     <div>
       <div class="panel" id="searchPanel">
         <div class="panel-title">Make a Guess</div>
         <div class="search-wrap" id="searchWrap">
-          <input type="text" class="search-input" id="searchInput"
-            placeholder="Type a common or scientific name…" autocomplete="off"/>
+          <input
+            type="text"
+            class="search-input"
+            id="searchInput"
+            placeholder="Type a common or scientific name…"
+            autocomplete="off"
+          />
           <button class="guess-btn" id="guessBtn">Guess</button>
           <div class="autocomplete-list" id="autocompleteList"></div>
         </div>
         <div class="search-hint">Guesses fill in the taxonomic tree. Hints unlock after 3 and 5 guesses.</div>
-        <div class="guess-counter-row">
-          <div class="guess-counter-left">
-            <span class="remaining" id="remainingCount">30</span> guesses remaining
-          </div>
-          <div id="guessCountText" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--steel);">0 / 30</div>
-        </div>
-        <div class="guess-progress-track">
-          <div class="guess-progress-fill" id="guessProgressFill" style="width:0%"></div>
-        </div>
-        <button class="give-up-btn" id="giveUpBtn">Give Up</button>
+        <div class="max-guesses-note" id="guessCounter">0 guesses</div>
       </div>
 
       <div class="panel" style="margin-top: 16px;">
@@ -698,16 +442,15 @@
         Green chips = matching taxonomic level. Red = no match.
         The <em>Tree of Life</em> panel fills in as you identify each level.
         <br><br>
-        <strong>Branch view</strong> shows all possible sub-groups at each confirmed level — helping you narrow down the target. Eliminated branches (from your guesses) are shown faded.
+        <strong>Proximity %</strong> reflects how closely related your guess is, weighted by how many species share that taxonomic group — guessing within a species-rich genus scores higher than a monotypic one.
       </div>
     </div>
 
-    <!-- RIGHT -->
+    <!-- RIGHT: TREE + HINTS -->
     <div>
+      <!-- TREE OF LIFE -->
       <div class="panel tree-panel">
-        <div class="panel-title">Tree of Life
-          <button class="tree-toggle-btn" id="treeToggleBtn">⬡ Branch view</button>
-        </div>
+        <div class="panel-title">Tree of Life</div>
         <div id="treeContainer"></div>
 
         <div style="margin-top: 20px;">
@@ -724,315 +467,107 @@
           </div>
           <div class="hint-unlock-note" id="hintNote">Diet unlocks after 3 guesses · Range after 5</div>
         </div>
-        <div id="treeRevealHint" class="tree-reveal-hint">▸ View full taxonomy path</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TAXONOMY POPUP -->
-<div class="tax-popup-overlay" id="taxPopupOverlay">
-  <div class="tax-popup">
-    <button class="tax-popup-close" id="taxPopupClose">✕</button>
-    <div class="tax-popup-title" id="taxPopupName"></div>
-    <div class="tax-popup-sci" id="taxPopupSci"></div>
-    <div class="tax-popup-tree" id="taxPopupTree"></div>
-    <div class="tax-popup-note" id="taxPopupNote" style="display:none"></div>
-  </div>
-</div>
-
 <script>
-// ── CONFIG ────────────────────────────────────────────────────────────────────
-const LEVELS       = ['kingdom','phylum','class','order','family','genus','species'];
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const LEVELS = ['kingdom','phylum','class','order','family','genus','species'];
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
-const DIET_UNLOCK  = 3;
+const DIET_UNLOCK = 3;
 const RANGE_UNLOCK = 5;
-const MAX_GUESSES  = 30;
-const MAX_BRANCHES = 8;   // Max branches shown per node in branch view
-const SAVE_KEY     = 'taxon_session_v1';
 
-// ── SPECIES COUNTS (for proximity scoring) ────────────────────────────────────
-const SPECIES_COUNTS = {
-  'animalia':1500000,
-  'chordata':69000,'arthropoda':1170000,'mollusca':85000,
-  'annelida':22000,'echinodermata':7000,'cnidaria':10000,
-  'platyhelminthes':20000,'nematoda':25000,'porifera':10000,
-  'mammalia':6500,'aves':11000,'reptilia':11000,'amphibia':8000,
-  'actinopterygii':34000,'chondrichthyes':1200,
-  'insecta':1000000,'arachnida':48000,'malacostraca':40000,
-  'cephalopoda':800,'gastropoda':65000,'bivalvia':20000,
-  'rodentia':2500,'chiroptera':1400,'eulipotyphla':500,
-  'carnivora':300,'primates':500,'artiodactyla':300,
-  'cetacea':90,'lagomorpha':92,'proboscidea':3,
-  'perissodactyla':17,'pilosa':9,'tubulidentata':1,
-  'passeriformes':6500,'apodiformes':450,'psittaciformes':400,
-  'falconiformes':290,'piciformes':440,'columbiformes':350,
-  'charadriiformes':380,'strigiformes':250,'anseriformes':180,
-  'galliformes':290,
-  'squamata':10000,'testudines':360,'crocodylia':27,
-  'anura':7000,'caudata':700,
-  'perciformes':10000,'cypriniformes':4200,'siluriformes':3700,
-  'coleoptera':400000,'lepidoptera':180000,'hymenoptera':150000,
-  'diptera':125000,'hemiptera':80000,
-};
-const LOG_MAX = Math.log(1500000);
-
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let animals        = [];
-let target         = null;
-let guesses        = [];
-let selectedIndex  = -1;
-let filteredList   = [];
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let animals = [];
+let target = null;
+let guesses = [];
+let selectedIndex = -1;
+let filteredList = [];
 let revealedLevels = new Set();
-let gameOver       = false;
-let taxonIndex     = {};
-let branchViewActive = false;
+let gameOver = false;
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function pickRandom(arr, exclude = null) {
-  const pool = exclude ? arr.filter(a => a !== exclude) : arr;
-  return pool[Math.floor(Math.random() * pool.length)];
+// ─── DAILY SEED (PRNG) ───────────────────────────────────────────────────────
+function dateToSeed() {
+  const d = new Date();
+  return d.getFullYear() * 10000 + (d.getMonth()+1) * 100 + d.getDate();
 }
-
-// ── TAXON INDEX ───────────────────────────────────────────────────────────────
-function buildTaxonIndex(arr) {
-  const idx = {};
-  arr.forEach(a => {
-    LEVELS.forEach(lvl => {
-      const val = a[lvl];
-      if (val && val.trim()) idx[val.toLowerCase()] = { level: lvl, value: val };
-    });
-  });
-  return idx;
-}
-
-function buildTaxonGuess(level, value) {
-  const rep = animals.find(a => a[level] && a[level].toLowerCase() === value.toLowerCase());
-  if (!rep) return null;
-  const lvlIdx = LEVELS.indexOf(level);
-  const obj = {
-    common_name: value, scientific_name: '',
-    _isTaxon: true, _taxonLevel: level,
-    _taxonLabelSuffix: ` (${LEVEL_LABELS[lvlIdx]})`,
+function seededRandom(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
   };
-  for (let i = 0; i <= lvlIdx; i++) obj[LEVELS[i]] = rep[LEVELS[i]];
-  for (let i = lvlIdx + 1; i < LEVELS.length; i++) obj[LEVELS[i]] = '';
-  return obj;
+}
+function pickDaily(arr) {
+  const rng = seededRandom(dateToSeed());
+  return arr[Math.floor(rng() * arr.length)];
 }
 
-// ── PROXIMITY ─────────────────────────────────────────────────────────────────
-function calcProximity(guess, tgt) {
-  let deepest = -1;
+// ─── PROXIMITY SCORING ───────────────────────────────────────────────────────
+function calcProximity(guess, target, allAnimals) {
+  // Find deepest matching level (must be sequential from kingdom down)
+  let deepestMatch = -1;
   for (let i = 0; i < LEVELS.length; i++) {
-    const gv = guess[LEVELS[i]];
-    if (!gv) break;
-    if (gv.toLowerCase() === tgt[LEVELS[i]].toLowerCase()) deepest = i;
-    else break;
+    if (guess[LEVELS[i]].toLowerCase() === target[LEVELS[i]].toLowerCase()) {
+      deepestMatch = i;
+    } else {
+      break;
+    }
   }
-  if (deepest === LEVELS.length - 1) return 100;
-  if (deepest === -1) return 0;
-  const matchedVal = tgt[LEVELS[deepest]].toLowerCase();
-  const knownCount = SPECIES_COUNTS[matchedVal] || null;
-  let score;
-  if (knownCount) {
-    const specificity = 1 - (Math.log(knownCount) / LOG_MAX);
-    score = 0.5 * ((deepest + 1) / LEVELS.length) + 0.5 * specificity;
-  } else {
-    score = (deepest + 1) / LEVELS.length;
+
+  if (deepestMatch === LEVELS.length - 1) return 100; // exact species match
+
+  if (deepestMatch === -1) {
+    // No match at all (shouldn't happen — all are Animalia)
+    return 0;
   }
-  return Math.min(99, Math.round(score * 100));
+
+  const matchedLevel = LEVELS[deepestMatch];
+  const matchedValue = target[matchedLevel].toLowerCase();
+
+  // How many animals in the dataset share this taxonomic value at this level?
+  const sharingCount = allAnimals.filter(a =>
+    a[matchedLevel].toLowerCase() === matchedValue
+  ).length;
+
+  // What's the maximum sharing count for this level across all values?
+  const countMap = {};
+  allAnimals.forEach(a => {
+    const v = a[matchedLevel].toLowerCase();
+    countMap[v] = (countMap[v] || 0) + 1;
+  });
+  const maxSharing = Math.max(...Object.values(countMap));
+
+  // Level score: linear (0..1) based on deepest matched level index
+  // Level 0 (kingdom) = 1/7; Level 6 (species) = 7/7
+  const levelScore = (deepestMatch + 1) / LEVELS.length;
+
+  // Diversity score: log-scaled. Higher when matched group is larger (more species-rich).
+  // This rewards finding a species-rich genus over a monotypic one.
+  const diversityScore = Math.log(1 + sharingCount) / Math.log(1 + maxSharing);
+
+  // Blend: level drives ~65% of score, diversity modifier ~35%
+  const raw = 0.65 * levelScore + 0.35 * diversityScore;
+  return Math.min(99, Math.round(raw * 100));
 }
 
-function levelMatchMap(guess, tgt) {
+function levelMatchMap(guess, target) {
+  // Returns object: { kingdom: true/false, phylum: true/false, ... }
   const map = {};
   let sequential = true;
   for (const lvl of LEVELS) {
-    const gv = guess[lvl];
-    if (!gv) { map[lvl] = null; continue; }
-    const match = sequential && gv.toLowerCase() === tgt[lvl].toLowerCase();
+    const match = sequential && guess[lvl].toLowerCase() === target[lvl].toLowerCase();
     map[lvl] = match;
     if (!match) sequential = false;
   }
   return map;
 }
 
-// ── BRANCH TREE ───────────────────────────────────────────────────────────────
-// Shows the "solution space": the confirmed sequential path as a spine,
-// then fans out at the deepest confirmed level to show ALL possible next-level
-// values from the dataset. Branches are marked:
-//   • confirmed  — a guess matched this exact value at this level
-//   • eliminated — a guess shared the confirmed path but had a different value here
-//   • possible   — not yet tested
-
-function getBranchStatus(level, value) {
-  // Get the confirmed path so far
-  const confirmedPath = [];
-  for (const lvl of LEVELS) {
-    if (revealedLevels.has(lvl)) confirmedPath.push({ level: lvl, value: target[lvl] });
-    else break;
-  }
-
-  for (const g of guesses) {
-    const gVal = (g[level] || '').toLowerCase();
-    if (!gVal) continue;
-    if (gVal !== value.toLowerCase()) continue;
-
-    // Does this guess match ALL confirmed levels above this branch?
-    // (i.e., the guess is "in the same subtree" as the confirmed path)
-    const inSubtree = confirmedPath.every(({ level: cl, value: cv }) =>
-      (g[cl] || '').toLowerCase() === cv.toLowerCase()
-    );
-    if (!inSubtree) continue;
-
-    const mm = levelMatchMap(g, target);
-    if (mm[level] === true)  return 'confirmed';
-    if (mm[level] === false) return 'eliminated';
-  }
-  return 'possible';
-}
-
-function renderBranchTree() {
+// ─── TREE OF LIFE RENDERING ──────────────────────────────────────────────────
+function renderTree() {
   const container = document.getElementById('treeContainer');
-  container.classList.add('branch-mode');
-  container.innerHTML = '';
-
-  // Build confirmed sequential path
-  const confirmedPath = [];
-  for (const lvl of LEVELS) {
-    if (revealedLevels.has(lvl)) {
-      confirmedPath.push({ level: lvl, value: target[lvl] });
-    } else break;
-  }
-
-  // Next level to branch at
-  const nextLevelIdx = confirmedPath.length;
-  const nextLevel    = LEVELS[nextLevelIdx];
-
-  if (guesses.length === 0 && confirmedPath.length === 0) {
-    container.innerHTML = '<div class="bt-pregame-hint">Make a guess to start mapping<br>the tree of life.</div>';
-    return;
-  }
-
-  // Filter dataset to animals matching the confirmed path
-  const candidates = animals.filter(a =>
-    confirmedPath.every(({ level, value }) =>
-      (a[level] || '').toLowerCase() === value.toLowerCase()
-    )
-  );
-
-  // Count candidates per branch value at next level
-  const branchMap = {};
-  if (nextLevel) {
-    candidates.forEach(a => {
-      const val = a[nextLevel] || '';
-      if (val) branchMap[val] = (branchMap[val] || 0) + 1;
-    });
-  }
-
-  // ── Render confirmed spine ──────────────────────────────────────────────
-  if (confirmedPath.length === 0) {
-    // No confirmed levels yet — show a placeholder spine row
-    const wrap = document.createElement('div');
-    wrap.className = 'bt-spine-row';
-    wrap.innerHTML = `
-      <div class="bt-spine-connector">
-        <div class="v" style="visibility:hidden"></div>
-        <div class="d" style="background:var(--worn);outline-color:var(--worn)"></div>
-        <div class="v"></div>
-      </div>
-      <div style="padding:3px 0 3px 8px">
-        <div class="bt-spine-label">Kingdom</div>
-        <div class="bt-spine-val">Animalia</div>
-      </div>`;
-    container.appendChild(wrap);
-  } else {
-    confirmedPath.forEach(({ level, value }, i) => {
-      // Count animals matching path up to this level
-      const pathToHere = confirmedPath.slice(0, i + 1);
-      const cnt = animals.filter(a =>
-        pathToHere.every(({ level: cl, value: cv }) =>
-          (a[cl] || '').toLowerCase() === cv.toLowerCase()
-        )
-      ).length;
-
-      const row = document.createElement('div');
-      row.className = 'bt-spine-row';
-      row.innerHTML = `
-        <div class="bt-spine-connector">
-          <div class="v" ${i === 0 ? 'style="visibility:hidden"' : ''}></div>
-          <div class="d"></div>
-          <div class="v"></div>
-        </div>
-        <div style="padding:3px 0 3px 8px">
-          <div class="bt-spine-label">${LEVEL_LABELS[LEVELS.indexOf(level)]}</div>
-          <div class="bt-spine-val">${value} <span class="bt-spine-count">${cnt}</span></div>
-        </div>`;
-      container.appendChild(row);
-    });
-  }
-
-  // ── Render branches at next level ─────────────────────────────────────────
-  if (!nextLevel) {
-    // All levels confirmed — game should be over
-    return;
-  }
-
-  const branches = Object.entries(branchMap).sort(([,a],[,b]) => b - a);
-  if (branches.length === 0) {
-    const el = document.createElement('div');
-    el.className = 'bt-empty';
-    el.textContent = 'No further branches in dataset.';
-    container.appendChild(el);
-    return;
-  }
-
-  const lvlLabel = LEVEL_LABELS[nextLevelIdx];
-
-  const branchWrap = document.createElement('div');
-  branchWrap.className = 'bt-branches';
-
-  const MAX_VIS = MAX_BRANCHES;
-  const visible = branches.slice(0, MAX_VIS);
-  const hidden  = branches.length - visible.length;
-
-  // Sort: put confirmed first, then possible, then eliminated
-  const statusOrder = { confirmed: 0, possible: 1, eliminated: 2 };
-  visible.sort(([va], [vb]) => {
-    const sa = getBranchStatus(nextLevel, va);
-    const sb = getBranchStatus(nextLevel, vb);
-    return (statusOrder[sa] ?? 1) - (statusOrder[sb] ?? 1);
-  });
-
-  visible.forEach(([value, count]) => {
-    const status = getBranchStatus(nextLevel, value);
-    const row = document.createElement('div');
-    row.className = `bt-branch-row status-${status}`;
-    row.innerHTML = `
-      <div class="bt-branch-dot ${status}"></div>
-      <span class="bt-branch-val">${value}</span>
-      <span class="bt-branch-level">${lvlLabel}</span>
-      <span class="bt-branch-count">${count}</span>`;
-    branchWrap.appendChild(row);
-  });
-
-  if (hidden > 0) {
-    const more = document.createElement('div');
-    more.className = 'bt-more';
-    more.textContent = `+ ${hidden} more ${lvlLabel.toLowerCase()}${hidden === 1 ? '' : 's'} not shown`;
-    branchWrap.appendChild(more);
-  }
-
-  container.appendChild(branchWrap);
-
-  // Reveal hint after game ends
-  const hint = document.getElementById('treeRevealHint');
-  if (gameOver) hint.classList.add('visible');
-}
-
-// ── LINEAR TREE ───────────────────────────────────────────────────────────────
-function renderLinearTree() {
-  const container = document.getElementById('treeContainer');
-  container.classList.remove('branch-mode');
   container.innerHTML = '';
   LEVELS.forEach((lvl, i) => {
     const node = document.createElement('div');
@@ -1045,392 +580,232 @@ function renderLinearTree() {
         <span class="tree-value ${revealedLevels.has(lvl) ? '' : 'hidden'}">
           ${revealedLevels.has(lvl) ? target[lvl] : '━━━━━'}
         </span>
-      </span>`;
+      </span>
+    `;
     container.appendChild(node);
   });
-  const hint = document.getElementById('treeRevealHint');
-  if (gameOver) hint.classList.add('visible');
 }
 
-function renderTree() {
-  branchViewActive ? renderBranchTree() : renderLinearTree();
-}
-
-// ── HINTS ─────────────────────────────────────────────────────────────────────
+// ─── HINT RENDERING ──────────────────────────────────────────────────────────
 function renderHints() {
   const n = guesses.length;
-  document.getElementById('hintDiet').innerHTML =
-    (n >= DIET_UNLOCK || gameOver)
-      ? `<strong>${target.diet || '—'}</strong>`
-      : `<span class="hint-locked">?????</span>`;
-  const pips = (target.continents || []).map(c => `<span class="continent-pip">${c}</span>`).join('');
-  document.getElementById('hintContinents').innerHTML =
-    (n >= RANGE_UNLOCK || gameOver)
-      ? (pips || '<em style="color:var(--steel)">—</em>')
-      : `<span class="hint-locked">?????</span>`;
+  const dietEl = document.getElementById('hintDiet');
+  const contEl = document.getElementById('hintContinents');
+  const noteEl = document.getElementById('hintNote');
+
+  if (n >= DIET_UNLOCK || gameOver) {
+    dietEl.innerHTML = `<strong>${target.diet}</strong>`;
+  } else {
+    dietEl.innerHTML = `<span class="hint-locked">?????</span>`;
+  }
+
+  if (n >= RANGE_UNLOCK || gameOver) {
+    contEl.innerHTML = target.continents.map(c =>
+      `<span class="continent-pip">${c}</span>`
+    ).join('');
+  } else {
+    contEl.innerHTML = `<span class="hint-locked">?????</span>`;
+  }
+
+  // Update unlock note
   const parts = [];
-  if (n < DIET_UNLOCK  && !gameOver) parts.push(`Diet in ${DIET_UNLOCK-n} guess${DIET_UNLOCK-n===1?'':'es'}`);
-  if (n < RANGE_UNLOCK && !gameOver) parts.push(`Range in ${RANGE_UNLOCK-n}`);
-  document.getElementById('hintNote').textContent = parts.join(' · ');
+  if (n < DIET_UNLOCK && !gameOver) parts.push(`Diet in ${DIET_UNLOCK - n} guess${DIET_UNLOCK - n===1?'':'es'}`);
+  if (n < RANGE_UNLOCK && !gameOver) parts.push(`Range in ${RANGE_UNLOCK - n}`);
+  noteEl.textContent = parts.join(' · ');
 }
 
-// ── GUESS CARD ────────────────────────────────────────────────────────────────
+// ─── GUESS CARD RENDERING ────────────────────────────────────────────────────
 function renderGuessCard(animal, matchMap, proximity) {
-  const proxClass = proximity >= 70 ? 'prox-high' : proximity >= 40 ? 'prox-mid' : 'prox-low';
+  const prox = proximity;
+  let proxClass = prox >= 70 ? 'prox-high' : prox >= 40 ? 'prox-mid' : 'prox-low';
+
   const chips = LEVELS.map((lvl, i) => {
     const m = matchMap[lvl];
-    if (m === null)
-      return `<div><span class="tax-chip tax-unknown"><span class="tax-label">${LEVEL_LABELS[i]}</span>?</span></div>`;
-    return `<div><span class="tax-chip ${m ? 'tax-match' : 'tax-nomatch'}">
-      <span class="tax-label">${LEVEL_LABELS[i]}</span>${animal[lvl] || '?'}</span></div>`;
+    return `<div>
+      <span class="tax-chip ${m ? 'tax-match' : 'tax-nomatch'}">
+        <span class="tax-label">${LEVEL_LABELS[i]}</span>
+        ${animal[lvl]}
+      </span>
+    </div>`;
   }).join('');
 
-  const displayName = animal._isTaxon
-    ? `${animal.common_name}<span class="taxon-badge">${animal._taxonLabelSuffix}</span>`
-    : animal.common_name;
-
   const card = document.createElement('div');
-  card.className = 'guess-card' + (animal._isTaxon ? ' taxon-guess-card' : '');
+  card.className = 'guess-card';
   card.innerHTML = `
     <div class="guess-card-header">
       <div>
-        <div class="guess-name">${displayName}</div>
-        ${!animal._isTaxon ? `<div class="guess-sci">${animal.scientific_name}</div>` : ''}
+        <div class="guess-name">${animal.common_name}</div>
+        <div class="guess-sci">${animal.scientific_name}</div>
       </div>
-      <span class="proximity-badge ${proxClass}">${proximity}%</span>
+      <span class="proximity-badge ${proxClass}">${prox}%</span>
     </div>
-    <div class="tax-row">${chips}</div>`;
+    <div class="tax-row">${chips}</div>
+  `;
   return card;
 }
 
-// ── CORE GUESS APPLICATION ────────────────────────────────────────────────────
-function _applyGuess(animal, render = true) {
-  guesses.unshift(animal);
-  const matchMap  = levelMatchMap(animal, target);
-  const proximity = calcProximity(animal, target);
-
-  for (const lvl of LEVELS) {
-    if (matchMap[lvl] === true) revealedLevels.add(lvl);
-    else break;
-  }
-
-  if (render) {
-    const list = document.getElementById('guessList');
-    if (guesses.length === 1) list.innerHTML = '';
-    list.insertBefore(renderGuessCard(animal, matchMap, proximity), list.firstChild);
-    updateGuessCounter();
-    renderTree();
-    renderHints();
-  }
-  return matchMap;
-}
-
-// ── SUBMIT GUESS ──────────────────────────────────────────────────────────────
+// ─── SUBMIT GUESS ────────────────────────────────────────────────────────────
 function submitGuess(animal) {
   if (gameOver) return;
-  const key = animal._isTaxon ? `__taxon__${animal.common_name}` : animal.scientific_name;
-  if (guesses.some(g => (g._isTaxon ? `__taxon__${g.common_name}` : g.scientific_name) === key)) {
+  // Prevent duplicate
+  if (guesses.some(g => g.scientific_name === animal.scientific_name)) {
     document.getElementById('searchInput').value = '';
     document.getElementById('autocompleteList').classList.remove('open');
     return;
   }
 
-  _applyGuess(animal, true);
+  guesses.unshift(animal);  // newest first
 
-  if (!animal._isTaxon &&
-      animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
-    endGame(true); return;
+  const matchMap = levelMatchMap(animal, target);
+  const proximity = calcProximity(animal, target, animals);
+
+  // Update revealed levels
+  for (const lvl of LEVELS) {
+    if (matchMap[lvl]) revealedLevels.add(lvl);
+    else break;
   }
-  if (guesses.length >= MAX_GUESSES) { endGame(false); return; }
 
-  saveSession();
+  // Render guess list
+  const list = document.getElementById('guessList');
+  if (guesses.length === 1) list.innerHTML = ''; // clear empty state
+  const card = renderGuessCard(animal, matchMap, proximity);
+  list.insertBefore(card, list.firstChild);
+
+  // Update counter
+  document.getElementById('guessCounter').textContent = `${guesses.length} guess${guesses.length===1?'':'es'}`;
+
+  renderTree();
+  renderHints();
+
+  // Check win
+  if (animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
+    endGame(true);
+    return;
+  }
+
+  // Clear input
   document.getElementById('searchInput').value = '';
   document.getElementById('autocompleteList').classList.remove('open');
-  filteredList = []; selectedIndex = -1;
+  filteredList = [];
+  selectedIndex = -1;
 }
 
-// ── END GAME ──────────────────────────────────────────────────────────────────
 function endGame(won) {
   gameOver = true;
+  // Reveal all levels
   LEVELS.forEach(l => revealedLevels.add(l));
-  renderTree(); renderHints(); updateGuessCounter();
+  renderTree();
+  renderHints();
 
   const banner = document.getElementById('resultBanner');
   banner.classList.add('show');
-  document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
-  document.getElementById('resultSubtitle').textContent = won
-    ? `You identified it in ${guesses.length} guess${guesses.length===1?'':'es'}.`
-    : 'Better luck on the next one.';
-  document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
+  document.getElementById('resultTitle').textContent = won
+    ? `🎉 Correct!`
+    : `The answer was…`;
+  document.getElementById('resultSubtitle').textContent =
+    won ? `You identified it in ${guesses.length} guess${guesses.length===1?'':'es'}.`
+        : `Better luck tomorrow.`;
+  document.getElementById('resultSci').textContent = `${target.common_name} — ${target.scientific_name}`;
   document.getElementById('resultFact').textContent = target.notes || '';
-  document.getElementById('newGameBtn').style.display = 'inline-block';
+
   document.getElementById('searchInput').disabled = true;
-  document.getElementById('guessBtn').disabled    = true;
-  document.getElementById('giveUpBtn').disabled   = true;
-
-  saveSession();
-  setTimeout(() => renderTaxPopup(target), 600);
+  document.getElementById('guessBtn').disabled = true;
 }
 
-// ── COUNTER ───────────────────────────────────────────────────────────────────
-function updateGuessCounter() {
-  const n = guesses.length, rem = MAX_GUESSES - n;
-  document.getElementById('remainingCount').textContent = rem;
-  document.getElementById('remainingCount').classList.toggle('low', rem <= 5);
-  document.getElementById('guessCountText').textContent = `${n} / ${MAX_GUESSES}`;
-  document.getElementById('guessProgressFill').style.width = `${(n/MAX_GUESSES)*100}%`;
-}
-
-// ── TAXONOMY POPUP ────────────────────────────────────────────────────────────
-function renderTaxPopup(animal) {
-  document.getElementById('taxPopupName').textContent = animal.common_name;
-  document.getElementById('taxPopupSci').textContent  = animal.scientific_name;
-  const treeEl = document.getElementById('taxPopupTree');
-  treeEl.innerHTML = '';
-  LEVELS.forEach((lvl, i) => {
-    const row = document.createElement('div');
-    row.className = 'tax-popup-row';
-    row.innerHTML = `
-      <div class="tax-popup-connector">
-        <div class="vert"></div><div class="dot"></div><div class="vert"></div>
-      </div>
-      <div class="tax-popup-cell">
-        <span class="tax-popup-level">${LEVEL_LABELS[i]}</span>
-        <span class="tax-popup-value">${animal[lvl] || '—'}</span>
-      </div>`;
-    treeEl.appendChild(row);
-  });
-  const noteEl = document.getElementById('taxPopupNote');
-  if (animal.notes) { noteEl.textContent = animal.notes; noteEl.style.display = 'block'; }
-  else noteEl.style.display = 'none';
-  document.getElementById('taxPopupOverlay').classList.add('open');
-}
-
-// ── AUTOCOMPLETE ──────────────────────────────────────────────────────────────
-const TAXON_SEARCHABLE = new Set(['phylum','class','order','family','genus']);
-
+// ─── AUTOCOMPLETE ────────────────────────────────────────────────────────────
 function updateAutocomplete(query) {
   const q = query.trim().toLowerCase();
-  if (q.length < 2) {
+  if (q.length < 1) {
     filteredList = [];
     document.getElementById('autocompleteList').classList.remove('open');
     return;
   }
-  const animalMatches = animals.filter(a =>
-    a.common_name.toLowerCase().includes(q) || a.scientific_name.toLowerCase().includes(q)
-  ).slice(0, 6);
-
-  const taxonMatches = [], seen = new Set();
-  for (const [key, entry] of Object.entries(taxonIndex)) {
-    if (!TAXON_SEARCHABLE.has(entry.level) || !key.includes(q) || seen.has(key)) continue;
-    seen.add(key);
-    const tg = buildTaxonGuess(entry.level, entry.value);
-    if (tg) { taxonMatches.push(tg); if (taxonMatches.length >= 3) break; }
-  }
-  filteredList = [...animalMatches, ...taxonMatches].slice(0, 9);
+  filteredList = animals.filter(a =>
+    a.common_name.toLowerCase().includes(q) ||
+    a.scientific_name.toLowerCase().includes(q)
+  ).slice(0, 8);
 
   const list = document.getElementById('autocompleteList');
   list.innerHTML = '';
-  if (!filteredList.length) { list.classList.remove('open'); return; }
-  filteredList.forEach(a => {
+  if (filteredList.length === 0) {
+    list.classList.remove('open');
+    return;
+  }
+  filteredList.forEach((a, i) => {
     const item = document.createElement('div');
-    item.className = 'autocomplete-item' + (a._isTaxon ? ' autocomplete-taxon' : '');
-    if (a._isTaxon) {
-      item.innerHTML = `<span>${a.common_name} <em style="color:var(--steel);font-size:0.78rem">${a._taxonLabelSuffix}</em></span>
-                        <span class="sci">${LEVEL_LABELS[LEVELS.indexOf(a._taxonLevel)]}</span>`;
-    } else {
-      item.innerHTML = `<span>${a.common_name}</span><span class="sci">${a.scientific_name}</span>`;
-    }
-    item.addEventListener('mousedown', e => { e.preventDefault(); submitGuess(a); });
+    item.className = 'autocomplete-item';
+    item.innerHTML = `<span>${a.common_name}</span><span class="sci">${a.scientific_name}</span>`;
+    item.addEventListener('mousedown', e => {
+      e.preventDefault();
+      submitGuess(a);
+    });
     list.appendChild(item);
   });
   list.classList.add('open');
   selectedIndex = -1;
 }
 
-// ── SESSION PERSISTENCE ───────────────────────────────────────────────────────
-function sessionKey() {
-  if (!target) return null;
-  const d = new Date();
-  return `${SAVE_KEY}__${target.scientific_name}__${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-}
-
-function saveSession() {
-  const key = sessionKey();
-  if (!key) return;
-  try {
-    localStorage.setItem(key, JSON.stringify({
-      target: target.scientific_name,
-      guesses: guesses.map(g => g._isTaxon ? `__taxon__${g.common_name}` : g.scientific_name),
-      gameOver,
-      branchViewActive,
-    }));
-  } catch(e) {}
-}
-
-function loadSession(savedTarget) {
-  const d = new Date();
-  const prefix = `${SAVE_KEY}__${savedTarget.scientific_name}__${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-  try {
-    const raw = localStorage.getItem(prefix);
-    if (!raw) return false;
-    const data = JSON.parse(raw);
-    if (data.target !== savedTarget.scientific_name) return false;
-    for (const key of data.guesses) {
-      let animal;
-      if (key.startsWith('__taxon__')) {
-        const val = key.replace('__taxon__', '');
-        for (const lvl of ['phylum','class','order','family','genus']) {
-          const tg = buildTaxonGuess(lvl, val);
-          if (tg) { animal = tg; break; }
-        }
-      } else {
-        animal = animals.find(a => a.scientific_name === key);
-      }
-      if (animal) _applyGuess(animal, false);
-    }
-    if (data.gameOver) {
-      gameOver = true;
-      LEVELS.forEach(l => revealedLevels.add(l));
-      document.getElementById('searchInput').disabled = true;
-      document.getElementById('guessBtn').disabled    = true;
-      document.getElementById('giveUpBtn').disabled   = true;
-      document.getElementById('newGameBtn').style.display = 'inline-block';
-      const banner = document.getElementById('resultBanner');
-      banner.classList.add('show');
-      const won = guesses.length > 0 && !guesses[0]._isTaxon &&
-                  guesses[0].scientific_name.toLowerCase() === target.scientific_name.toLowerCase();
-      document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
-      document.getElementById('resultSubtitle').textContent = won
-        ? `You identified it in ${guesses.length} guess${guesses.length===1?'':'es'}.`
-        : 'Better luck on the next one.';
-      document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
-      document.getElementById('resultFact').textContent = target.notes || '';
-    }
-    branchViewActive = data.branchViewActive || false;
-    if (branchViewActive) document.getElementById('treeToggleBtn').textContent = '≡ List view';
-    return true;
-  } catch(e) { return false; }
-}
-
-// ── NEW GAME ──────────────────────────────────────────────────────────────────
-function startNewGame() {
-  const prev = target;
-  target = pickRandom(animals, prev);
-  guesses = []; revealedLevels = new Set(); gameOver = false;
-  filteredList = []; selectedIndex = -1; branchViewActive = false;
-
-  document.getElementById('resultBanner').classList.remove('show');
-  document.getElementById('newGameBtn').style.display  = 'none';
-  document.getElementById('guessList').innerHTML       = '<div class="empty-state">Your guesses will appear here.</div>';
-  document.getElementById('searchInput').disabled      = false;
-  document.getElementById('guessBtn').disabled         = false;
-  document.getElementById('giveUpBtn').disabled        = false;
-  document.getElementById('treeRevealHint').classList.remove('visible');
-  document.getElementById('taxPopupOverlay').classList.remove('open');
-  document.getElementById('treeToggleBtn').textContent = '⬡ Branch view';
-  document.getElementById('searchInput').value         = '';
-
-  updateGuessCounter(); renderTree(); renderHints();
-  document.getElementById('searchInput').focus();
-}
-
-// ── EVENTS ────────────────────────────────────────────────────────────────────
+// ─── EVENT WIRING ────────────────────────────────────────────────────────────
 function wireEvents() {
   const input = document.getElementById('searchInput');
-  const list  = document.getElementById('autocompleteList');
+  const list = document.getElementById('autocompleteList');
 
   input.addEventListener('input', () => updateAutocomplete(input.value));
+
   input.addEventListener('keydown', e => {
     const items = list.querySelectorAll('.autocomplete-item');
-    if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = Math.min(selectedIndex + 1, items.length - 1); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = Math.max(selectedIndex - 1, -1); }
-    else if (e.key === 'Enter') {
-      if (selectedIndex >= 0 && filteredList[selectedIndex]) submitGuess(filteredList[selectedIndex]);
-      else if (filteredList.length === 1) submitGuess(filteredList[0]);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, -1);
+    } else if (e.key === 'Enter') {
+      if (selectedIndex >= 0 && filteredList[selectedIndex]) {
+        submitGuess(filteredList[selectedIndex]);
+      } else if (filteredList.length === 1) {
+        submitGuess(filteredList[0]);
+      }
       return;
-    } else if (e.key === 'Escape') { list.classList.remove('open'); return; }
+    } else if (e.key === 'Escape') {
+      list.classList.remove('open');
+      return;
+    }
     items.forEach((el, i) => el.classList.toggle('selected', i === selectedIndex));
   });
-  input.addEventListener('blur', () => setTimeout(() => list.classList.remove('open'), 150));
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => list.classList.remove('open'), 150);
+  });
 
   document.getElementById('guessBtn').addEventListener('click', () => {
-    if (filteredList.length > 0) submitGuess(filteredList[selectedIndex >= 0 ? selectedIndex : 0]);
-  });
-  document.getElementById('giveUpBtn').addEventListener('click', () => {
-    if (gameOver) return;
-    if (!confirm('Give up and reveal the answer?')) return;
-    endGame(false);
-  });
-  document.getElementById('newGameBtn').addEventListener('click', startNewGame);
-  document.getElementById('treeRevealHint').addEventListener('click', () => renderTaxPopup(target));
-  document.getElementById('treeToggleBtn').addEventListener('click', () => {
-    branchViewActive = !branchViewActive;
-    document.getElementById('treeToggleBtn').textContent = branchViewActive ? '≡ List view' : '⬡ Branch view';
-    saveSession();
-    renderTree();
-  });
-  document.getElementById('taxPopupClose').addEventListener('click', () =>
-    document.getElementById('taxPopupOverlay').classList.remove('open'));
-  document.getElementById('taxPopupOverlay').addEventListener('click', e => {
-    if (e.target === e.currentTarget) document.getElementById('taxPopupOverlay').classList.remove('open');
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') document.getElementById('taxPopupOverlay').classList.remove('open');
+    if (filteredList.length > 0) {
+      const idx = selectedIndex >= 0 ? selectedIndex : 0;
+      submitGuess(filteredList[idx]);
+    }
   });
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// ─── INIT ────────────────────────────────────────────────────────────────────
 async function init() {
+  // Set date badge
   const d = new Date();
   document.getElementById('dateBadge').textContent =
-    d.toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
+  // Load animals
   try {
     const resp = await fetch('animals.json');
     animals = await resp.json();
   } catch(e) {
-    document.body.innerHTML = '<div style="padding:40px;font-family:serif;color:#600">Could not load animals.json — run: <code>python -m http.server 8080</code></div>';
+    document.body.innerHTML = '<div style="padding:40px;font-family:serif;color:#600">Could not load animals.json — make sure you\'re serving from a local server. Run: <code>python -m http.server 8080</code></div>';
     return;
   }
 
-  taxonIndex = buildTaxonIndex(animals);
-
-  // Try to restore saved session
-  let restored = false;
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k || !k.startsWith(SAVE_KEY)) continue;
-      const raw = localStorage.getItem(k);
-      if (!raw) continue;
-      const data = JSON.parse(raw);
-      const candidate = animals.find(a => a.scientific_name === data.target);
-      if (!candidate) continue;
-      const d2 = new Date();
-      const today = `${d2.getFullYear()}-${d2.getMonth()}-${d2.getDate()}`;
-      if (!k.includes(today)) continue;
-      target   = candidate;
-      restored = loadSession(candidate);
-      break;
-    }
-  } catch(e) {}
-
-  if (!restored || !target) target = pickRandom(animals);
-
-  updateGuessCounter();
-
-  if (restored && guesses.length > 0) {
-    const list = document.getElementById('guessList');
-    list.innerHTML = '';
-    [...guesses].reverse().forEach(g => {
-      const mm   = levelMatchMap(g, target);
-      const prox = calcProximity(g, target);
-      list.insertBefore(renderGuessCard(g, mm, prox), list.firstChild);
-    });
-  }
-
-  renderTree(); renderHints(); wireEvents();
+  target = pickDaily(animals);
+  renderTree();
+  renderHints();
+  wireEvents();
 }
 
 init();
