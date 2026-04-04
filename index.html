@@ -39,7 +39,7 @@
   }
 
   .page-wrap {
-    max-width: 780px;
+    max-width: 860px;
     margin: 0 auto;
     padding: 0 16px 60px;
   }
@@ -47,9 +47,9 @@
   /* HEADER */
   header {
     text-align: center;
-    padding: 36px 0 24px;
+    padding: 36px 0 20px;
     border-bottom: 2px solid var(--worn);
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     position: relative;
   }
   header::before {
@@ -81,18 +81,33 @@
     letter-spacing: 2px;
     color: var(--gold);
     text-transform: uppercase;
-    margin-top: 10px;
+    margin-top: 8px;
   }
+  .attribution {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    color: var(--worn);
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .attribution a {
+    color: var(--gold);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .attribution a:hover { color: var(--forest); }
 
-  /* TWO COLUMN LAYOUT */
+  /* LAYOUT */
   .game-layout {
     display: grid;
-    grid-template-columns: 1fr 280px;
-    gap: 24px;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
     align-items: start;
   }
-  @media (max-width: 620px) {
+  @media (max-width: 660px) {
     .game-layout { grid-template-columns: 1fr; }
+    .tree-panel { position: static !important; }
   }
 
   /* PANELS */
@@ -100,19 +115,32 @@
     background: var(--parchment);
     border: 1px solid var(--worn);
     border-radius: 4px;
-    padding: 20px;
+    padding: 18px 20px;
     box-shadow: 2px 3px 8px rgba(0,0,0,0.08);
   }
   .panel-title {
     font-family: var(--font-display);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 3px;
     text-transform: uppercase;
     color: var(--gold);
-    margin-bottom: 14px;
-    padding-bottom: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 7px;
     border-bottom: 1px solid var(--worn);
+  }
+  .panel-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid var(--worn);
+  }
+  .panel-title-row .panel-title {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
   }
 
   /* SEARCH */
@@ -159,12 +187,12 @@
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
+    right: 58px;
     background: var(--cream);
     border: 1.5px solid var(--gold);
     border-top: none;
     border-radius: 0 0 3px 3px;
-    max-height: 220px;
+    max-height: 260px;
     overflow-y: auto;
     z-index: 100;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -172,9 +200,9 @@
   }
   .autocomplete-list.open { display: block; }
   .autocomplete-item {
-    padding: 9px 14px;
+    padding: 8px 14px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     border-bottom: 1px solid var(--worn);
     display: flex;
     justify-content: space-between;
@@ -183,77 +211,214 @@
   }
   .autocomplete-item:last-child { border-bottom: none; }
   .autocomplete-item:hover, .autocomplete-item.selected { background: var(--parchment); }
-  .autocomplete-item .sci { font-style: italic; color: var(--steel); font-size: 0.82rem; }
-  .search-hint { font-size: 0.82rem; color: var(--steel); font-style: italic; margin-bottom: 14px; }
+  .autocomplete-item .sci { font-style: italic; color: var(--steel); font-size: 0.8rem; }
+  .autocomplete-item .taxon-level-badge {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    background: var(--forest);
+    color: var(--cream);
+    flex-shrink: 0;
+  }
+  .autocomplete-section-label {
+    padding: 5px 14px 3px;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--parchment);
+    border-bottom: 1px solid var(--worn);
+    pointer-events: none;
+  }
+  .search-hint { font-size: 0.82rem; color: var(--steel); font-style: italic; margin-bottom: 10px; }
 
-  /* GUESS HISTORY */
-  .guess-list { display: flex; flex-direction: column; gap: 10px; }
+  /* NAME HINT */
+  .name-hint-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .reveal-btn {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .reveal-btn:hover { background: var(--gold); color: var(--cream); }
+  .reveal-btn:disabled { border-color: var(--worn); color: var(--worn); cursor: default; background: transparent; }
+  .cost-badge {
+    font-size: 0.6em;
+    opacity: 0.7;
+    font-weight: normal;
+  }
+  .name-hint-reveal {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--forest);
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* GUESS COUNTER */
+  .guess-counter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .max-guesses-note {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--steel);
+    letter-spacing: 0.5px;
+  }
+
+  /* VIEW TOGGLE */
+  .view-toggle {
+    display: flex;
+    gap: 2px;
+  }
+  .view-btn {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    background: transparent;
+    border: 1px solid var(--worn);
+    color: var(--steel);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .view-btn:first-child { border-radius: 2px 0 0 2px; }
+  .view-btn:last-child { border-radius: 0 2px 2px 0; margin-left: -1px; }
+  .view-btn.active { background: var(--forest); border-color: var(--forest); color: var(--cream); }
+
+  /* GUESS HISTORY — CARD VIEW */
+  .guess-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
   .guess-card {
     background: var(--cream);
     border: 1px solid var(--worn);
     border-radius: 3px;
-    padding: 12px 14px;
+    padding: 11px 13px;
     animation: slide-in 0.2s ease;
   }
+  .guess-card.taxon-card { border-left: 3px solid var(--sage); }
   @keyframes slide-in {
-    from { opacity: 0; transform: translateY(-6px); }
+    from { opacity: 0; transform: translateY(-5px); }
     to { opacity: 1; transform: translateY(0); }
   }
   .guess-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 7px;
   }
   .guess-name {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.97rem;
   }
-  .guess-sci { font-style: italic; color: var(--steel); font-size: 0.82rem; }
+  .guess-sci { font-style: italic; color: var(--steel); font-size: 0.8rem; }
   .proximity-badge {
     font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 700;
     padding: 3px 9px;
     border-radius: 20px;
     letter-spacing: 0.5px;
+    flex-shrink: 0;
   }
   .prox-high { background: #d4edda; color: #1a4a28; border: 1px solid #7cba8f; }
   .prox-mid  { background: #fff3cd; color: #5a3e00; border: 1px solid #c9a227; }
   .prox-low  { background: #f8d7da; color: #5a1a1a; border: 1px solid #c47070; }
+  .taxon-correct { background: #d4edda; color: #1a4a28; border: 1px solid #7cba8f; }
+  .taxon-wrong   { background: #f8d7da; color: #5a1a1a; border: 1px solid #c47070; }
 
-  /* TAXONOMY DOTS */
+  /* TAXONOMY CHIPS */
   .tax-row {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin-top: 4px;
+    margin-top: 3px;
   }
   .tax-chip {
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     padding: 2px 7px;
     border-radius: 2px;
     letter-spacing: 0.3px;
   }
   .tax-match   { background: #c8e6c9; color: #1b5e20; border: 1px solid #81c784; }
   .tax-nomatch { background: #ffcdd2; color: #7f0000; border: 1px solid #e57373; }
-  .tax-label { font-size: 0.62rem; opacity: 0.7; display: block; }
+  .tax-label { font-size: 0.6rem; opacity: 0.7; display: block; }
+
+  /* LIST VIEW */
+  .guess-list-view { margin-top: 10px; }
+  .list-view-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+  }
+  .list-view-table th {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-align: left;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--worn);
+    font-weight: 700;
+  }
+  .list-view-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #ede6c8aa;
+    vertical-align: middle;
+  }
+  .list-view-table tr:last-child td { border-bottom: none; }
+  .list-view-table tr:hover td { background: rgba(0,0,0,0.02); }
+  .lv-name { font-family: var(--font-display); font-weight: 700; font-size: 0.88rem; }
+  .lv-sci { font-style: italic; color: var(--steel); font-size: 0.75rem; }
+  .lv-dots { display: flex; gap: 3px; }
+  .lv-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+  .lv-dot-match { background: #4caf50; }
+  .lv-dot-nomatch { background: #f44336; }
+  .lv-dot-taxon-ok { background: var(--sage); }
+  .lv-dot-taxon-bad { background: var(--rust); }
 
   /* TREE OF LIFE PANEL */
   .tree-panel { position: sticky; top: 16px; }
   .tree-node {
     font-family: var(--font-mono);
-    font-size: 0.82rem;
-    padding: 5px 0;
+    font-size: 0.8rem;
+    padding: 5px 0 5px 12px;
     display: flex;
     align-items: center;
     gap: 6px;
     border-left: 2px solid var(--worn);
-    padding-left: 12px;
     margin-left: 8px;
     transition: all 0.3s;
+    position: relative;
   }
   .tree-node:first-child { border-left: none; margin-left: 0; padding-left: 0; }
   .tree-dot {
@@ -264,134 +429,211 @@
     flex-shrink: 0;
     transition: all 0.3s;
   }
-  .tree-node.revealed .tree-dot {
-    background: var(--gold);
-    border-color: var(--gold);
-  }
-  .tree-node.revealed { border-left-color: var(--gold); }
-  .tree-level { font-size: 0.62rem; color: var(--steel); letter-spacing: 1px; text-transform: uppercase; }
+  .tree-node.revealed-animal .tree-dot { background: var(--gold); border-color: var(--gold); }
+  .tree-node.revealed-animal { border-left-color: var(--gold); }
+  .tree-node.revealed-taxon .tree-dot { background: var(--sage); border-color: var(--sage); }
+  .tree-node.revealed-taxon { border-left-color: var(--sage); }
+  .tree-level { font-size: 0.6rem; color: var(--steel); letter-spacing: 1px; text-transform: uppercase; }
   .tree-value { color: var(--ink); font-style: italic; }
   .tree-value.hidden { color: var(--worn); font-style: normal; }
+
+  /* CURRENT LEVEL BADGE */
+  .current-level-badge {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 3px;
+    margin-bottom: 12px;
+    background: var(--cream);
+    border: 1px solid var(--worn);
+    color: var(--steel);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .current-level-badge .level-label {
+    background: var(--forest);
+    color: var(--cream);
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 0.6rem;
+  }
+  .current-level-badge.active {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, #fdf8ec, var(--cream));
+  }
+
+  /* NEXT TAXONS PANEL */
+  .next-taxons-scroll {
+    max-height: 160px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding-top: 2px;
+  }
+  .next-taxon-btn {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+    padding: 3px 9px;
+    background: var(--cream);
+    border: 1px solid var(--worn);
+    color: var(--ink);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+  .next-taxon-btn:hover { background: var(--forest); color: var(--cream); border-color: var(--forest); }
+  .next-taxons-empty {
+    font-style: italic;
+    color: var(--worn);
+    font-size: 0.82rem;
+  }
 
   /* HINTS PANEL */
   .hint-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
-    padding: 8px 0;
+    padding: 7px 0;
     border-bottom: 1px solid var(--worn);
   }
   .hint-item:last-child { border-bottom: none; }
   .hint-label {
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--steel);
-    width: 80px;
+    width: 75px;
     flex-shrink: 0;
+    padding-top: 2px;
   }
-  .hint-value {
-    font-size: 0.9rem;
-    color: var(--ink);
-  }
-  .hint-locked {
-    font-style: italic;
-    color: var(--worn);
-    font-size: 0.85rem;
-  }
-  .hint-unlock-note {
-    font-size: 0.75rem;
-    color: var(--steel);
-    font-style: italic;
-    margin-top: 2px;
-  }
-  .reveal-btn {
+  .hint-value { font-size: 0.88rem; color: var(--ink); }
+  .hint-locked { font-style: italic; color: var(--worn); font-size: 0.83rem; }
+  .hint-unlock-note { font-size: 0.72rem; color: var(--steel); font-style: italic; margin-top: 4px; }
+  .continent-pip {
+    display: inline-block;
+    background: var(--sage);
+    color: var(--cream);
     font-family: var(--font-mono);
-    font-size: 0.7rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    background: transparent;
-    border: 1px solid var(--gold);
-    color: var(--gold);
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 0.15s;
+    font-size: 0.62rem;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin: 1px 2px 1px 0;
+    letter-spacing: 0.3px;
   }
-  .reveal-btn:hover { background: var(--gold); color: var(--cream); }
 
-  /* WIN / LOSE STATES */
+  /* RESULT BANNER */
   .result-banner {
     text-align: center;
-    padding: 28px;
+    padding: 26px;
     border: 2px solid var(--gold);
     border-radius: 4px;
     background: var(--parchment);
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     display: none;
     animation: slide-in 0.3s ease;
   }
   .result-banner.show { display: block; }
   .result-banner h2 {
     font-family: var(--font-display);
-    font-size: 1.8rem;
+    font-size: 1.7rem;
     color: var(--forest);
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
-  .result-banner p {
-    font-size: 0.95rem;
-    color: var(--steel);
-    margin-bottom: 4px;
-  }
-  .result-sci { font-style: italic; color: var(--gold); font-family: var(--font-mono); font-size: 0.9rem; }
-  .result-fact { font-style: italic; margin-top: 12px; font-size: 1rem; color: var(--ink); border-left: 3px solid var(--gold); padding-left: 12px; text-align: left; }
+  .result-banner p { font-size: 0.93rem; color: var(--steel); margin-bottom: 4px; }
+  .result-sci { font-style: italic; color: var(--gold); font-family: var(--font-mono); font-size: 0.88rem; }
+  .result-fact { font-style: italic; margin-top: 10px; font-size: 0.95rem; color: var(--ink); border-left: 3px solid var(--gold); padding-left: 12px; text-align: left; }
 
-  .max-guesses-note {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--steel);
-    text-align: right;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-  }
-
+  /* MISC */
   .empty-state {
     text-align: center;
-    padding: 24px 0;
+    padding: 20px 0;
     color: var(--steel);
     font-style: italic;
-    font-size: 0.95rem;
+    font-size: 0.93rem;
   }
 
-  .continent-pip {
-    display: inline-block;
-    background: var(--sage);
-    color: var(--cream);
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    padding: 1px 6px;
-    border-radius: 10px;
-    margin: 1px;
-    letter-spacing: 0.3px;
-  }
-
-  /* HOW TO PLAY */
   .howto {
-    margin-top: 28px;
-    padding: 16px 20px;
+    margin-top: 20px;
+    padding: 14px 18px;
     border: 1px dashed var(--worn);
     border-radius: 3px;
-    font-size: 0.88rem;
+    font-size: 0.86rem;
     color: var(--steel);
     line-height: 1.6;
   }
   .howto strong { color: var(--ink); font-family: var(--font-display); }
 
   /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: var(--cream); }
   ::-webkit-scrollbar-thumb { background: var(--worn); border-radius: 3px; }
+
+  /* TREE LEGEND */
+  .tree-legend {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.58rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--steel);
+  }
+  .legend-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .legend-dot-animal { background: var(--gold); }
+  .legend-dot-taxon  { background: var(--sage); }
+  .legend-dot-none   { background: var(--worn); border: 1px solid var(--worn); }
+
+  /* TAXON GUESS CARD */
+  .taxon-guess-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .taxon-guess-level {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--steel);
+    background: var(--parchment);
+    padding: 1px 6px;
+    border-radius: 2px;
+    border: 1px solid var(--worn);
+    flex-shrink: 0;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--worn);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--worn);
+  }
+  footer a { color: var(--gold); text-decoration: none; }
+  footer a:hover { color: var(--forest); }
 </style>
 </head>
 <body>
@@ -401,6 +643,7 @@
     <div class="title">Taxon</div>
     <div class="subtitle">Identify today's animal through the tree of life</div>
     <div class="date-badge" id="dateBadge"></div>
+    <div class="attribution">by <a href="https://huggingface.co/spaces/Sbhat2026/Taxondle" target="_blank">Sbhat2026</a></div>
   </header>
 
   <div id="resultBanner" class="result-banner">
@@ -420,40 +663,85 @@
             type="text"
             class="search-input"
             id="searchInput"
-            placeholder="Type a common or scientific name…"
+            placeholder="Animal name or taxon (e.g. Mammalia)…"
             autocomplete="off"
           />
           <button class="guess-btn" id="guessBtn">Guess</button>
           <div class="autocomplete-list" id="autocompleteList"></div>
         </div>
-        <div class="search-hint">Guesses fill in the taxonomic tree. Hints unlock after 3 and 5 guesses.</div>
-        <div class="max-guesses-note" id="guessCounter">0 guesses</div>
+        <div class="search-hint">Guess any animal <em>or</em> a taxonomic group like Chordata, Mammalia, Felidae…</div>
+
+        <!-- Name hint -->
+        <div class="name-hint-row">
+          <button class="reveal-btn" id="nameHintBtn">
+            Reveal name hint <span class="cost-badge">(−5 guesses)</span>
+          </button>
+          <span class="name-hint-reveal" id="nameHintText"></span>
+        </div>
+
+        <div class="guess-counter-row">
+          <div class="max-guesses-note" id="guessCounter">0 guesses</div>
+          <div class="max-guesses-note" id="hintCostNote"></div>
+        </div>
       </div>
 
+      <!-- GUESS HISTORY -->
       <div class="panel" style="margin-top: 16px;">
-        <div class="panel-title">Guess History</div>
-        <div class="guess-list" id="guessList">
+        <div class="panel-title-row">
+          <div class="panel-title">Guess History</div>
+          <div class="view-toggle">
+            <button class="view-btn active" id="viewCards" onclick="setViewMode('card')">Cards</button>
+            <button class="view-btn" id="viewList" onclick="setViewMode('list')">List</button>
+          </div>
+        </div>
+        <div id="guessHistoryContainer">
           <div class="empty-state">Your guesses will appear here.</div>
         </div>
       </div>
 
       <div class="howto">
-        <strong>How to play:</strong> Guess any animal to reveal how its taxonomy compares to today's target.
-        Green chips = matching taxonomic level. Red = no match.
-        The <em>Tree of Life</em> panel fills in as you identify each level.
+        <strong>How to play:</strong> Guess any <em>animal</em> to see how its full taxonomy compares to today's target — green chips match, red don't.
+        Or guess a <em>taxon</em> (like <em>Mammalia</em> or <em>Chordata</em>) to narrow down a specific level directly.
+        The <strong>Tree of Life</strong> fills in as levels are confirmed.
         <br><br>
-        <strong>Proximity %</strong> reflects how closely related your guess is, weighted by how many species share that taxonomic group — guessing within a species-rich genus scores higher than a monotypic one.
+        <strong>Next Possible Taxons</strong> shows the valid options for your current deepest confirmed level — click any to guess it instantly.
+        <br><br>
+        <strong>Name Hint</strong> costs 5 guesses and reveals the first word (or first half) of the target's common name.
+        <strong>Proximity %</strong> reflects how closely related your animal guess is, weighted by group size.
       </div>
     </div>
 
-    <!-- RIGHT: TREE + HINTS -->
+    <!-- RIGHT: TREE + PANELS -->
     <div>
-      <!-- TREE OF LIFE -->
       <div class="panel tree-panel">
+
+        <!-- Current Level Indicator -->
+        <div class="current-level-badge" id="currentLevelBadge">
+          <span>Narrowing:</span>
+          <span class="level-label" id="currentLevelLabel">Kingdom</span>
+        </div>
+
         <div class="panel-title">Tree of Life</div>
+
+        <!-- Legend -->
+        <div class="tree-legend">
+          <div class="legend-item"><div class="legend-dot legend-dot-animal"></div>Animal guess</div>
+          <div class="legend-item"><div class="legend-dot legend-dot-taxon"></div>Taxon guess</div>
+          <div class="legend-item"><div class="legend-dot legend-dot-none"></div>Unknown</div>
+        </div>
+
         <div id="treeContainer"></div>
 
-        <div style="margin-top: 20px;">
+        <!-- Next Possible Taxons -->
+        <div style="margin-top: 16px;">
+          <div class="panel-title" id="nextTaxonsTitle">Next Possible Taxons</div>
+          <div class="next-taxons-scroll" id="nextTaxonsList">
+            <span class="next-taxons-empty">Make a guess to narrow the options.</span>
+          </div>
+        </div>
+
+        <!-- Field Notes -->
+        <div style="margin-top: 16px;">
           <div class="panel-title">Field Notes</div>
           <div id="hintsContainer">
             <div class="hint-item">
@@ -467,9 +755,15 @@
           </div>
           <div class="hint-unlock-note" id="hintNote">Diet unlocks after 3 guesses · Range after 5</div>
         </div>
+
       </div>
     </div>
   </div>
+
+  <footer>
+    Taxon · Animal Classification Game · Made by <a href="https://huggingface.co/spaces/Sbhat2026/Taxondle" target="_blank">Sbhat2026</a>
+  </footer>
+
 </div>
 
 <script>
@@ -478,15 +772,20 @@ const LEVELS = ['kingdom','phylum','class','order','family','genus','species'];
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
 const DIET_UNLOCK = 3;
 const RANGE_UNLOCK = 5;
+const NAME_HINT_COST = 5;
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 let animals = [];
 let target = null;
-let guesses = [];
-let selectedIndex = -1;
-let filteredList = [];
-let revealedLevels = new Set();
+let allGuesses = [];            // { type: 'animal'|'taxon', data, result }
+let confirmedTaxons = {};       // level -> confirmed value (merged from both guess types)
+let taxonRevealSources = {};    // level -> 'animal' | 'taxon'
 let gameOver = false;
+let viewMode = 'card';
+let nameHintUsed = false;
+let nameHintGuessEquiv = 0;     // guesses "spent" on hints
+let selectedIndex = -1;
+let filteredList = [];          // { type, display, animal?, level?, value? }
 
 // ─── DAILY SEED (PRNG) ───────────────────────────────────────────────────────
 function dateToSeed() {
@@ -502,217 +801,452 @@ function seededRandom(seed) {
 }
 function pickDaily(arr) {
   const rng = seededRandom(dateToSeed());
-  return arr[Math.floor(rng() * arr.length)];
+  // Only pick animals with a proper common name and scientific name
+  const valid = arr.filter(a => a.common_name && a.scientific_name && a.kingdom && a.species);
+  return valid[Math.floor(rng() * valid.length)];
+}
+
+// ─── TOTAL GUESS COUNT (including hint cost) ─────────────────────────────────
+function totalGuessCount() {
+  return allGuesses.length + nameHintGuessEquiv;
 }
 
 // ─── PROXIMITY SCORING ───────────────────────────────────────────────────────
-function calcProximity(guess, target, allAnimals) {
-  // Find deepest matching level (must be sequential from kingdom down)
+function calcProximity(guess, tgt, allAnimals) {
   let deepestMatch = -1;
   for (let i = 0; i < LEVELS.length; i++) {
-    if (guess[LEVELS[i]].toLowerCase() === target[LEVELS[i]].toLowerCase()) {
+    if ((guess[LEVELS[i]]||'').toLowerCase() === (tgt[LEVELS[i]]||'').toLowerCase()) {
       deepestMatch = i;
     } else {
       break;
     }
   }
-
-  if (deepestMatch === LEVELS.length - 1) return 100; // exact species match
-
-  if (deepestMatch === -1) {
-    // No match at all (shouldn't happen — all are Animalia)
-    return 0;
-  }
+  if (deepestMatch === LEVELS.length - 1) return 100;
+  if (deepestMatch === -1) return 0;
 
   const matchedLevel = LEVELS[deepestMatch];
-  const matchedValue = target[matchedLevel].toLowerCase();
-
-  // How many animals in the dataset share this taxonomic value at this level?
-  const sharingCount = allAnimals.filter(a =>
-    a[matchedLevel].toLowerCase() === matchedValue
-  ).length;
-
-  // What's the maximum sharing count for this level across all values?
+  const matchedValue = (tgt[matchedLevel]||'').toLowerCase();
+  const sharingCount = allAnimals.filter(a => (a[matchedLevel]||'').toLowerCase() === matchedValue).length;
   const countMap = {};
   allAnimals.forEach(a => {
-    const v = a[matchedLevel].toLowerCase();
+    const v = (a[matchedLevel]||'').toLowerCase();
     countMap[v] = (countMap[v] || 0) + 1;
   });
   const maxSharing = Math.max(...Object.values(countMap));
-
-  // Level score: linear (0..1) based on deepest matched level index
-  // Level 0 (kingdom) = 1/7; Level 6 (species) = 7/7
   const levelScore = (deepestMatch + 1) / LEVELS.length;
-
-  // Diversity score: log-scaled. Higher when matched group is larger (more species-rich).
-  // This rewards finding a species-rich genus over a monotypic one.
   const diversityScore = Math.log(1 + sharingCount) / Math.log(1 + maxSharing);
-
-  // Blend: level drives ~65% of score, diversity modifier ~35%
   const raw = 0.65 * levelScore + 0.35 * diversityScore;
   return Math.min(99, Math.round(raw * 100));
 }
 
-function levelMatchMap(guess, target) {
-  // Returns object: { kingdom: true/false, phylum: true/false, ... }
+function levelMatchMap(guess, tgt) {
   const map = {};
   let sequential = true;
   for (const lvl of LEVELS) {
-    const match = sequential && guess[lvl].toLowerCase() === target[lvl].toLowerCase();
+    const match = sequential && (guess[lvl]||'').toLowerCase() === (tgt[lvl]||'').toLowerCase();
     map[lvl] = match;
     if (!match) sequential = false;
   }
   return map;
 }
 
-// ─── TREE OF LIFE RENDERING ──────────────────────────────────────────────────
+// ─── CONFIRMED TAXONS HELPERS ─────────────────────────────────────────────────
+function updateConfirmedFromAnimal(animal) {
+  let sequential = true;
+  for (const lvl of LEVELS) {
+    if (sequential && (animal[lvl]||'').toLowerCase() === (target[lvl]||'').toLowerCase()) {
+      if (!confirmedTaxons[lvl]) {
+        confirmedTaxons[lvl] = target[lvl];
+        taxonRevealSources[lvl] = 'animal';
+      }
+    } else {
+      sequential = false;
+    }
+  }
+}
+
+function updateConfirmedFromTaxon(level, value) {
+  // Returns true if correct
+  if ((value||'').toLowerCase() === (target[level]||'').toLowerCase()) {
+    confirmedTaxons[level] = target[level];
+    taxonRevealSources[level] = 'taxon';
+    return true;
+  }
+  return false;
+}
+
+// ─── CURRENT LEVEL ───────────────────────────────────────────────────────────
+function getCurrentSequentialLevelIndex() {
+  // Deepest index where all levels 0..i are confirmed
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (!confirmedTaxons[LEVELS[i]]) return i;
+  }
+  return LEVELS.length;
+}
+
+// ─── NEXT POSSIBLE TAXONS ─────────────────────────────────────────────────────
+function getNextPossibleTaxons() {
+  const idx = getCurrentSequentialLevelIndex();
+  if (idx >= LEVELS.length) return { level: null, levelLabel: 'All confirmed!', taxons: [] };
+
+  const lvl = LEVELS[idx];
+  const lbl = LEVEL_LABELS[idx];
+
+  // Filter animals matching all confirmed sequential levels
+  const eligible = animals.filter(a => {
+    for (let i = 0; i < idx; i++) {
+      const l = LEVELS[i];
+      if (confirmedTaxons[l] && (a[l]||'').toLowerCase() !== confirmedTaxons[l].toLowerCase()) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const unique = [...new Set(eligible.map(a => a[lvl]).filter(Boolean))].sort();
+  return { level: lvl, levelLabel: lbl, taxons: unique };
+}
+
+// ─── TREE RENDERING ──────────────────────────────────────────────────────────
 function renderTree() {
   const container = document.getElementById('treeContainer');
   container.innerHTML = '';
+
   LEVELS.forEach((lvl, i) => {
+    const confirmed = confirmedTaxons[lvl];
+    const source = taxonRevealSources[lvl];
+    let cls = 'tree-node';
+    if (confirmed) cls += source === 'taxon' ? ' revealed-taxon' : ' revealed-animal';
+
     const node = document.createElement('div');
-    node.className = 'tree-node' + (revealedLevels.has(lvl) ? ' revealed' : '');
+    node.className = cls;
     node.style.paddingLeft = (i === 0 ? 0 : 12) + 'px';
     node.innerHTML = `
       <span class="tree-dot"></span>
       <span>
         <span class="tree-level">${LEVEL_LABELS[i]}</span>
-        <span class="tree-value ${revealedLevels.has(lvl) ? '' : 'hidden'}">
-          ${revealedLevels.has(lvl) ? target[lvl] : '━━━━━'}
+        <span class="tree-value ${confirmed ? '' : 'hidden'}">
+          ${confirmed ? confirmed : '━━━━━'}
         </span>
-      </span>
-    `;
+      </span>`;
     container.appendChild(node);
+  });
+
+  // Update current level badge
+  const idx = getCurrentSequentialLevelIndex();
+  const badge = document.getElementById('currentLevelBadge');
+  const label = document.getElementById('currentLevelLabel');
+
+  if (idx >= LEVELS.length) {
+    badge.className = 'current-level-badge active';
+    label.textContent = 'All confirmed!';
+    badge.querySelector('span').textContent = 'Status:';
+  } else {
+    badge.className = 'current-level-badge' + (idx > 0 ? ' active' : '');
+    label.textContent = LEVEL_LABELS[idx];
+    badge.querySelector('span').textContent = 'Narrowing:';
+  }
+
+  // Next possible taxons
+  renderNextTaxons();
+}
+
+function renderNextTaxons() {
+  const { level, levelLabel, taxons } = getNextPossibleTaxons();
+  const container = document.getElementById('nextTaxonsList');
+  const title = document.getElementById('nextTaxonsTitle');
+
+  if (!level) {
+    title.textContent = 'Next Possible Taxons';
+    container.innerHTML = '<span class="next-taxons-empty">All levels confirmed — guess the animal!</span>';
+    return;
+  }
+
+  title.textContent = `Possible ${levelLabel}s`;
+  container.innerHTML = '';
+
+  if (allGuesses.length === 0) {
+    container.innerHTML = '<span class="next-taxons-empty">Make a guess to see options.</span>';
+    return;
+  }
+
+  if (taxons.length === 0) {
+    container.innerHTML = '<span class="next-taxons-empty">No matches found.</span>';
+    return;
+  }
+
+  taxons.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'next-taxon-btn';
+    btn.textContent = t;
+    btn.title = `Guess ${levelLabel}: ${t}`;
+    btn.addEventListener('click', () => {
+      if (!gameOver) submitTaxonGuess(level, t);
+    });
+    container.appendChild(btn);
   });
 }
 
 // ─── HINT RENDERING ──────────────────────────────────────────────────────────
 function renderHints() {
-  const n = guesses.length;
+  const n = allGuesses.length + nameHintGuessEquiv;
   const dietEl = document.getElementById('hintDiet');
   const contEl = document.getElementById('hintContinents');
   const noteEl = document.getElementById('hintNote');
 
   if (n >= DIET_UNLOCK || gameOver) {
-    dietEl.innerHTML = `<strong>${target.diet}</strong>`;
+    dietEl.innerHTML = `<strong>${target.diet || '—'}</strong>`;
   } else {
     dietEl.innerHTML = `<span class="hint-locked">?????</span>`;
   }
 
   if (n >= RANGE_UNLOCK || gameOver) {
-    contEl.innerHTML = target.continents.map(c =>
-      `<span class="continent-pip">${c}</span>`
-    ).join('');
+    contEl.innerHTML = (target.continents || []).length
+      ? target.continents.map(c => `<span class="continent-pip">${c}</span>`).join('')
+      : '<em style="color:var(--steel)">Unknown</em>';
   } else {
     contEl.innerHTML = `<span class="hint-locked">?????</span>`;
   }
 
-  // Update unlock note
   const parts = [];
-  if (n < DIET_UNLOCK && !gameOver) parts.push(`Diet in ${DIET_UNLOCK - n} guess${DIET_UNLOCK - n===1?'':'es'}`);
+  if (n < DIET_UNLOCK && !gameOver) parts.push(`Diet in ${DIET_UNLOCK - n} guess${DIET_UNLOCK-n===1?'':'es'}`);
   if (n < RANGE_UNLOCK && !gameOver) parts.push(`Range in ${RANGE_UNLOCK - n}`);
   noteEl.textContent = parts.join(' · ');
 }
 
-// ─── GUESS CARD RENDERING ────────────────────────────────────────────────────
-function renderGuessCard(animal, matchMap, proximity) {
-  const prox = proximity;
-  let proxClass = prox >= 70 ? 'prox-high' : prox >= 40 ? 'prox-mid' : 'prox-low';
+// ─── GUESS COUNTER ────────────────────────────────────────────────────────────
+function updateGuessCounter() {
+  const base = allGuesses.length;
+  const total = totalGuessCount();
+  let text = `${base} guess${base===1?'':'es'}`;
+  if (nameHintGuessEquiv > 0) text += ` + ${nameHintGuessEquiv} (hint)`;
+  document.getElementById('guessCounter').textContent = text;
+}
 
-  const chips = LEVELS.map((lvl, i) => {
-    const m = matchMap[lvl];
-    return `<div>
-      <span class="tax-chip ${m ? 'tax-match' : 'tax-nomatch'}">
-        <span class="tax-label">${LEVEL_LABELS[i]}</span>
-        ${animal[lvl]}
-      </span>
-    </div>`;
-  }).join('');
+// ─── VIEW MODE ────────────────────────────────────────────────────────────────
+function setViewMode(mode) {
+  viewMode = mode;
+  document.getElementById('viewCards').classList.toggle('active', mode === 'card');
+  document.getElementById('viewList').classList.toggle('active', mode === 'list');
+  renderGuessHistory();
+}
 
+function renderGuessHistory() {
+  const container = document.getElementById('guessHistoryContainer');
+  if (allGuesses.length === 0) {
+    container.innerHTML = '<div class="empty-state">Your guesses will appear here.</div>';
+    return;
+  }
+
+  if (viewMode === 'card') {
+    const list = document.createElement('div');
+    list.className = 'guess-list';
+    allGuesses.forEach(g => {
+      list.appendChild(buildGuessCard(g));
+    });
+    container.innerHTML = '';
+    container.appendChild(list);
+  } else {
+    renderListView(container);
+  }
+}
+
+function buildGuessCard(g) {
   const card = document.createElement('div');
-  card.className = 'guess-card';
-  card.innerHTML = `
-    <div class="guess-card-header">
-      <div>
-        <div class="guess-name">${animal.common_name}</div>
-        <div class="guess-sci">${animal.scientific_name}</div>
+
+  if (g.type === 'taxon') {
+    card.className = 'guess-card taxon-card';
+    const correct = g.result;
+    card.innerHTML = `
+      <div class="guess-card-header">
+        <div class="taxon-guess-row">
+          <span class="taxon-guess-level">${g.levelLabel}</span>
+          <span class="guess-name">${g.value}</span>
+        </div>
+        <span class="proximity-badge ${correct ? 'taxon-correct' : 'taxon-wrong'}">
+          ${correct ? '✓ Correct' : '✗ Wrong'}
+        </span>
+      </div>`;
+  } else {
+    const { animal, matchMap, proximity } = g;
+    let proxClass = proximity >= 70 ? 'prox-high' : proximity >= 40 ? 'prox-mid' : 'prox-low';
+    const chips = LEVELS.map((lvl, i) => `<div>
+      <span class="tax-chip ${matchMap[lvl] ? 'tax-match' : 'tax-nomatch'}">
+        <span class="tax-label">${LEVEL_LABELS[i]}</span>
+        ${animal[lvl]||'—'}
+      </span></div>`).join('');
+
+    card.className = 'guess-card';
+    card.innerHTML = `
+      <div class="guess-card-header">
+        <div>
+          <div class="guess-name">${animal.common_name}</div>
+          <div class="guess-sci">${animal.scientific_name}</div>
+        </div>
+        <span class="proximity-badge ${proxClass}">${proximity}%</span>
       </div>
-      <span class="proximity-badge ${proxClass}">${prox}%</span>
-    </div>
-    <div class="tax-row">${chips}</div>
-  `;
+      <div class="tax-row">${chips}</div>`;
+  }
   return card;
 }
 
-// ─── SUBMIT GUESS ────────────────────────────────────────────────────────────
-function submitGuess(animal) {
-  if (gameOver) return;
-  // Prevent duplicate
-  if (guesses.some(g => g.scientific_name === animal.scientific_name)) {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('autocompleteList').classList.remove('open');
-    return;
+function renderListView(container) {
+  const table = document.createElement('table');
+  table.className = 'list-view-table';
+  table.innerHTML = `<thead><tr>
+    <th>Name</th>
+    <th>Match</th>
+    <th>Result</th>
+  </tr></thead>`;
+  const tbody = document.createElement('tbody');
+  allGuesses.forEach(g => {
+    const tr = document.createElement('tr');
+    if (g.type === 'taxon') {
+      tr.innerHTML = `
+        <td>
+          <div class="lv-name">${g.value}</div>
+          <div class="lv-sci">${g.levelLabel}</div>
+        </td>
+        <td>—</td>
+        <td><span style="color:${g.result ? 'var(--sage)' : 'var(--rust)'}">${g.result ? '✓' : '✗'}</span></td>`;
+    } else {
+      const { animal, matchMap, proximity } = g;
+      const dots = LEVELS.map(lvl =>
+        `<div class="lv-dot ${matchMap[lvl] ? 'lv-dot-match' : 'lv-dot-nomatch'}" title="${lvl}: ${animal[lvl]||'—'}"></div>`
+      ).join('');
+      let proxClass = proximity >= 70 ? 'prox-high' : proximity >= 40 ? 'prox-mid' : 'prox-low';
+      tr.innerHTML = `
+        <td>
+          <div class="lv-name">${animal.common_name}</div>
+          <div class="lv-sci">${animal.scientific_name}</div>
+        </td>
+        <td><div class="lv-dots">${dots}</div></td>
+        <td><span class="proximity-badge ${proxClass}" style="font-size:0.65rem;padding:2px 6px">${proximity}%</span></td>`;
+    }
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  container.innerHTML = '';
+  container.appendChild(table);
+}
+
+// ─── NAME HINT ────────────────────────────────────────────────────────────────
+function revealNameHint() {
+  if (nameHintUsed || gameOver) return;
+  nameHintUsed = true;
+  nameHintGuessEquiv = NAME_HINT_COST;
+
+  const name = target.common_name;
+  const words = name.split(' ');
+  let hint;
+  if (words.length >= 2) {
+    hint = words[0] + ' ' + '_'.repeat(words.slice(1).join(' ').length);
+  } else {
+    const half = Math.ceil(name.length / 2);
+    hint = name.slice(0, half) + '_'.repeat(name.length - half);
   }
 
-  guesses.unshift(animal);  // newest first
+  document.getElementById('nameHintText').textContent = hint;
+  document.getElementById('nameHintBtn').disabled = true;
+  document.getElementById('nameHintBtn').textContent = 'Name hint revealed';
+
+  updateGuessCounter();
+  renderHints(); // may unlock diet/range
+}
+
+// ─── SUBMIT ANIMAL GUESS ──────────────────────────────────────────────────────
+function submitAnimalGuess(animal) {
+  if (gameOver) return;
+  if (allGuesses.some(g => g.type === 'animal' && g.animal.scientific_name === animal.scientific_name)) {
+    clearSearch(); return;
+  }
 
   const matchMap = levelMatchMap(animal, target);
   const proximity = calcProximity(animal, target, animals);
+  updateConfirmedFromAnimal(animal);
 
-  // Update revealed levels
-  for (const lvl of LEVELS) {
-    if (matchMap[lvl]) revealedLevels.add(lvl);
-    else break;
-  }
+  allGuesses.unshift({ type: 'animal', animal, matchMap, proximity });
 
-  // Render guess list
-  const list = document.getElementById('guessList');
-  if (guesses.length === 1) list.innerHTML = ''; // clear empty state
-  const card = renderGuessCard(animal, matchMap, proximity);
-  list.insertBefore(card, list.firstChild);
-
-  // Update counter
-  document.getElementById('guessCounter').textContent = `${guesses.length} guess${guesses.length===1?'':'es'}`;
-
+  renderGuessHistory();
   renderTree();
   renderHints();
+  updateGuessCounter();
+  clearSearch();
 
-  // Check win
   if (animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
     endGame(true);
-    return;
   }
-
-  // Clear input
-  document.getElementById('searchInput').value = '';
-  document.getElementById('autocompleteList').classList.remove('open');
-  filteredList = [];
-  selectedIndex = -1;
 }
 
+// ─── SUBMIT TAXON GUESS ───────────────────────────────────────────────────────
+function submitTaxonGuess(level, value) {
+  if (gameOver) return;
+
+  // Prevent duplicate taxon guesses for the same level+value
+  if (allGuesses.some(g => g.type === 'taxon' && g.level === level && g.value.toLowerCase() === value.toLowerCase())) {
+    clearSearch(); return;
+  }
+
+  // Check if already confirmed
+  if (confirmedTaxons[level] && confirmedTaxons[level].toLowerCase() === value.toLowerCase()) {
+    // already known — skip silently
+    clearSearch(); return;
+  }
+
+  const correct = updateConfirmedFromTaxon(level, value);
+  const levelIdx = LEVELS.indexOf(level);
+  const levelLabel = LEVEL_LABELS[levelIdx];
+
+  allGuesses.unshift({ type: 'taxon', level, levelLabel, value, result: correct });
+
+  renderGuessHistory();
+  renderTree();
+  renderHints();
+  updateGuessCounter();
+  clearSearch();
+}
+
+// ─── END GAME ─────────────────────────────────────────────────────────────────
 function endGame(won) {
   gameOver = true;
-  // Reveal all levels
-  LEVELS.forEach(l => revealedLevels.add(l));
+  LEVELS.forEach(l => {
+    confirmedTaxons[l] = target[l];
+    if (!taxonRevealSources[l]) taxonRevealSources[l] = 'animal';
+  });
   renderTree();
   renderHints();
 
   const banner = document.getElementById('resultBanner');
   banner.classList.add('show');
-  document.getElementById('resultTitle').textContent = won
-    ? `🎉 Correct!`
-    : `The answer was…`;
-  document.getElementById('resultSubtitle').textContent =
-    won ? `You identified it in ${guesses.length} guess${guesses.length===1?'':'es'}.`
-        : `Better luck tomorrow.`;
+  document.getElementById('resultTitle').textContent = won ? '🎉 Correct!' : 'The answer was…';
+  document.getElementById('resultSubtitle').textContent = won
+    ? `You identified it in ${allGuesses.length} guess${allGuesses.length===1?'':'es'}` + (nameHintGuessEquiv ? ` (+ ${nameHintGuessEquiv} hint).` : '.')
+    : 'Better luck tomorrow.';
   document.getElementById('resultSci').textContent = `${target.common_name} — ${target.scientific_name}`;
   document.getElementById('resultFact').textContent = target.notes || '';
 
   document.getElementById('searchInput').disabled = true;
   document.getElementById('guessBtn').disabled = true;
+  document.getElementById('nameHintBtn').disabled = true;
 }
 
-// ─── AUTOCOMPLETE ────────────────────────────────────────────────────────────
+// ─── AUTOCOMPLETE ─────────────────────────────────────────────────────────────
+let taxonItems = []; // { type:'taxon', level, levelLabel, value, display }
+
+function buildTaxonItems() {
+  const byLevel = {};
+  LEVELS.forEach(lvl => { byLevel[lvl] = new Set(); });
+  animals.forEach(a => {
+    LEVELS.forEach(lvl => { if (a[lvl]) byLevel[lvl].add(a[lvl]); });
+  });
+  taxonItems = [];
+  LEVELS.forEach((lvl, i) => {
+    [...byLevel[lvl]].sort().forEach(val => {
+      taxonItems.push({ type: 'taxon', level: lvl, levelLabel: LEVEL_LABELS[i], value: val });
+    });
+  });
+}
+
 function updateAutocomplete(query) {
   const q = query.trim().toLowerCase();
   if (q.length < 1) {
@@ -720,32 +1254,65 @@ function updateAutocomplete(query) {
     document.getElementById('autocompleteList').classList.remove('open');
     return;
   }
-  filteredList = animals.filter(a =>
+
+  // Animal matches
+  const animalMatches = animals.filter(a =>
     a.common_name.toLowerCase().includes(q) ||
     a.scientific_name.toLowerCase().includes(q)
-  ).slice(0, 8);
+  ).slice(0, 5).map(a => ({ type: 'animal', display: a.common_name, sci: a.scientific_name, animal: a }));
+
+  // Taxon matches
+  const taxonMatches = taxonItems.filter(t =>
+    t.value.toLowerCase().startsWith(q) ||
+    t.value.toLowerCase().includes(q)
+  ).slice(0, 6).map(t => ({ type: 'taxon', display: t.value, level: t.level, levelLabel: t.levelLabel, value: t.value }));
+
+  filteredList = [...animalMatches, ...taxonMatches];
 
   const list = document.getElementById('autocompleteList');
   list.innerHTML = '';
+
   if (filteredList.length === 0) {
     list.classList.remove('open');
     return;
   }
-  filteredList.forEach((a, i) => {
-    const item = document.createElement('div');
-    item.className = 'autocomplete-item';
-    item.innerHTML = `<span>${a.common_name}</span><span class="sci">${a.scientific_name}</span>`;
-    item.addEventListener('mousedown', e => {
+
+  let lastType = null;
+  filteredList.forEach((item, i) => {
+    if (item.type !== lastType) {
+      const label = document.createElement('div');
+      label.className = 'autocomplete-section-label';
+      label.textContent = item.type === 'animal' ? 'Animals' : 'Taxonomic Groups';
+      list.appendChild(label);
+      lastType = item.type;
+    }
+    const el = document.createElement('div');
+    el.className = 'autocomplete-item';
+    if (item.type === 'animal') {
+      el.innerHTML = `<span>${item.display}</span><span class="sci">${item.sci}</span>`;
+    } else {
+      el.innerHTML = `<span>${item.display}</span><span class="taxon-level-badge">${item.levelLabel}</span>`;
+    }
+    el.addEventListener('mousedown', e => {
       e.preventDefault();
-      submitGuess(a);
+      if (item.type === 'animal') submitAnimalGuess(item.animal);
+      else submitTaxonGuess(item.level, item.value);
     });
-    list.appendChild(item);
+    list.appendChild(el);
   });
+
   list.classList.add('open');
   selectedIndex = -1;
 }
 
-// ─── EVENT WIRING ────────────────────────────────────────────────────────────
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('autocompleteList').classList.remove('open');
+  filteredList = [];
+  selectedIndex = -1;
+}
+
+// ─── EVENT WIRING ─────────────────────────────────────────────────────────────
 function wireEvents() {
   const input = document.getElementById('searchInput');
   const list = document.getElementById('autocompleteList');
@@ -761,10 +1328,11 @@ function wireEvents() {
       e.preventDefault();
       selectedIndex = Math.max(selectedIndex - 1, -1);
     } else if (e.key === 'Enter') {
-      if (selectedIndex >= 0 && filteredList[selectedIndex]) {
-        submitGuess(filteredList[selectedIndex]);
-      } else if (filteredList.length === 1) {
-        submitGuess(filteredList[0]);
+      const realItems = filteredList.filter((_, i) => i === selectedIndex || (selectedIndex < 0 && i === 0));
+      const chosen = selectedIndex >= 0 ? filteredList[selectedIndex] : (filteredList.length === 1 ? filteredList[0] : null);
+      if (chosen) {
+        if (chosen.type === 'animal') submitAnimalGuess(chosen.animal);
+        else submitTaxonGuess(chosen.level, chosen.value);
       }
       return;
     } else if (e.key === 'Escape') {
@@ -780,20 +1348,23 @@ function wireEvents() {
 
   document.getElementById('guessBtn').addEventListener('click', () => {
     if (filteredList.length > 0) {
-      const idx = selectedIndex >= 0 ? selectedIndex : 0;
-      submitGuess(filteredList[idx]);
+      const item = filteredList[selectedIndex >= 0 ? selectedIndex : 0];
+      if (item.type === 'animal') submitAnimalGuess(item.animal);
+      else submitTaxonGuess(item.level, item.value);
     }
+  });
+
+  document.getElementById('nameHintBtn').addEventListener('click', () => {
+    if (!nameHintUsed && !gameOver) revealNameHint();
   });
 }
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+// ─── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
-  // Set date badge
   const d = new Date();
   document.getElementById('dateBadge').textContent =
     d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-  // Load animals
   try {
     const resp = await fetch('animals.json');
     animals = await resp.json();
@@ -802,6 +1373,7 @@ async function init() {
     return;
   }
 
+  buildTaxonItems();
   target = pickDaily(animals);
   renderTree();
   renderHints();
