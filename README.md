@@ -5,7 +5,6 @@ colorFrom: indigo
 colorTo: blue
 sdk: static
 pinned: false
-short_description: Updating readme
 ---
 
 # Taxondle
