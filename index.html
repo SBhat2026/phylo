@@ -314,7 +314,7 @@
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 const LEVELS       = ['kingdom','phylum','class','order','family','genus','species'];
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
-const VALID_RANKS  = new Set(LEVELS);
+
 const DIET_UNLOCK  = 3;
 const RANGE_UNLOCK = 5;
 const NAME_HINT_COST = 5;
@@ -340,12 +340,14 @@ let selectedIndex = -1;
 let pendingGuess = null;   // { type, … } — waiting for API response
 
 // ─── WIKIDATA SPARQL ──────────────────────────────────────────────────────────
-// One query: find species by P225, union species itself + all P171 ancestors.
-// Only keep ranks that map exactly to our 7 Linnaean levels.
+// Walks P171+ ancestor chain from species matched by P225 (scientific name).
+// Returns all ancestors whose taxon rank maps to one of our 7 levels.
 async function fetchWikidataTaxonomy(scientificName) {
   const escaped = scientificName.replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+  // We use LCASE() matching to handle capitalisation inconsistencies in Wikidata
   const sparql = `SELECT ?rankLabel ?name WHERE {
-  ?sp wdt:P225 "${escaped}" .
+  ?sp wdt:P225 ?rawName .
+  FILTER(LCASE(?rawName) = LCASE("${escaped}")) .
   {
     ?sp wdt:P225 ?name .
     ?sp wdt:P105 ?rank .
@@ -366,25 +368,123 @@ async function fetchWikidataTaxonomy(scientificName) {
   for (const b of data.results.bindings) {
     const rank = (b.rankLabel?.value || '').toLowerCase();
     const name = b.name?.value || '';
-    if (VALID_RANKS.has(rank) && name) result[rank] = name;
+    // Map rank synonyms (e.g. "subclass" → skip; "superfamily" → skip)
+    const mapped = RANK_MAP[rank] || (VALID_RANKS.has(rank) ? rank : null);
+    if (mapped && name && !result[mapped]) result[mapped] = name;
+  }
+  // Always derive genus and species from the binomial if Wikidata didn't return them
+  if (scientificName.includes(' ')) {
+    const [g, ...rest] = scientificName.split(' ');
+    if (!result.genus)   result.genus   = g;
+    if (!result.species) result.species = rest.join(' ');
+  }
+  return result;
+}
+
+// Rank label synonyms to standard levels
+const RANK_MAP = {
+  'kingdom': 'kingdom', 'regnum': 'kingdom',
+  'phylum': 'phylum', 'division': 'phylum', 'divisio': 'phylum',
+  'class': 'class', 'classis': 'class',
+  'order': 'order', 'ordo': 'order',
+  'family': 'family', 'familia': 'family',
+  'genus': 'genus',
+  'species': 'species',
+};
+
+// ─── WIKIPEDIA WIKITEXT TAXOBOX (fallback for incomplete Wikidata) ────────────
+// Fetches the raw wikitext for a page and parses the Taxobox / Speciesbox
+// template to extract taxonomy. This is the most reliable fallback because
+// Wikipedia editors maintain taxoboxes carefully.
+async function fetchWikipediaTaxobox(title) {
+  const url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&titles=${encodeURIComponent(title)}&rvprop=content&rvslots=main&format=json&origin=*`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`Wikipedia API HTTP ${r.status}`);
+  const data = await r.json();
+  const pages = data?.query?.pages || {};
+  const page  = Object.values(pages)[0];
+  const wikitext = page?.revisions?.[0]?.slots?.main?.['*'] || '';
+  return parseTaxoboxWikitext(wikitext);
+}
+
+function parseTaxoboxWikitext(wikitext) {
+  const result = {};
+  if (!wikitext) return result;
+
+  // Strip wikilinks: [[Foo|Bar]] → Bar, [[Foo]] → Foo
+  function strip(s) {
+    return s.replace(/\[\[(?:[^\]|]+\|)?([^\]]+)\]\]/g,'$1')
+            .replace(/\{\{[^}]*\}\}/g,'')   // remove {{templates}}
+            .replace(/'+/g,'')              // remove bold/italic markers
+            .replace(/<[^>]+>/g,'')         // remove HTML tags
+            .trim();
   }
 
-  // Species field: store just the epithet, not the full binomial Wikidata returns
-  result.species = scientificName.split(' ')[1] || scientificName;
-  // Genus: if Wikidata didn't return it, infer from binomial
-  if (!result.genus && scientificName.includes(' ')) result.genus = scientificName.split(' ')[0];
+  // Taxobox field → our level
+  const fieldMap = {
+    regnum:'kingdom', kingdom:'kingdom',
+    phylum:'phylum', divisio:'phylum', division:'phylum',
+    classis:'class', 'class':'class',
+    ordo:'order', 'order':'order',
+    familia:'family', family:'family',
+    genus:'genus',
+    species:'species',
+    // Automatic taxobox uses 'taxon' for the species itself
+    taxon:'_taxon',
+  };
+
+  // Match each | field = value pair in the taxobox template
+  // We handle multi-line values by scanning line by line
+  const lines = wikitext.split('\n');
+  let inTaxobox = false;
+  let depth = 0;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!inTaxobox) {
+      if (/\{\{\s*(Taxobox|Automatic\s+taxobox|Speciesbox|Subspeciesbox)/i.test(trimmed)) {
+        inTaxobox = true; depth = 1;
+      }
+      continue;
+    }
+    // Track nesting depth
+    depth += (trimmed.match(/\{\{/g)||[]).length;
+    depth -= (trimmed.match(/\}\}/g)||[]).length;
+    if (depth <= 0) break; // end of template
+
+    const m = trimmed.match(/^\|\s*([a-z_]+)\s*=\s*(.+)/i);
+    if (!m) continue;
+    const field = m[1].toLowerCase().trim();
+    const val   = strip(m[2]);
+    const level = fieldMap[field];
+    if (level && val && !result[level]) result[level] = val;
+  }
+
+  // For Speciesbox/Automatic taxobox, 'taxon' gives the full binomial
+  if (result._taxon) {
+    const parts = result._taxon.split(' ');
+    if (!result.genus && parts[0])   result.genus   = parts[0];
+    if (!result.species && parts[1]) result.species = parts[1];
+    delete result._taxon;
+  }
+
+  // Species in taxobox is often "G. epithet" — extract just the epithet
+  if (result.species) {
+    const sp = result.species.trim();
+    const lastWord = sp.split(/\s+/).pop();
+    result.species = lastWord;
+  }
 
   return result;
 }
 
-// ─── WIKIPEDIA REST API ───────────────────────────────────────────────────────
-// Tries scientific name first, then common name as fallback.
+// ─── WIKIPEDIA REST SUMMARY ───────────────────────────────────────────────────
 // Returns { extract, title } or {}
 async function fetchWikipediaSummary(scientificName, commonName) {
   const candidates = [
     scientificName.replace(/ /g,'_'),
-    commonName.replace(/ /g,'_')
-  ];
+    commonName ? commonName.replace(/ /g,'_') : null,
+  ].filter(Boolean);
   for (const title of candidates) {
     try {
       const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
@@ -397,35 +497,77 @@ async function fetchWikipediaSummary(scientificName, commonName) {
   return {};
 }
 
-// ─── DIET & CONTINENT DETECTION ───────────────────────────────────────────────
+// ─── DIET DETECTION ───────────────────────────────────────────────────────────
+// First tries to assign a standard category. If none matches, extracts a short
+// descriptive phrase (e.g. "insects and small lizards") from the text.
 function detectDiet(text) {
   if (!text) return '';
   const t = text.toLowerCase();
-  if (/\b(herbivore|herbivorous|grazer|grazing|plant.eating|feeds on grass|feeds on leaves|feeds on vegetation|folivore|frugivore|nectarivore)\b/.test(t)) return 'Herbivore';
-  if (/\b(insectivore|insectivorous|insect.eating|feeds on insects|myrmecophage)\b/.test(t)) return 'Insectivore';
-  if (/\b(piscivore|piscivorous|fish.eating|feeds on fish)\b/.test(t)) return 'Piscivore';
-  if (/\b(scavenger|scavenging|feeds on carrion|carrion.eating)\b/.test(t)) return 'Scavenger';
-  if (/\b(omnivore|omnivorous|both plants and|plants and animals|plant and animal matter)\b/.test(t)) return 'Omnivore';
-  if (/\b(carnivore|carnivorous|meat.eating|preys on|predator of|apex predator|hypercarnivore)\b/.test(t)) return 'Carnivore';
-  if (/\b(parasite|parasitoid|parasitic|endoparasit)\b/.test(t)) return 'Parasitoid';
+
+  // Categorical matches — checked in priority order
+  const cats = [
+    [/\b(herbivore|herbivorous|folivore|frugivore|granivore|nectarivore|grazer|grazing|plant.eating|feeds on grass|feeds on leaves|feeds on vegetation|feeds on plants|eats? plants|eats? leaves|eats? fruit|eats? seeds)\b/, 'Herbivore'],
+    [/\b(insectivore|insectivorous|insect.eating|feeds on insects|eats? insects|myrmecophage|feeds on ants|feeds on termites)\b/, 'Insectivore'],
+    [/\b(piscivore|piscivorous|fish.eating|feeds on fish|eats? fish|eats? mainly fish)\b/, 'Piscivore'],
+    [/\b(scavenger|scavenging|feeds on carrion|eats? carrion|carrion.eating|detritivore)\b/, 'Scavenger'],
+    [/\b(parasite|parasitoid|parasitic|endoparasit|ectoparasit)\b/, 'Parasitoid'],
+    [/\b(omnivore|omnivorous|both plants and|plants and animals|plant and animal|eats? both|wide.?ranging diet)\b/, 'Omnivore'],
+    [/\b(carnivore|carnivorous|meat.eating|apex predator|hypercarnivore|obligate carnivore)\b/, 'Carnivore'],
+  ];
+  for (const [re, label] of cats) {
+    if (re.test(t)) return label;
+  }
+
+  // No category — try to extract a short descriptive phrase
+  const phrasePatterns = [
+    /\bfeeds? (?:mainly |primarily |largely |mostly |exclusively |chiefly |on )?on ([^,.;(]{4,55})/i,
+    /\beats? (?:mainly |primarily |largely |mostly |exclusively |chiefly )?([^,.;(]{4,55})/i,
+    /\bdiet (?:consists? |composed? |made up )?(?:mainly |primarily |largely |mostly |chiefly )?(?:of )?([^,.;(]{4,55})/i,
+    /\bpreys? (?:mainly |primarily |chiefly )?on ([^,.;(]{4,55})/i,
+    /\bspecializes? in (?:eating |consuming )?([^,.;(]{4,55})/i,
+  ];
+  for (const pat of phrasePatterns) {
+    const m = text.match(pat);
+    if (m) {
+      let prey = m[1].trim().replace(/\s+/g,' ');
+      // Strip trailing weak endings
+      prey = prey.replace(/\s+(and|or|but|which|that|including|such|as well).*$/i,'').trim();
+      if (prey.length > 2 && prey.length <= 55) {
+        // Capitalise first letter
+        return prey.charAt(0).toUpperCase() + prey.slice(1);
+      }
+    }
+  }
   return '';
 }
 
+// ─── CONTINENT DETECTION ─────────────────────────────────────────────────────
 function detectContinents(text) {
   if (!text) return [];
   const t = text.toLowerCase();
   const found = [];
-  if (/\b(africa|african|sub.saharan|sahara|madagascar|savanna|serengeti)\b/.test(t)) found.push('Africa');
-  if (/\b(asia|asian|south asia|southeast asia|east asia|india|china|japan|indonesia|borneo|sumatra|indochina|himalaya|siberia|middle east)\b/.test(t)) found.push('Asia');
-  if (/\b(europe|european|britain|mediterranean|scandinavia|iberian|balkans|alps)\b/.test(t)) found.push('Europe');
-  if (/\b(north america|northern america|canada|united states|mexico|central america|caribbean)\b/.test(t)) found.push('North America');
-  if (/\b(south america|southern america|amazon|brazil|andes|patagonia|neotropical)\b/.test(t)) found.push('South America');
-  if (/\b(australia|australasia|new zealand|oceania|new guinea|papua)\b/.test(t)) found.push('Australia');
+  if (/\b(africa|african|sub.saharan|sahara|madagascar|savanna|serengeti|ethiopia|kenya|tanzania|nigeria|congo)\b/.test(t)) found.push('Africa');
+  if (/\b(asia|asian|south asia|southeast asia|east asia|india|china|japan|indonesia|borneo|sumatra|indochina|himalaya|siberia|middle east|korea|vietnam|thailand|philippines|malaysia)\b/.test(t)) found.push('Asia');
+  if (/\b(europe|european|britain|mediterranean|scandinavia|iberian|balkans|alps|france|germany|spain|italy|russia(?! .*asia))\b/.test(t)) found.push('Europe');
+  if (/\b(north america|canada|united states|u\.s\.|mexico|central america|caribbean|alaska|florida|texas|california|guatemala|belize|honduras)\b/.test(t)) found.push('North America');
+  if (/\b(south america|amazon|brazil|andes|patagonia|neotropical|colombia|peru|argentina|venezuela|ecuador|chile|bolivia)\b/.test(t)) found.push('South America');
+  if (/\b(australia|australasia|new zealand|oceania|new guinea|papua|queensland|tasmania)\b/.test(t)) found.push('Australia');
   if (/\b(antarctica|antarctic)\b/.test(t)) found.push('Antarctica');
   return found;
 }
 
-// ─── MAIN FETCH: gets taxonomy + wikipedia data, with caching ─────────────────
+// ─── MISSING LEVEL COUNT HELPER ───────────────────────────────────────────────
+function missingLevels(tax) {
+  // Returns the levels that are empty (excluding always-inferable genus/species)
+  return ['phylum','class','order','family'].filter(l => !tax[l]);
+}
+
+// ─── MAIN FETCH ───────────────────────────────────────────────────────────────
+// Strategy:
+//   1. Wikidata SPARQL + Wikipedia REST summary run in parallel.
+//   2. If SPARQL left any of phylum/class/order/family blank, we fire a
+//      Wikipedia wikitext taxobox fetch as a second-pass fallback and merge.
+//   3. Diet uses improved regex; falls back to phrase extraction.
 async function fetchAnimalData(scientificName, commonName) {
   if (animalCache.has(scientificName)) return animalCache.get(scientificName);
 
@@ -433,27 +575,39 @@ async function fetchAnimalData(scientificName, commonName) {
 
   let taxonomy = {};
   let wikiData = {};
+  const wikiTitle = scientificName.replace(/ /g,'_');
 
   try {
-    // Run both in parallel
     const [taxResult, wikiResult] = await Promise.allSettled([
       fetchWikidataTaxonomy(scientificName),
-      fetchWikipediaSummary(scientificName, commonName || scientificName)
+      fetchWikipediaSummary(scientificName, commonName || scientificName),
     ]);
-
-    if (taxResult.status === 'fulfilled') taxonomy = taxResult.value;
-    else console.warn('Wikidata failed:', taxResult.reason);
-
+    if (taxResult.status === 'fulfilled')  taxonomy = taxResult.value;
+    else console.warn('Wikidata SPARQL failed:', taxResult.reason?.message);
     if (wikiResult.status === 'fulfilled') wikiData = wikiResult.value;
-    else console.warn('Wikipedia failed:', wikiResult.reason);
+    else console.warn('Wikipedia summary failed:', wikiResult.reason?.message);
   } catch(e) {
-    console.error('fetchAnimalData error:', e);
+    console.error('fetchAnimalData parallel error:', e);
+  }
+
+  // ── Second pass: Wikipedia taxobox fallback if SPARQL left gaps ──────────
+  if (missingLevels(taxonomy).length > 0) {
+    try {
+      showApiStatus('loading', `Filling gaps via Wikipedia taxobox…`);
+      const boxTax = await fetchWikipediaTaxobox(wikiTitle);
+      // Merge: only fill levels that SPARQL left empty
+      for (const lvl of LEVELS) {
+        if (!taxonomy[lvl] && boxTax[lvl]) taxonomy[lvl] = boxTax[lvl];
+      }
+    } catch(e) {
+      console.warn('Wikipedia taxobox fallback failed:', e?.message);
+    }
   }
 
   const extract = wikiData.extract || '';
 
   const result = {
-    common_name: commonName || scientificName,
+    common_name:     commonName || scientificName,
     scientific_name: scientificName,
     kingdom: taxonomy.kingdom || 'Animalia',
     phylum:  taxonomy.phylum  || '',
@@ -462,9 +616,9 @@ async function fetchAnimalData(scientificName, commonName) {
     family:  taxonomy.family  || '',
     genus:   taxonomy.genus   || (scientificName.includes(' ') ? scientificName.split(' ')[0] : ''),
     species: taxonomy.species || (scientificName.includes(' ') ? scientificName.split(' ')[1] : ''),
-    notes:    extract,
-    diet:     detectDiet(extract),
-    continents: detectContinents(extract)
+    notes:      extract,
+    diet:       detectDiet(extract),
+    continents: detectContinents(extract),
   };
 
   animalCache.set(scientificName, result);
@@ -660,12 +814,18 @@ function renderHints() {
   const n = allGuesses.length + nameHintCost;
   if (!target) return;
 
-  if (n >= DIET_UNLOCK || gameOver)
-    document.getElementById('hintDiet').innerHTML = target.diet
-      ? `<strong>${target.diet}</strong>`
-      : '<em style="color:var(--steel)">—</em>';
-  else
+  if (n >= DIET_UNLOCK || gameOver) {
+    const DIET_CATS = new Set(['Herbivore','Carnivore','Omnivore','Insectivore','Piscivore','Scavenger','Parasitoid']);
+    const diet = target.diet;
+    if (!diet)
+      document.getElementById('hintDiet').innerHTML = '<em style="color:var(--steel)">—</em>';
+    else if (DIET_CATS.has(diet))
+      document.getElementById('hintDiet').innerHTML = `<strong>${diet}</strong>`;
+    else
+      document.getElementById('hintDiet').innerHTML = `<em>${diet}</em>`;
+  } else {
     document.getElementById('hintDiet').innerHTML = `<span class="hint-locked">?????</span>`;
+  }
 
   if (n >= RANGE_UNLOCK || gameOver)
     document.getElementById('hintContinents').innerHTML = target.continents?.length
@@ -691,7 +851,7 @@ function makeLoadingCard(label) {
   const card = document.createElement('div');
   card.className = 'guess-card loading-card';
   card.id = 'loadingCard';
-  card.innerHTML = `<div class="guess-card-header"><div><div class="guess-name"><span class="spin"></span>${label}</div><div class="guess-sci">Fetching taxonomy from Wikidata…</div></div></div>`;
+  card.innerHTML = `<div class="guess-card-header"><div><div class="guess-name"><span class="spin"></span>${label}</div><div class="guess-sci">Looking up taxonomy via Wikidata + Wikipedia…</div></div></div>`;
   return card;
 }
 
