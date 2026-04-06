@@ -173,11 +173,6 @@
   .try-another-btn:hover { background: var(--sage); }
   .practice-badge { display: inline-block; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold); padding: 2px 8px; border-radius: 2px; margin-bottom: 10px; }
 
-  /* API status banner */
-  .api-status { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.5px; padding: 6px 12px; border-radius: 3px; margin-bottom: 14px; display: none; }
-  .api-status.loading { display: flex; align-items: center; gap: 8px; background: #fef9ec; border: 1px solid var(--gold-light); color: var(--gold); }
-  .api-status.error   { display: flex; align-items: center; gap: 8px; background: #fdf0f0; border: 1px solid #e57373; color: var(--rust); }
-
   /* misc */
   .empty-state { text-align: center; padding: 24px 0; color: var(--steel); font-style: italic; font-size: 0.95rem; }
   .howto { margin-top: 28px; padding: 16px 20px; border: 1px dashed var(--worn); border-radius: 3px; font-size: 0.88rem; color: var(--steel); line-height: 1.6; }
@@ -214,8 +209,6 @@
     <div>
       <div class="panel">
         <div class="panel-title">Make a Guess</div>
-
-        <div id="apiStatus" class="api-status"></div>
 
         <div class="search-wrap">
           <input type="text" class="search-input" id="searchInput"
@@ -314,228 +307,125 @@
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 const LEVELS       = ['kingdom','phylum','class','order','family','genus','species'];
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
-
+const MAX_GUESSES  = 25;
 const DIET_UNLOCK  = 3;
 const RANGE_UNLOCK = 5;
 const NAME_HINT_COST = 5;
+const DIET_CATS = new Set(['Herbivore','Carnivore','Omnivore','Insectivore','Piscivore','Scavenger','Parasitoid']);
 
-// ─── API CACHE ────────────────────────────────────────────────────────────────
-// Keyed by scientific_name → full taxonomy object
+// ─── CACHE & STATE ───────────────────────────────────────────────────────────
 const animalCache = new Map();
-
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let slimAnimals  = [];     // [{common_name, scientific_name}] — for autocomplete
-let taxonItems   = [];     // [{level, levelLabel, value}] — built from cached guesses over session
-let target       = null;   // full taxonomy object (fetched from Wikidata)
-let allGuesses   = [];
+let slimAnimals   = [];
+let taxonFlat     = [];   // [{level,levelLabel,value}]  for autocomplete
+let taxonTree     = {};   // {"phylum/Chordata": ["Mammalia","Aves",...], ...}
+let target        = null;
+let allGuesses    = [];
 let confirmedTaxons = {};
 let taxonSources    = {};
-let gameOver     = false;
-let isPractice   = false;
-let treeView     = 'branch';
-let nameHintUsed = false;
-let nameHintCost = 0;
-let filteredList = [];
+let gameOver      = false;
+let isPractice    = false;
+let treeView      = 'branch';
+let nameHintUsed  = false;
+let nameHintCost  = 0;
+let filteredList  = [];   // flat list matching current autocomplete query
 let selectedIndex = -1;
-let pendingGuess = null;   // { type, … } — waiting for API response
 
-// ─── WIKIDATA SPARQL ──────────────────────────────────────────────────────────
-// Walks P171+ ancestor chain from species matched by P225 (scientific name).
-// Returns all ancestors whose taxon rank maps to one of our 7 levels.
-async function fetchWikidataTaxonomy(scientificName) {
-  const escaped = scientificName.replace(/\\/g,'\\\\').replace(/"/g,'\\"');
-  // We use LCASE() matching to handle capitalisation inconsistencies in Wikidata
-  const sparql = `SELECT ?rankLabel ?name WHERE {
-  ?sp wdt:P225 ?rawName .
-  FILTER(LCASE(?rawName) = LCASE("${escaped}")) .
-  {
-    ?sp wdt:P225 ?name .
-    ?sp wdt:P105 ?rank .
-    ?rank rdfs:label ?rankLabel FILTER(lang(?rankLabel)='en') .
-  } UNION {
-    ?sp wdt:P171+ ?anc .
-    ?anc wdt:P225 ?name .
-    ?anc wdt:P105 ?rank .
-    ?rank rdfs:label ?rankLabel FILTER(lang(?rankLabel)='en') .
-  }
-}`;
-  const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(sparql)}&format=json`;
-  const resp = await fetch(url, { headers: { Accept: 'application/sparql-results+json' } });
-  if (!resp.ok) throw new Error(`Wikidata HTTP ${resp.status}`);
-  const data = await resp.json();
+// ─── EFFECTIVE GUESS COUNT ───────────────────────────────────────────────────
+function effectiveGuesses() { return allGuesses.length + nameHintCost; }
+function remainingGuesses()  { return MAX_GUESSES - effectiveGuesses(); }
 
-  const result = {};
-  for (const b of data.results.bindings) {
-    const rank = (b.rankLabel?.value || '').toLowerCase();
-    const name = b.name?.value || '';
-    // Map rank synonyms (e.g. "subclass" → skip; "superfamily" → skip)
-    const mapped = RANK_MAP[rank] || (VALID_RANKS.has(rank) ? rank : null);
-    if (mapped && name && !result[mapped]) result[mapped] = name;
-  }
-  // Always derive genus and species from the binomial if Wikidata didn't return them
-  if (scientificName.includes(' ')) {
-    const [g, ...rest] = scientificName.split(' ');
-    if (!result.genus)   result.genus   = g;
-    if (!result.species) result.species = rest.join(' ');
-  }
-  return result;
-}
-
-// Rank label synonyms to standard levels
-const RANK_MAP = {
-  'kingdom': 'kingdom', 'regnum': 'kingdom',
-  'phylum': 'phylum', 'division': 'phylum', 'divisio': 'phylum',
-  'class': 'class', 'classis': 'class',
-  'order': 'order', 'ordo': 'order',
-  'family': 'family', 'familia': 'family',
-  'genus': 'genus',
-  'species': 'species',
-};
-
-// ─── WIKIPEDIA WIKITEXT TAXOBOX (fallback for incomplete Wikidata) ────────────
-// Fetches the raw wikitext for a page and parses the Taxobox / Speciesbox
-// template to extract taxonomy. This is the most reliable fallback because
-// Wikipedia editors maintain taxoboxes carefully.
+// ─── WIKIPEDIA WIKITEXT TAXOBOX (primary taxonomy source) ────────────────────
+// Much faster than Wikidata SPARQL and equally accurate for Wikipedia articles.
 async function fetchWikipediaTaxobox(title) {
   const url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&titles=${encodeURIComponent(title)}&rvprop=content&rvslots=main&format=json&origin=*`;
   const r = await fetch(url);
-  if (!r.ok) throw new Error(`Wikipedia API HTTP ${r.status}`);
+  if (!r.ok) throw new Error(`WP ${r.status}`);
   const data = await r.json();
   const pages = data?.query?.pages || {};
-  const page  = Object.values(pages)[0];
-  const wikitext = page?.revisions?.[0]?.slots?.main?.['*'] || '';
-  return parseTaxoboxWikitext(wikitext);
+  const wikitext = Object.values(pages)[0]?.revisions?.[0]?.slots?.main?.['*'] || '';
+  return parseTaxobox(wikitext);
 }
 
-function parseTaxoboxWikitext(wikitext) {
+function parseTaxobox(wikitext) {
   const result = {};
   if (!wikitext) return result;
-
-  // Strip wikilinks: [[Foo|Bar]] → Bar, [[Foo]] → Foo
   function strip(s) {
     return s.replace(/\[\[(?:[^\]|]+\|)?([^\]]+)\]\]/g,'$1')
-            .replace(/\{\{[^}]*\}\}/g,'')   // remove {{templates}}
-            .replace(/'+/g,'')              // remove bold/italic markers
-            .replace(/<[^>]+>/g,'')         // remove HTML tags
-            .trim();
+            .replace(/\{\{[^}]*\}\}/g,'').replace(/'+/g,'')
+            .replace(/<[^>]+>/g,'').trim();
   }
-
-  // Taxobox field → our level
   const fieldMap = {
     regnum:'kingdom', kingdom:'kingdom',
     phylum:'phylum', divisio:'phylum', division:'phylum',
-    classis:'class', 'class':'class',
-    ordo:'order', 'order':'order',
+    classis:'class', class:'class',
+    ordo:'order', order:'order',
     familia:'family', family:'family',
-    genus:'genus',
-    species:'species',
-    // Automatic taxobox uses 'taxon' for the species itself
-    taxon:'_taxon',
+    genus:'genus', species:'species', taxon:'_taxon',
   };
-
-  // Match each | field = value pair in the taxobox template
-  // We handle multi-line values by scanning line by line
   const lines = wikitext.split('\n');
-  let inTaxobox = false;
-  let depth = 0;
-
+  let inBox=false, depth=0;
   for (const line of lines) {
-    const trimmed = line.trim();
-    if (!inTaxobox) {
-      if (/\{\{\s*(Taxobox|Automatic\s+taxobox|Speciesbox|Subspeciesbox)/i.test(trimmed)) {
-        inTaxobox = true; depth = 1;
-      }
+    const t = line.trim();
+    if (!inBox) {
+      if (/\{\{\s*(Taxobox|Automatic\s+taxobox|Speciesbox|Subspeciesbox)/i.test(t)) { inBox=true; depth=1; }
       continue;
     }
-    // Track nesting depth
-    depth += (trimmed.match(/\{\{/g)||[]).length;
-    depth -= (trimmed.match(/\}\}/g)||[]).length;
-    if (depth <= 0) break; // end of template
-
-    const m = trimmed.match(/^\|\s*([a-z_]+)\s*=\s*(.+)/i);
+    depth += (t.match(/\{\{/g)||[]).length;
+    depth -= (t.match(/\}\}/g)||[]).length;
+    if (depth<=0) break;
+    const m = t.match(/^\|\s*([a-z_]+)\s*=\s*(.+)/i);
     if (!m) continue;
-    const field = m[1].toLowerCase().trim();
-    const val   = strip(m[2]);
-    const level = fieldMap[field];
-    if (level && val && !result[level]) result[level] = val;
+    const lvl = fieldMap[m[1].toLowerCase().trim()];
+    const val = strip(m[2]);
+    if (lvl && val && !result[lvl]) result[lvl] = val;
   }
-
-  // For Speciesbox/Automatic taxobox, 'taxon' gives the full binomial
   if (result._taxon) {
-    const parts = result._taxon.split(' ');
-    if (!result.genus && parts[0])   result.genus   = parts[0];
-    if (!result.species && parts[1]) result.species = parts[1];
+    const p = result._taxon.split(' ');
+    if (!result.genus && p[0])   result.genus   = p[0];
+    if (!result.species && p[1]) result.species = p[1];
     delete result._taxon;
   }
-
-  // Species in taxobox is often "G. epithet" — extract just the epithet
-  if (result.species) {
-    const sp = result.species.trim();
-    const lastWord = sp.split(/\s+/).pop();
-    result.species = lastWord;
-  }
-
+  if (result.species) result.species = result.species.trim().split(/\s+/).pop();
   return result;
 }
 
 // ─── WIKIPEDIA REST SUMMARY ───────────────────────────────────────────────────
-// Returns { extract, title } or {}
 async function fetchWikipediaSummary(scientificName, commonName) {
-  const candidates = [
-    scientificName.replace(/ /g,'_'),
-    commonName ? commonName.replace(/ /g,'_') : null,
-  ].filter(Boolean);
+  const candidates = [scientificName.replace(/ /g,'_'), commonName ? commonName.replace(/ /g,'_') : null].filter(Boolean);
   for (const title of candidates) {
     try {
       const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-      if (r.ok) {
-        const d = await r.json();
-        if (d.extract && d.extract.length > 30) return d;
-      }
+      if (r.ok) { const d = await r.json(); if (d.extract?.length > 30) return d; }
     } catch(_) {}
   }
   return {};
 }
 
-// ─── DIET DETECTION ───────────────────────────────────────────────────────────
-// First tries to assign a standard category. If none matches, extracts a short
-// descriptive phrase (e.g. "insects and small lizards") from the text.
+// ─── DIET DETECTION ──────────────────────────────────────────────────────────
 function detectDiet(text) {
   if (!text) return '';
   const t = text.toLowerCase();
-
-  // Categorical matches — checked in priority order
   const cats = [
-    [/\b(herbivore|herbivorous|folivore|frugivore|granivore|nectarivore|grazer|grazing|plant.eating|feeds on grass|feeds on leaves|feeds on vegetation|feeds on plants|eats? plants|eats? leaves|eats? fruit|eats? seeds)\b/, 'Herbivore'],
+    [/\b(herbivore|herbivorous|folivore|frugivore|granivore|nectarivore|grazer|grazing|plant.eating|feeds on grass|feeds on leaves|feeds on vegetation|eats? plants|eats? leaves|eats? fruit|eats? seeds)\b/, 'Herbivore'],
     [/\b(insectivore|insectivorous|insect.eating|feeds on insects|eats? insects|myrmecophage|feeds on ants|feeds on termites)\b/, 'Insectivore'],
-    [/\b(piscivore|piscivorous|fish.eating|feeds on fish|eats? fish|eats? mainly fish)\b/, 'Piscivore'],
-    [/\b(scavenger|scavenging|feeds on carrion|eats? carrion|carrion.eating|detritivore)\b/, 'Scavenger'],
+    [/\b(piscivore|piscivorous|fish.eating|feeds on fish|eats? fish)\b/, 'Piscivore'],
+    [/\b(scavenger|scavenging|feeds on carrion|eats? carrion|detritivore)\b/, 'Scavenger'],
     [/\b(parasite|parasitoid|parasitic|endoparasit|ectoparasit)\b/, 'Parasitoid'],
-    [/\b(omnivore|omnivorous|both plants and|plants and animals|plant and animal|eats? both|wide.?ranging diet)\b/, 'Omnivore'],
+    [/\b(omnivore|omnivorous|both plants and|plants and animals|plant and animal|eats? both)\b/, 'Omnivore'],
     [/\b(carnivore|carnivorous|meat.eating|apex predator|hypercarnivore|obligate carnivore)\b/, 'Carnivore'],
   ];
-  for (const [re, label] of cats) {
-    if (re.test(t)) return label;
-  }
-
-  // No category — try to extract a short descriptive phrase
-  const phrasePatterns = [
+  for (const [re, label] of cats) if (re.test(t)) return label;
+  const pats = [
     /\bfeeds? (?:mainly |primarily |largely |mostly |exclusively |chiefly |on )?on ([^,.;(]{4,55})/i,
     /\beats? (?:mainly |primarily |largely |mostly |exclusively |chiefly )?([^,.;(]{4,55})/i,
-    /\bdiet (?:consists? |composed? |made up )?(?:mainly |primarily |largely |mostly |chiefly )?(?:of )?([^,.;(]{4,55})/i,
+    /\bdiet (?:consists? |is )?(?:mainly |primarily |chiefly )?(?:of )?([^,.;(]{4,55})/i,
     /\bpreys? (?:mainly |primarily |chiefly )?on ([^,.;(]{4,55})/i,
-    /\bspecializes? in (?:eating |consuming )?([^,.;(]{4,55})/i,
   ];
-  for (const pat of phrasePatterns) {
+  for (const pat of pats) {
     const m = text.match(pat);
     if (m) {
-      let prey = m[1].trim().replace(/\s+/g,' ');
-      // Strip trailing weak endings
-      prey = prey.replace(/\s+(and|or|but|which|that|including|such|as well).*$/i,'').trim();
-      if (prey.length > 2 && prey.length <= 55) {
-        // Capitalise first letter
-        return prey.charAt(0).toUpperCase() + prey.slice(1);
-      }
+      let p = m[1].trim().replace(/\s+/g,' ').replace(/\s+(and|or|which|that|including|such).*$/i,'').trim();
+      if (p.length>2 && p.length<=55) return p.charAt(0).toUpperCase()+p.slice(1);
     }
   }
   return '';
@@ -544,501 +434,391 @@ function detectDiet(text) {
 // ─── CONTINENT DETECTION ─────────────────────────────────────────────────────
 function detectContinents(text) {
   if (!text) return [];
-  const t = text.toLowerCase();
-  const found = [];
-  if (/\b(africa|african|sub.saharan|sahara|madagascar|savanna|serengeti|ethiopia|kenya|tanzania|nigeria|congo)\b/.test(t)) found.push('Africa');
-  if (/\b(asia|asian|south asia|southeast asia|east asia|india|china|japan|indonesia|borneo|sumatra|indochina|himalaya|siberia|middle east|korea|vietnam|thailand|philippines|malaysia)\b/.test(t)) found.push('Asia');
-  if (/\b(europe|european|britain|mediterranean|scandinavia|iberian|balkans|alps|france|germany|spain|italy|russia(?! .*asia))\b/.test(t)) found.push('Europe');
-  if (/\b(north america|canada|united states|u\.s\.|mexico|central america|caribbean|alaska|florida|texas|california|guatemala|belize|honduras)\b/.test(t)) found.push('North America');
-  if (/\b(south america|amazon|brazil|andes|patagonia|neotropical|colombia|peru|argentina|venezuela|ecuador|chile|bolivia)\b/.test(t)) found.push('South America');
+  const t=text.toLowerCase(), found=[];
+  if (/\b(africa|african|sub.saharan|sahara|madagascar|kenya|tanzania|nigeria|congo)\b/.test(t)) found.push('Africa');
+  if (/\b(asia|asian|south asia|southeast asia|east asia|india|china|japan|indonesia|borneo|sumatra|himalaya|siberia|middle east|korea|vietnam|thailand|philippines|malaysia)\b/.test(t)) found.push('Asia');
+  if (/\b(europe|european|britain|mediterranean|scandinavia|iberian|balkans|alps|france|germany|spain|italy)\b/.test(t)) found.push('Europe');
+  if (/\b(north america|canada|united states|u\.s\.|mexico|central america|caribbean|alaska|florida|california|guatemala)\b/.test(t)) found.push('North America');
+  if (/\b(south america|amazon|brazil|andes|patagonia|neotropical|colombia|peru|argentina|venezuela|ecuador|chile)\b/.test(t)) found.push('South America');
   if (/\b(australia|australasia|new zealand|oceania|new guinea|papua|queensland|tasmania)\b/.test(t)) found.push('Australia');
   if (/\b(antarctica|antarctic)\b/.test(t)) found.push('Antarctica');
   return found;
 }
 
-// ─── MISSING LEVEL COUNT HELPER ───────────────────────────────────────────────
-function missingLevels(tax) {
-  // Returns the levels that are empty (excluding always-inferable genus/species)
-  return ['phylum','class','order','family'].filter(l => !tax[l]);
-}
-
-// ─── MAIN FETCH ───────────────────────────────────────────────────────────────
-// Strategy:
-//   1. Wikidata SPARQL + Wikipedia REST summary run in parallel.
-//   2. If SPARQL left any of phylum/class/order/family blank, we fire a
-//      Wikipedia wikitext taxobox fetch as a second-pass fallback and merge.
-//   3. Diet uses improved regex; falls back to phrase extraction.
+// ─── MAIN FETCH: Wikipedia-only (taxobox + summary in parallel) ───────────────
+// Drops Wikidata SPARQL entirely — taxobox is faster and more reliable.
 async function fetchAnimalData(scientificName, commonName) {
   if (animalCache.has(scientificName)) return animalCache.get(scientificName);
-
-  showApiStatus('loading', `Fetching taxonomy for ${commonName || scientificName}…`);
-
-  let taxonomy = {};
-  let wikiData = {};
   const wikiTitle = scientificName.replace(/ /g,'_');
-
-  try {
-    const [taxResult, wikiResult] = await Promise.allSettled([
-      fetchWikidataTaxonomy(scientificName),
-      fetchWikipediaSummary(scientificName, commonName || scientificName),
-    ]);
-    if (taxResult.status === 'fulfilled')  taxonomy = taxResult.value;
-    else console.warn('Wikidata SPARQL failed:', taxResult.reason?.message);
-    if (wikiResult.status === 'fulfilled') wikiData = wikiResult.value;
-    else console.warn('Wikipedia summary failed:', wikiResult.reason?.message);
-  } catch(e) {
-    console.error('fetchAnimalData parallel error:', e);
+  const [boxResult, wikiResult] = await Promise.allSettled([
+    fetchWikipediaTaxobox(wikiTitle),
+    fetchWikipediaSummary(scientificName, commonName||scientificName),
+  ]);
+  const boxTax  = boxResult.status==='fulfilled'  ? boxResult.value  : {};
+  const wikiData = wikiResult.status==='fulfilled' ? wikiResult.value : {};
+  if (scientificName.includes(' ')) {
+    const [g,...rest] = scientificName.split(' ');
+    if (!boxTax.genus)   boxTax.genus   = g;
+    if (!boxTax.species) boxTax.species = rest.join(' ');
   }
-
-  // ── Second pass: Wikipedia taxobox fallback if SPARQL left gaps ──────────
-  if (missingLevels(taxonomy).length > 0) {
-    try {
-      showApiStatus('loading', `Filling gaps via Wikipedia taxobox…`);
-      const boxTax = await fetchWikipediaTaxobox(wikiTitle);
-      // Merge: only fill levels that SPARQL left empty
-      for (const lvl of LEVELS) {
-        if (!taxonomy[lvl] && boxTax[lvl]) taxonomy[lvl] = boxTax[lvl];
-      }
-    } catch(e) {
-      console.warn('Wikipedia taxobox fallback failed:', e?.message);
-    }
-  }
-
   const extract = wikiData.extract || '';
-
   const result = {
-    common_name:     commonName || scientificName,
-    scientific_name: scientificName,
-    kingdom: taxonomy.kingdom || 'Animalia',
-    phylum:  taxonomy.phylum  || '',
-    class:   taxonomy.class   || '',
-    order:   taxonomy.order   || '',
-    family:  taxonomy.family  || '',
-    genus:   taxonomy.genus   || (scientificName.includes(' ') ? scientificName.split(' ')[0] : ''),
-    species: taxonomy.species || (scientificName.includes(' ') ? scientificName.split(' ')[1] : ''),
-    notes:      extract,
-    diet:       detectDiet(extract),
-    continents: detectContinents(extract),
+    common_name: commonName||scientificName, scientific_name: scientificName,
+    kingdom: boxTax.kingdom||'Animalia',
+    phylum:  boxTax.phylum  || '',
+    class:   boxTax.class   || '',
+    order:   boxTax.order   || '',
+    family:  boxTax.family  || '',
+    genus:   boxTax.genus   || '',
+    species: boxTax.species || '',
+    notes: extract, diet: detectDiet(extract), continents: detectContinents(extract),
   };
-
   animalCache.set(scientificName, result);
-  hideApiStatus();
   return result;
 }
 
-// ─── API STATUS UI ────────────────────────────────────────────────────────────
-function showApiStatus(type, msg) {
-  const el = document.getElementById('apiStatus');
-  el.className = `api-status ${type}`;
-  el.innerHTML = type === 'loading'
-    ? `<span class="spin"></span>${msg}`
-    : `⚠ ${msg}`;
-}
-function hideApiStatus() {
-  document.getElementById('apiStatus').className = 'api-status';
-}
-
-// ─── TAXON ITEMS (built dynamically from guesses + initial dataset) ───────────
-// We build this from all animals that have been fetched into the cache,
-// plus we pre-populate level values from the target on load.
-function rebuildTaxonItems() {
-  const byLevel = {};
-  LEVELS.forEach(lvl => { byLevel[lvl] = new Set(); });
-
-  // Include target's taxonomy so next-possible works even before guesses
-  if (target) {
-    LEVELS.forEach(lvl => { if (target[lvl]) byLevel[lvl].add(target[lvl]); });
-  }
-
-  // Include all cached animals
-  for (const data of animalCache.values()) {
-    LEVELS.forEach(lvl => { if (data[lvl]) byLevel[lvl].add(data[lvl]); });
-  }
-
-  taxonItems = [];
-  LEVELS.forEach((lvl, i) => {
-    const higherVals = new Set();
-    LEVELS.slice(0, i).forEach(hl => byLevel[hl].forEach(v => higherVals.add(v)));
-    [...byLevel[lvl]].filter(v => !higherVals.has(v)).sort()
-      .forEach(v => taxonItems.push({ level: lvl, levelLabel: LEVEL_LABELS[i], value: v }));
-  });
-}
-
-// ─── DAILY / PRACTICE PICK ───────────────────────────────────────────────────
-function dateToSeed() {
-  const d = new Date();
-  return d.getFullYear() * 10000 + (d.getMonth()+1) * 100 + d.getDate();
-}
-function seededRandom(seed) {
-  let s = seed;
-  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
-}
-function pickDailySlim()     { const r = seededRandom(dateToSeed()); return slimAnimals[Math.floor(r() * slimAnimals.length)]; }
-function pickRandomSlim(excl){ const p = slimAnimals.filter(a => a.scientific_name !== excl); return p[Math.floor(Math.random() * p.length)]; }
+// ─── DAILY / PRACTICE PICKS ──────────────────────────────────────────────────
+function dateToSeed() { const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+function seededRandom(seed) { let s=seed; return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }; }
+function pickDailySlim()     { const r=seededRandom(dateToSeed()); return slimAnimals[Math.floor(r()*slimAnimals.length)]; }
+function pickRandomSlim(excl){ const p=slimAnimals.filter(a=>a.scientific_name!==excl); return p[Math.floor(Math.random()*p.length)]; }
 
 // ─── PROXIMITY ────────────────────────────────────────────────────────────────
-function calcProximity(guessData, targetData) {
-  let deepest = -1;
-  for (let i = 0; i < LEVELS.length; i++) {
-    if ((guessData[LEVELS[i]]||'').toLowerCase() === (targetData[LEVELS[i]]||'').toLowerCase()) deepest = i;
-    else break;
+function calcProximity(g, t) {
+  let d=-1;
+  for (let i=0;i<LEVELS.length;i++) {
+    if ((g[LEVELS[i]]||'').toLowerCase()===(t[LEVELS[i]]||'').toLowerCase()) d=i; else break;
   }
-  if (deepest === LEVELS.length - 1) return 100;
-  if (deepest === -1) return 0;
-
-  const lvl = LEVELS[deepest], val = (targetData[lvl]||'').toLowerCase();
-  const countMap = {};
-  for (const d of animalCache.values()) {
-    const v = (d[lvl]||'').toLowerCase();
-    if (v) countMap[v] = (countMap[v]||0) + 1;
-  }
-  if (!countMap[val]) countMap[val] = 1;
-  const maxShare = Math.max(...Object.values(countMap));
-  const levelScore = (deepest+1)/LEVELS.length;
-  const divScore   = Math.log(1+countMap[val])/Math.log(1+maxShare);
-  return Math.min(99, Math.round((0.65*levelScore + 0.35*divScore)*100));
+  if (d===LEVELS.length-1) return 100;
+  if (d===-1) return 0;
+  const lvl=LEVELS[d], val=(t[lvl]||'').toLowerCase();
+  const cm={};
+  for (const a of animalCache.values()) { const v=(a[lvl]||'').toLowerCase(); if(v) cm[v]=(cm[v]||0)+1; }
+  if (!cm[val]) cm[val]=1;
+  const ms=Math.max(...Object.values(cm));
+  return Math.min(99,Math.round((0.65*(d+1)/LEVELS.length+0.35*Math.log(1+cm[val])/Math.log(1+ms))*100));
 }
 
-function levelMatchMap(guess, tgt) {
-  const map = {}; let seq = true;
-  for (const lvl of LEVELS) {
-    const m = seq && (guess[lvl]||'').toLowerCase() === (tgt[lvl]||'').toLowerCase();
-    map[lvl] = m; if (!m) seq = false;
-  }
+function levelMatchMap(g, t) {
+  const map={}; let seq=true;
+  for (const lvl of LEVELS) { const m=seq&&(g[lvl]||'').toLowerCase()===(t[lvl]||'').toLowerCase(); map[lvl]=m; if(!m) seq=false; }
   return map;
 }
 
 // ─── CONFIRMED TAXONS ─────────────────────────────────────────────────────────
-function confirmFromAnimal(animalData) {
-  let seq = true;
+function confirmFromAnimal(a) {
+  let seq=true;
   for (const lvl of LEVELS) {
-    if (seq && (animalData[lvl]||'').toLowerCase() === (target[lvl]||'').toLowerCase()) {
-      if (!confirmedTaxons[lvl]) { confirmedTaxons[lvl] = target[lvl]; taxonSources[lvl] = 'animal'; }
-    } else seq = false;
+    if (seq&&(a[lvl]||'').toLowerCase()===(target[lvl]||'').toLowerCase()) {
+      if (!confirmedTaxons[lvl]) { confirmedTaxons[lvl]=target[lvl]; taxonSources[lvl]='animal'; }
+    } else seq=false;
   }
 }
 function confirmFromTaxon(level, value) {
-  if ((value||'').toLowerCase() === (target[level]||'').toLowerCase()) {
-    confirmedTaxons[level] = target[level]; taxonSources[level] = 'taxon'; return true;
+  if ((value||'').toLowerCase()===(target[level]||'').toLowerCase()) {
+    confirmedTaxons[level]=target[level]; taxonSources[level]='taxon'; return true;
   }
   return false;
 }
-function currentSeqIdx() {
-  for (let i = 0; i < LEVELS.length; i++) if (!confirmedTaxons[LEVELS[i]]) return i;
-  return LEVELS.length;
-}
+function currentSeqIdx() { for (let i=0;i<LEVELS.length;i++) if(!confirmedTaxons[LEVELS[i]]) return i; return LEVELS.length; }
 
-// ─── NEXT POSSIBLE ────────────────────────────────────────────────────────────
+// ─── NEXT POSSIBLE (uses precomputed tree, never reveals target) ──────────────
 function getNextPossible() {
   const idx = currentSeqIdx();
-  if (idx >= LEVELS.length) return { level:null, levelLabel:'', taxons:[] };
+  if (idx >= LEVELS.length) return {level:null, levelLabel:'', taxons:[]};
   const lvl = LEVELS[idx];
 
-  // Only include values from cached animals (those we've actually seen)
-  const eligible = [...animalCache.values()].filter(a => {
-    for (let i = 0; i < idx; i++) {
-      const l = LEVELS[i];
-      if (confirmedTaxons[l] && (a[l]||'').toLowerCase() !== confirmedTaxons[l].toLowerCase()) return false;
+  let taxons;
+  if (idx === 0) {
+    // Kingdom: always just Animalia
+    taxons = ['Animalia'];
+  } else {
+    // Walk confirmed levels from top to find the deepest confirmed parent
+    // and use the tree to get children. If no confirmed parent for this level,
+    // fall back to all values at this level from taxonFlat.
+    const parentLvl = LEVELS[idx-1];
+    const parentVal = confirmedTaxons[parentLvl];
+    if (parentVal) {
+      const key = `${parentLvl}/${parentVal}`;
+      taxons = taxonTree[key] || [];
+    } else {
+      // Nothing confirmed above — show all at this level (exclude levels we've skipped)
+      taxons = taxonFlat.filter(t => t.level === lvl).map(t => t.value);
     }
-    return true;
-  });
-  // Also add target's value so it's always in the list
-  const targetVal = target?.[lvl];
-  const vals = new Set(eligible.map(a => a[lvl]).filter(Boolean));
-  if (targetVal) vals.add(targetVal);
+  }
 
-  return { level: lvl, levelLabel: LEVEL_LABELS[idx], taxons: [...vals].sort() };
+  // Also always include any value from guessed animals at this level
+  // (without adding the target's value — that would be a cheat)
+  const fromCache = new Set(taxons);
+  for (const a of animalCache.values()) {
+    const v = a[lvl];
+    if (v) fromCache.add(v);
+  }
+
+  return {level:lvl, levelLabel:LEVEL_LABELS[idx], taxons:[...fromCache].sort()};
 }
 
 // ─── TREE VIEW ────────────────────────────────────────────────────────────────
 function setTreeView(mode) {
-  treeView = mode;
-  document.getElementById('btnBranch').classList.toggle('active', mode==='branch');
-  document.getElementById('btnList').classList.toggle('active', mode==='list');
+  treeView=mode;
+  document.getElementById('btnBranch').classList.toggle('active',mode==='branch');
+  document.getElementById('btnList').classList.toggle('active',mode==='list');
   renderTree();
 }
 
 function renderTree() {
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = '';
-
-  if (treeView === 'branch') {
-    LEVELS.forEach((lvl, i) => {
-      const c = confirmedTaxons[lvl], src = taxonSources[lvl];
-      const node = document.createElement('div');
-      node.className = 'tree-node' + (c ? ' by-'+src : '');
-      node.style.paddingLeft = (i===0?0:12)+'px';
-      node.innerHTML = `<span class="tree-dot"></span><span><span class="tree-level">${LEVEL_LABELS[i]}</span> <span class="tree-value${c?'':' hidden'}">${c||'━━━━━'}</span></span>`;
+  const container=document.getElementById('treeContainer');
+  container.innerHTML='';
+  if (treeView==='branch') {
+    LEVELS.forEach((lvl,i)=>{
+      const c=confirmedTaxons[lvl], src=taxonSources[lvl];
+      const node=document.createElement('div');
+      node.className='tree-node'+(c?' by-'+src:'');
+      node.style.paddingLeft=(i===0?0:12)+'px';
+      node.innerHTML=`<span class="tree-dot"></span><span><span class="tree-level">${LEVEL_LABELS[i]}</span> <span class="tree-value${c?'':' hidden'}">${c||'━━━━━'}</span></span>`;
       container.appendChild(node);
     });
   } else {
-    const list = document.createElement('div'); list.className = 'tree-list';
-    LEVELS.forEach((lvl, i) => {
-      const c = confirmedTaxons[lvl], src = taxonSources[lvl];
-      const row = document.createElement('div'); row.className = 'tree-list-row';
-      row.innerHTML = `<div class="tl-dot${c?' by-'+src:''}"></div><div class="tl-level">${LEVEL_LABELS[i]}</div><div class="tl-sep">│</div><div class="tl-value${c?'':' hidden'}">${c||'━━━━━'}</div>`;
+    const list=document.createElement('div'); list.className='tree-list';
+    LEVELS.forEach((lvl,i)=>{
+      const c=confirmedTaxons[lvl],src=taxonSources[lvl];
+      const row=document.createElement('div'); row.className='tree-list-row';
+      row.innerHTML=`<div class="tl-dot${c?' by-'+src:''}"></div><div class="tl-level">${LEVEL_LABELS[i]}</div><div class="tl-sep">│</div><div class="tl-value${c?'':' hidden'}">${c||'━━━━━'}</div>`;
       list.appendChild(row);
     });
     container.appendChild(list);
   }
-
-  const idx = currentSeqIdx();
-  const badge = document.getElementById('currentLevelBadge');
-  document.getElementById('clbPrefix').textContent = idx < LEVELS.length ? 'Narrowing:' : 'Status:';
-  document.getElementById('clbLabel').textContent  = idx < LEVELS.length ? LEVEL_LABELS[idx] : 'All confirmed!';
-  badge.className = 'current-level-badge' + (idx > 0 ? ' active' : '');
-
+  const idx=currentSeqIdx();
+  const badge=document.getElementById('currentLevelBadge');
+  document.getElementById('clbPrefix').textContent=idx<LEVELS.length?'Narrowing:':'Status:';
+  document.getElementById('clbLabel').textContent=idx<LEVELS.length?LEVEL_LABELS[idx]:'All confirmed!';
+  badge.className='current-level-badge'+(idx>0?' active':'');
   renderNextPossible();
 }
 
 function renderNextPossible() {
-  const { level, levelLabel, taxons } = getNextPossible();
-  const container = document.getElementById('nextTaxonsList');
-  document.getElementById('nextTaxonsTitle').textContent = level ? `Possible ${levelLabel}s` : 'Next Possible';
-  container.innerHTML = '';
-
-  if (!level) { container.innerHTML = '<span class="next-taxons-empty">All confirmed — guess the exact animal!</span>'; return; }
-  if (!taxons.length || (allGuesses.length === 0 && !nameHintUsed)) {
-    container.innerHTML = '<span class="next-taxons-empty">Make a guess to see options.</span>'; return;
-  }
-  taxons.forEach(t => {
-    const btn = document.createElement('button'); btn.className = 'next-taxon-btn';
-    btn.textContent = t; btn.title = `Guess ${levelLabel}: ${t}`;
-    btn.addEventListener('click', () => { if (!gameOver) submitTaxonGuess(level, t); });
+  const {level,levelLabel,taxons}=getNextPossible();
+  const container=document.getElementById('nextTaxonsList');
+  document.getElementById('nextTaxonsTitle').textContent=level?`Possible ${levelLabel}s`:'Next Possible';
+  container.innerHTML='';
+  if (!level) { container.innerHTML='<span class="next-taxons-empty">All confirmed — guess the exact animal!</span>'; return; }
+  if (!taxons.length) { container.innerHTML='<span class="next-taxons-empty">Make a guess to narrow the options.</span>'; return; }
+  taxons.forEach(t=>{
+    const btn=document.createElement('button'); btn.className='next-taxon-btn';
+    btn.textContent=t; btn.title=`Guess ${levelLabel}: ${t}`;
+    btn.addEventListener('click',()=>{ if(!gameOver) submitTaxonGuess(level,t); });
     container.appendChild(btn);
   });
 }
 
 // ─── HINTS ────────────────────────────────────────────────────────────────────
 function renderHints() {
-  const n = allGuesses.length + nameHintCost;
+  const n=effectiveGuesses();
   if (!target) return;
-
-  if (n >= DIET_UNLOCK || gameOver) {
-    const DIET_CATS = new Set(['Herbivore','Carnivore','Omnivore','Insectivore','Piscivore','Scavenger','Parasitoid']);
-    const diet = target.diet;
-    if (!diet)
-      document.getElementById('hintDiet').innerHTML = '<em style="color:var(--steel)">—</em>';
-    else if (DIET_CATS.has(diet))
-      document.getElementById('hintDiet').innerHTML = `<strong>${diet}</strong>`;
-    else
-      document.getElementById('hintDiet').innerHTML = `<em>${diet}</em>`;
+  if (n>=DIET_UNLOCK||gameOver) {
+    const diet=target.diet;
+    document.getElementById('hintDiet').innerHTML=!diet?'<em style="color:var(--steel)">—</em>'
+      :DIET_CATS.has(diet)?`<strong>${diet}</strong>`:`<em>${diet}</em>`;
   } else {
-    document.getElementById('hintDiet').innerHTML = `<span class="hint-locked">?????</span>`;
+    document.getElementById('hintDiet').innerHTML='<span class="hint-locked">?????</span>';
   }
-
-  if (n >= RANGE_UNLOCK || gameOver)
-    document.getElementById('hintContinents').innerHTML = target.continents?.length
-      ? target.continents.map(c => `<span class="continent-pip">${c}</span>`).join('')
-      : '<em style="color:var(--steel)">—</em>';
+  if (n>=RANGE_UNLOCK||gameOver)
+    document.getElementById('hintContinents').innerHTML=target.continents?.length
+      ?target.continents.map(c=>`<span class="continent-pip">${c}</span>`).join('')
+      :'<em style="color:var(--steel)">—</em>';
   else
-    document.getElementById('hintContinents').innerHTML = `<span class="hint-locked">?????</span>`;
-
+    document.getElementById('hintContinents').innerHTML='<span class="hint-locked">?????</span>';
   const parts=[];
   if (n<DIET_UNLOCK&&!gameOver)  parts.push(`Diet in ${DIET_UNLOCK-n} guess${DIET_UNLOCK-n===1?'':'es'}`);
   if (n<RANGE_UNLOCK&&!gameOver) parts.push(`Range in ${RANGE_UNLOCK-n}`);
-  document.getElementById('hintNote').textContent = parts.join(' · ');
+  document.getElementById('hintNote').textContent=parts.join(' · ');
 }
 
 function updateCounter() {
-  let t = `${allGuesses.length} guess${allGuesses.length===1?'':'es'}`;
-  if (nameHintCost) t += ` + ${nameHintCost} (hint)`;
-  document.getElementById('guessCounter').textContent = t;
+  const used=effectiveGuesses(), rem=remainingGuesses();
+  document.getElementById('guessCounter').textContent=`${used} / ${MAX_GUESSES} guesses used`;
+  const hb=document.getElementById('nameHintBtn');
+  if (!nameHintUsed&&!gameOver) hb.disabled=(rem<NAME_HINT_COST);
 }
 
 // ─── GUESS CARDS ──────────────────────────────────────────────────────────────
-function makeLoadingCard(label) {
-  const card = document.createElement('div');
-  card.className = 'guess-card loading-card';
-  card.id = 'loadingCard';
-  card.innerHTML = `<div class="guess-card-header"><div><div class="guess-name"><span class="spin"></span>${label}</div><div class="guess-sci">Looking up taxonomy via Wikidata + Wikipedia…</div></div></div>`;
+// Loading card: spinner only, zero identifying text
+function makeLoadingCard() {
+  const card=document.createElement('div');
+  card.className='guess-card loading-card'; card.id='loadingCard';
+  card.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:2px 0"><span class="spin"></span><span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--worn);letter-spacing:1px">Looking up taxonomy…</span></div>';
   return card;
 }
 
 function makeAnimalCard(g) {
-  const { animalData, matchMap, proximity } = g;
-  const pc = proximity>=70?'prox-high':proximity>=40?'prox-mid':'prox-low';
-  const chips = LEVELS.map((lvl,i) => {
-    const val = animalData[lvl];
-    const cls = !val ? 'tax-unknown' : matchMap[lvl] ? 'tax-match' : 'tax-nomatch';
+  const {animalData,matchMap,proximity}=g;
+  const pc=proximity>=70?'prox-high':proximity>=40?'prox-mid':'prox-low';
+  const chips=LEVELS.map((lvl,i)=>{
+    const val=animalData[lvl];
+    const cls=!val?'tax-unknown':matchMap[lvl]?'tax-match':'tax-nomatch';
     return `<div><span class="tax-chip ${cls}"><span class="tax-label">${LEVEL_LABELS[i]}</span>${val||'?'}</span></div>`;
   }).join('');
-  const card = document.createElement('div'); card.className = 'guess-card';
-  card.innerHTML = `
-    <div class="guess-card-header">
-      <div><div class="guess-name">${animalData.common_name}</div><div class="guess-sci">${animalData.scientific_name}</div></div>
-      <span class="proximity-badge ${pc}">${proximity}%</span>
-    </div>
-    <div class="tax-row">${chips}</div>`;
+  const card=document.createElement('div'); card.className='guess-card';
+  card.innerHTML=`<div class="guess-card-header"><div><div class="guess-name">${animalData.common_name}</div><div class="guess-sci">${animalData.scientific_name}</div></div><span class="proximity-badge ${pc}">${proximity}%</span></div><div class="tax-row">${chips}</div>`;
   return card;
 }
 
 function makeTaxonCard(g) {
-  const card = document.createElement('div'); card.className = 'guess-card taxon-card';
-  card.innerHTML = `
-    <div class="guess-card-header">
-      <div class="taxon-card-left">
-        <span class="taxon-level-label">${g.levelLabel}</span>
-        <span class="guess-name">${g.value}</span>
-      </div>
-      <span class="proximity-badge ${g.correct?'taxon-correct':'taxon-wrong'}">${g.correct?'✓ Correct':'✗ Wrong'}</span>
-    </div>`;
+  const card=document.createElement('div'); card.className='guess-card taxon-card';
+  card.innerHTML=`<div class="guess-card-header"><div class="taxon-card-left"><span class="taxon-level-label">${g.levelLabel}</span><span class="guess-name">${g.value}</span></div><span class="proximity-badge ${g.correct?'taxon-correct':'taxon-wrong'}">${g.correct?'✓ Correct':'✗ Wrong'}</span></div>`;
   return card;
 }
 
 function prependCard(card) {
-  const list = document.getElementById('guessList');
-  if (allGuesses.length === 1) list.innerHTML = '';
-  list.insertBefore(card, list.firstChild);
+  const list=document.getElementById('guessList');
+  if (allGuesses.length===1) list.innerHTML='';
+  list.insertBefore(card,list.firstChild);
 }
 
 // ─── SUBMIT ANIMAL GUESS ──────────────────────────────────────────────────────
 async function submitAnimalGuess(slim) {
-  if (gameOver) return;
-  if (allGuesses.some(g => g.type==='animal' && g.animalData.scientific_name===slim.scientific_name)) { clearSearch(); return; }
+  if (gameOver||remainingGuesses()<=0) return;
+  if (allGuesses.some(g=>g.type==='animal'&&g.animalData.scientific_name===slim.scientific_name)) { clearSearch(); return; }
 
-  // Show loading card immediately
-  const list = document.getElementById('guessList');
-  const loadCard = makeLoadingCard(slim.common_name);
-  if (allGuesses.length === 0) list.innerHTML = '';
-  list.insertBefore(loadCard, list.firstChild);
+  const list=document.getElementById('guessList');
+  const loadCard=makeLoadingCard();
+  if (allGuesses.length===0) list.innerHTML='';
+  list.insertBefore(loadCard,list.firstChild);
   setInputsEnabled(false);
 
   let animalData;
-  try {
-    animalData = await fetchAnimalData(slim.scientific_name, slim.common_name);
-  } catch(e) {
-    showApiStatus('error', 'Could not fetch taxonomy — check your connection.');
+  try { animalData=await fetchAnimalData(slim.scientific_name,slim.common_name); }
+  catch(e) {
     loadCard.remove();
-    if (allGuesses.length === 0) list.innerHTML = '<div class="empty-state">Your guesses will appear here.</div>';
-    setInputsEnabled(true);
-    return;
+    if (allGuesses.length===0) list.innerHTML='<div class="empty-state">Your guesses will appear here.</div>';
+    setInputsEnabled(true); return;
   }
 
-  // Remove loading card
-  loadCard.remove();
-  setInputsEnabled(true);
-
-  const matchMap  = levelMatchMap(animalData, target);
-  const proximity = calcProximity(animalData, target);
+  loadCard.remove(); setInputsEnabled(true);
+  const matchMap=levelMatchMap(animalData,target);
+  const proximity=calcProximity(animalData,target);
   confirmFromAnimal(animalData);
-  rebuildTaxonItems();
-
-  const entry = { type:'animal', animalData, matchMap, proximity };
+  const entry={type:'animal',animalData,matchMap,proximity};
   allGuesses.unshift(entry);
   prependCard(makeAnimalCard(entry));
   renderTree(); renderHints(); updateCounter(); clearSearch();
-
-  if (animalData.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) endGame(true);
+  if (animalData.scientific_name.toLowerCase()===target.scientific_name.toLowerCase()) { endGame(true); return; }
+  if (effectiveGuesses()>=MAX_GUESSES) endGame(false);
 }
 
 // ─── SUBMIT TAXON GUESS ───────────────────────────────────────────────────────
 function submitTaxonGuess(level, value) {
-  if (gameOver) return;
-  if (allGuesses.some(g => g.type==='taxon' && g.level===level && g.value.toLowerCase()===value.toLowerCase())) { clearSearch(); return; }
-  if (confirmedTaxons[level] && confirmedTaxons[level].toLowerCase()===value.toLowerCase()) { clearSearch(); return; }
-
-  const correct = confirmFromTaxon(level, value);
-  const idx = LEVELS.indexOf(level);
-  const entry = { type:'taxon', level, levelLabel: LEVEL_LABELS[idx], value, correct };
+  if (gameOver||remainingGuesses()<=0) return;
+  if (allGuesses.some(g=>g.type==='taxon'&&g.level===level&&g.value.toLowerCase()===value.toLowerCase())) { clearSearch(); return; }
+  if (confirmedTaxons[level]&&confirmedTaxons[level].toLowerCase()===value.toLowerCase()) { clearSearch(); return; }
+  const correct=confirmFromTaxon(level,value);
+  const idx=LEVELS.indexOf(level);
+  const entry={type:'taxon',level,levelLabel:LEVEL_LABELS[idx],value,correct};
   allGuesses.unshift(entry);
-  prependCard(makeTaxonCard(entry));
+  const list=document.getElementById('guessList');
+  if (allGuesses.length===1) list.innerHTML='';
+  list.insertBefore(makeTaxonCard(entry),list.firstChild);
   renderTree(); renderHints(); updateCounter(); clearSearch();
+  if (effectiveGuesses()>=MAX_GUESSES) endGame(false);
 }
 
 // ─── NAME HINT ────────────────────────────────────────────────────────────────
 function revealNameHint() {
-  if (nameHintUsed || gameOver || !target) return;
-  nameHintUsed = true; nameHintCost = NAME_HINT_COST;
-  const name = target.common_name, words = name.split(' ');
+  if (nameHintUsed||gameOver||!target||remainingGuesses()<NAME_HINT_COST) return;
+  nameHintUsed=true; nameHintCost=NAME_HINT_COST;
+  const name=target.common_name, words=name.split(' ');
   let hint;
-  if (words.length >= 2) hint = words[0] + ' ' + '_'.repeat(words.slice(1).join(' ').length);
-  else { const h = Math.ceil(name.length/2); hint = name.slice(0,h) + '_'.repeat(name.length-h); }
-  document.getElementById('nameHintText').textContent = hint;
-  const btn = document.getElementById('nameHintBtn');
-  btn.disabled = true; btn.textContent = 'Name hint revealed';
+  if (words.length>=2) hint=words[0]+' '+'_'.repeat(words.slice(1).join(' ').length);
+  else { const h=Math.ceil(name.length/2); hint=name.slice(0,h)+'_'.repeat(name.length-h); }
+  document.getElementById('nameHintText').textContent=hint;
+  const btn=document.getElementById('nameHintBtn');
+  btn.disabled=true; btn.textContent='Name hint revealed';
   updateCounter(); renderHints(); renderNextPossible();
+  if (effectiveGuesses()>=MAX_GUESSES) endGame(false);
 }
 
 // ─── END GAME ─────────────────────────────────────────────────────────────────
 function endGame(won) {
-  gameOver = true;
-  LEVELS.forEach(l => { if (!confirmedTaxons[l]) { confirmedTaxons[l]=target[l]; taxonSources[l]='animal'; } });
+  gameOver=true;
+  LEVELS.forEach(l=>{ if(!confirmedTaxons[l]){confirmedTaxons[l]=target[l]; taxonSources[l]='animal';} });
   renderTree(); renderHints();
-
   document.getElementById('resultBanner').classList.add('show');
-  document.getElementById('practiceBadge').style.display = isPractice ? 'inline-block' : 'none';
-  document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
-  document.getElementById('resultSubtitle').textContent = won
-    ? `You identified it in ${allGuesses.length} guess${allGuesses.length===1?'':'es'}${nameHintCost?` (+${nameHintCost} hint)`:''}. `
-    : 'Better luck next time.';
-  document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
-  document.getElementById('resultFact').textContent = target.notes || '';
+  document.getElementById('practiceBadge').style.display=isPractice?'inline-block':'none';
+  document.getElementById('resultTitle').textContent=won?'🎉 Correct!':'The answer was…';
+  document.getElementById('resultSubtitle').textContent=won
+    ?`Identified in ${effectiveGuesses()} / ${MAX_GUESSES} guesses.`
+    :'No guesses remaining.';
+  document.getElementById('resultSci').textContent=`${target.common_name} — ${target.scientific_name}`;
+  document.getElementById('resultFact').textContent=target.notes||'';
   setInputsEnabled(false);
 }
 
 // ─── TRY ANOTHER ──────────────────────────────────────────────────────────────
 async function tryAnother() {
-  const slim = pickRandomSlim(target?.scientific_name);
+  const slim=pickRandomSlim(target?.scientific_name);
   document.getElementById('resultBanner').classList.remove('show');
   allGuesses=[]; confirmedTaxons={}; taxonSources={};
   gameOver=false; isPractice=true; nameHintUsed=false; nameHintCost=0;
   filteredList=[]; selectedIndex=-1;
-  document.getElementById('guessList').innerHTML = '<div class="empty-state">Your guesses will appear here.</div>';
-  document.getElementById('nameHintText').textContent = '';
-  document.getElementById('searchInput').value = '';
-  const hb = document.getElementById('nameHintBtn');
+  document.getElementById('guessList').innerHTML='<div class="empty-state">Your guesses will appear here.</div>';
+  document.getElementById('nameHintText').textContent='';
+  document.getElementById('searchInput').value='';
+  const hb=document.getElementById('nameHintBtn');
   hb.disabled=false; hb.innerHTML='Reveal name hint <span class="name-hint-cost">(−5 guesses)</span>';
   setInputsEnabled(true);
-  renderHints(); updateCounter();
-
-  showApiStatus('loading', `Loading ${slim.common_name}…`);
-  target = await fetchAnimalData(slim.scientific_name, slim.common_name);
-  hideApiStatus();
-  rebuildTaxonItems();
   renderTree(); renderHints(); updateCounter();
+  target=await fetchAnimalData(slim.scientific_name,slim.common_name).catch(()=>null);
+  if (target) { renderTree(); renderHints(); updateCounter(); }
 }
 
-// ─── INPUT ENABLE/DISABLE ─────────────────────────────────────────────────────
-function setInputsEnabled(enabled) {
-  document.getElementById('searchInput').disabled = !enabled;
-  document.getElementById('guessBtn').disabled    = !enabled;
-  if (!enabled) document.getElementById('autocompleteList').classList.remove('open');
+function setInputsEnabled(en) {
+  document.getElementById('searchInput').disabled=!en;
+  document.getElementById('guessBtn').disabled=!en;
+  if (!en) document.getElementById('autocompleteList').classList.remove('open');
 }
 
 // ─── AUTOCOMPLETE ────────────────────────────────────────────────────────────
+// filteredList is a flat array of items. Each item is {type,slim} or a taxonFlat entry.
+// selectedIndex indexes into filteredList directly. DOM items (no separators counted)
+// are kept in sync via a parallel animalItems[] and taxonItems[] split.
 function updateAutocomplete(query) {
-  const q = query.trim().toLowerCase();
-  if (q.length < 1) { filteredList=[]; document.getElementById('autocompleteList').classList.remove('open'); return; }
+  const q=query.trim().toLowerCase();
+  if (q.length<1) { filteredList=[]; document.getElementById('autocompleteList').classList.remove('open'); return; }
 
   const animalMatches = slimAnimals
-    .filter(a => a.common_name.toLowerCase().includes(q) || a.scientific_name.toLowerCase().includes(q))
-    .slice(0,6)
-    .map(a => ({ type:'animal', slim:a }));
+    .filter(a=>a.common_name.toLowerCase().includes(q)||a.scientific_name.toLowerCase().includes(q))
+    .slice(0,5)
+    .map(a=>({type:'animal',slim:a}));
 
-  const taxonMatches = taxonItems
-    .filter(t => t.value.toLowerCase().startsWith(q) || t.value.toLowerCase().includes(q))
+  // Prefer starts-with, then includes; sort starts-with first
+  const taxMatches = taxonFlat
+    .filter(t=>t.value.toLowerCase().startsWith(q)||t.value.toLowerCase().includes(q))
+    .sort((a,b)=>{
+      const as=a.value.toLowerCase().startsWith(q), bs=b.value.toLowerCase().startsWith(q);
+      if (as&&!bs) return -1; if (!as&&bs) return 1; return a.value.localeCompare(b.value);
+    })
     .slice(0,5);
 
-  filteredList = [...animalMatches, ...taxonMatches];
-  const list = document.getElementById('autocompleteList');
-  list.innerHTML = '';
+  filteredList=[...animalMatches,...taxMatches];
+  const list=document.getElementById('autocompleteList');
+  list.innerHTML='';
   if (!filteredList.length) { list.classList.remove('open'); return; }
 
-  let lastType = null;
-  filteredList.forEach(item => {
-    if (item.type !== lastType) {
-      const sep = document.createElement('div'); sep.className = 'autocomplete-sep';
-      sep.textContent = item.type==='animal' ? 'Animals' : 'Taxonomic Groups';
-      list.appendChild(sep); lastType = item.type;
+  let lastType=null;
+  filteredList.forEach((item,i)=>{
+    if (item.type!==lastType) {
+      const sep=document.createElement('div'); sep.className='autocomplete-sep';
+      sep.textContent=item.type==='animal'?'Animals':'Taxonomic Groups';
+      list.appendChild(sep); lastType=item.type;
     }
-    const el = document.createElement('div'); el.className = 'autocomplete-item';
+    const el=document.createElement('div'); el.className='autocomplete-item';
+    el.dataset.idx=i;   // store filteredList index on the DOM element
     if (item.type==='animal') {
-      el.innerHTML = `<span>${item.slim.common_name}</span><span class="sci">${item.slim.scientific_name}</span>`;
-      el.addEventListener('mousedown', e => { e.preventDefault(); submitAnimalGuess(item.slim); });
+      el.innerHTML=`<span>${item.slim.common_name}</span><span class="sci">${item.slim.scientific_name}</span>`;
+      el.addEventListener('mousedown',e=>{ e.preventDefault(); submitAnimalGuess(item.slim); });
     } else {
-      el.innerHTML = `<span>${item.value}</span><span class="taxon-level-pill">${item.levelLabel}</span>`;
-      el.addEventListener('mousedown', e => { e.preventDefault(); submitTaxonGuess(item.level, item.value); });
+      el.innerHTML=`<span>${item.value}</span><span class="taxon-level-pill">${item.levelLabel}</span>`;
+      el.addEventListener('mousedown',e=>{ e.preventDefault(); submitTaxonGuess(item.level,item.value); });
     }
     list.appendChild(el);
   });
@@ -1053,41 +833,58 @@ function clearSearch() {
 
 // ─── EVENTS ───────────────────────────────────────────────────────────────────
 function wireEvents() {
-  const input = document.getElementById('searchInput');
-  const list  = document.getElementById('autocompleteList');
-
-  input.addEventListener('input', () => updateAutocomplete(input.value));
-  input.addEventListener('keydown', e => {
-    const items = [...list.querySelectorAll('.autocomplete-item')];
+  const input=document.getElementById('searchInput');
+  const list=document.getElementById('autocompleteList');
+  input.addEventListener('input',()=>updateAutocomplete(input.value));
+  input.addEventListener('keydown',e=>{
+    // Use data-idx to keep keyboard nav in sync with filteredList regardless of separator divs
+    const items=[...list.querySelectorAll('.autocomplete-item')];
     if (e.key==='ArrowDown') { e.preventDefault(); selectedIndex=Math.min(selectedIndex+1,items.length-1); }
     else if (e.key==='ArrowUp') { e.preventDefault(); selectedIndex=Math.max(selectedIndex-1,-1); }
     else if (e.key==='Enter') {
-      const item = selectedIndex>=0 ? filteredList[selectedIndex] : (filteredList.length===1?filteredList[0]:null);
+      // Pick highlighted item, or first if nothing highlighted, or only if exactly one result
+      let item=null;
+      if (selectedIndex>=0 && items[selectedIndex]) {
+        const idx=parseInt(items[selectedIndex].dataset.idx);
+        item=filteredList[idx];
+      } else if (filteredList.length===1) {
+        item=filteredList[0];
+      }
       if (item) { if(item.type==='animal') submitAnimalGuess(item.slim); else submitTaxonGuess(item.level,item.value); }
       return;
     } else if (e.key==='Escape') { list.classList.remove('open'); return; }
     items.forEach((el,i)=>el.classList.toggle('selected',i===selectedIndex));
   });
-  input.addEventListener('blur', ()=>setTimeout(()=>list.classList.remove('open'),150));
-  document.getElementById('guessBtn').addEventListener('click', ()=>{
-    if(!filteredList.length) return;
-    const item = filteredList[selectedIndex>=0?selectedIndex:0];
-    if(item.type==='animal') submitAnimalGuess(item.slim); else submitTaxonGuess(item.level,item.value);
+  input.addEventListener('blur',()=>setTimeout(()=>list.classList.remove('open'),150));
+  document.getElementById('guessBtn').addEventListener('click',()=>{
+    if (!filteredList.length) return;
+    const items=[...document.querySelectorAll('#autocompleteList .autocomplete-item')];
+    let item;
+    if (selectedIndex>=0 && items[selectedIndex]) {
+      item=filteredList[parseInt(items[selectedIndex].dataset.idx)];
+    } else {
+      item=filteredList[0];
+    }
+    if (item) { if(item.type==='animal') submitAnimalGuess(item.slim); else submitTaxonGuess(item.level,item.value); }
   });
-  document.getElementById('nameHintBtn').addEventListener('click', ()=>{ if(!nameHintUsed&&!gameOver) revealNameHint(); });
-  document.getElementById('tryAnotherBtn').addEventListener('click', tryAnother);
+  document.getElementById('nameHintBtn').addEventListener('click',()=>{ if(!nameHintUsed&&!gameOver) revealNameHint(); });
+  document.getElementById('tryAnotherBtn').addEventListener('click',tryAnother);
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 async function init() {
-  document.getElementById('dateBadge').textContent =
+  document.getElementById('dateBadge').textContent=
     new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-  // 1. Load slim name list
   try {
-    slimAnimals = await (await fetch('animals.json')).json();
+    const [ar, tr] = await Promise.all([fetch('animals.json'), fetch('taxons.json')]);
+    slimAnimals = await ar.json();
+    const taxData = await tr.json();
+    // taxons.json is {tree:{...}, flat:[...]}
+    taxonFlat = taxData.flat || taxData;
+    taxonTree = taxData.tree || {};
   } catch(e) {
-    document.body.innerHTML='<div style="padding:40px;font-family:serif;color:#600">Could not load animals.json — serve with: <code>python -m http.server 8080</code></div>';
+    document.body.innerHTML='<div style="padding:40px;font-family:serif;color:#600">Could not load data files. Serve with: <code>python -m http.server 8080</code></div>';
     return;
   }
 
@@ -1095,18 +892,12 @@ async function init() {
   renderTree();
   updateCounter();
 
-  // 2. Pick daily animal and fetch its full data from Wikidata + Wikipedia
-  const dailySlim = pickDailySlim();
-  showApiStatus('loading', `Loading today's animal…`);
+  // Fetch today's target silently — no name, no status message shown anywhere
+  const dailySlim=pickDailySlim();
   try {
-    target = await fetchAnimalData(dailySlim.scientific_name, dailySlim.common_name);
-    hideApiStatus();
-    rebuildTaxonItems();
-    renderTree();
-    renderHints();
-  } catch(e) {
-    showApiStatus('error', 'Could not load today\'s animal. Check your connection and refresh.');
-  }
+    target=await fetchAnimalData(dailySlim.scientific_name, dailySlim.common_name);
+    renderTree(); renderHints(); updateCounter();
+  } catch(e) { console.error('Failed to load daily target:', e); }
 }
 
 init();
