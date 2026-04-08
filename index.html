@@ -3,1059 +3,185 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Taxondle — The Animal Classification Game</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<title>Taxondle</title>
+
 <style>
-  :root {
-    --ink:#1c1a14;--cream:#f4eed8;--parchment:#ede6c8;--worn:#d8ceac;
-    --gold:#b8921a;--gold-light:#d4a843;--forest:#2a4030;--sage:#5a7a5e;
-    --rust:#8b3a2a;--steel:#4a5568;
-    --font-display:'Playfair Display',Georgia,serif;
-    --font-mono:'Courier Prime','Courier New',monospace;
-    --font-body:'Crimson Pro',Georgia,serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--cream);color:var(--ink);font-family:var(--font-body);font-size:17px;min-height:100vh;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");}
-  .page-wrap{max-width:860px;margin:0 auto;padding:0 16px 60px;}
+body {
+  font-family: Inter, Arial, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  display: flex;
+  justify-content: center;
+}
 
-  /* HEADER */
-  header{text-align:center;padding:36px 0 24px;border-bottom:2px solid var(--worn);margin-bottom:28px;}
-  header::before{content:'⬡ ⬡ ⬡';display:block;color:var(--gold);font-size:10px;letter-spacing:8px;margin-bottom:10px;}
-  .title{font-family:var(--font-display);font-size:3.2rem;font-weight:700;letter-spacing:-1px;color:var(--forest);line-height:1;}
-  .subtitle{font-family:var(--font-body);font-style:italic;color:var(--steel);font-size:1.05rem;margin-top:6px;}
-  .date-badge{font-family:var(--font-mono);font-size:0.7rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-top:10px;}
-  .attribution{font-family:var(--font-mono);font-size:0.63rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--worn);margin-top:6px;}
-  .attribution a{color:var(--gold);text-decoration:none;}
-  .attribution a:hover{color:var(--forest);}
+.container {
+  width: 600px;
+  margin-top: 40px;
+}
 
-  /* LAYOUT */
-  .game-layout{display:grid;grid-template-columns:1fr 290px;gap:24px;align-items:start;}
-  @media(max-width:640px){.game-layout{grid-template-columns:1fr;}.tree-panel{position:static!important;}}
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
 
-  /* PANELS */
-  .panel{background:var(--parchment);border:1px solid var(--worn);border-radius:4px;padding:20px;box-shadow:2px 3px 8px rgba(0,0,0,.08);}
-  .panel-title{font-family:var(--font-display);font-size:.75rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--worn);}
-  .panel-title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--worn);}
-  .panel-title-row .panel-title{margin:0;padding:0;border:none;}
+#results {
+  background: #1e293b;
+  border-radius: 8px;
+  margin-top: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
 
-  /* SEARCH */
-  .search-wrap{position:relative;display:flex;gap:8px;margin-bottom:8px;}
-  .search-input{flex:1;font-family:var(--font-body);font-size:1.05rem;padding:10px 14px;background:var(--cream);border:1.5px solid var(--worn);border-radius:3px;color:var(--ink);outline:none;transition:border-color .15s;}
-  .search-input:focus{border-color:var(--gold);}
-  .search-input::placeholder{color:#a09070;font-style:italic;}
-  .search-input:disabled{opacity:.5;}
-  .guess-btn{font-family:var(--font-display);font-size:.85rem;font-weight:700;letter-spacing:1px;padding:10px 18px;background:var(--forest);color:var(--cream);border:none;border-radius:3px;cursor:pointer;transition:background .15s;white-space:nowrap;}
-  .guess-btn:hover{background:var(--sage);}
-  .guess-btn:disabled{background:var(--worn);cursor:default;}
+.result {
+  padding: 10px;
+  cursor: pointer;
+}
 
-  /* AUTOCOMPLETE */
-  .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:var(--cream);border:1.5px solid var(--gold);border-top:none;border-radius:0 0 3px 3px;max-height:260px;overflow-y:auto;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.1);display:none;}
-  .autocomplete-list.open{display:block;}
-  .autocomplete-sep{padding:4px 14px 3px;font-family:var(--font-mono);font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold);background:var(--parchment);border-bottom:1px solid var(--worn);pointer-events:none;user-select:none;}
-  .autocomplete-item{padding:9px 14px;cursor:pointer;font-size:.95rem;border-bottom:1px solid var(--worn);display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background .1s;}
-  .autocomplete-item:last-child{border-bottom:none;}
-  .autocomplete-item:hover,.autocomplete-item.selected{background:var(--parchment);}
-  .autocomplete-item .sci{font-style:italic;color:var(--steel);font-size:.82rem;flex-shrink:0;}
-  .taxon-level-pill{font-family:var(--font-mono);font-size:.6rem;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:2px;background:var(--forest);color:var(--cream);flex-shrink:0;}
-  .search-hint{font-size:.82rem;color:var(--steel);font-style:italic;margin-bottom:10px;}
+.result:hover, .active {
+  background: #334155;
+}
 
-  /* HINT + GIVE UP ROW */
-  .action-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
-  .hint-spend-btn{font-family:var(--font-mono);font-size:.67rem;letter-spacing:.8px;text-transform:uppercase;padding:5px 11px;background:transparent;border:1px solid var(--gold);color:var(--gold);cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;}
-  .hint-spend-btn:hover{background:var(--gold);color:var(--cream);}
-  .hint-spend-btn:disabled{border-color:var(--worn);color:var(--worn);cursor:default;background:transparent;}
-  .give-up-btn{font-family:var(--font-mono);font-size:.67rem;letter-spacing:.8px;text-transform:uppercase;padding:5px 11px;background:transparent;border:1px solid var(--rust);color:var(--rust);cursor:pointer;border-radius:2px;transition:all .15s;white-space:nowrap;}
-  .give-up-btn:hover{background:var(--rust);color:var(--cream);}
-  .give-up-btn:disabled{border-color:var(--worn);color:var(--worn);cursor:default;background:transparent;}
-  .name-hint-cost{font-size:.75em;opacity:.7;}
-  .name-hint-reveal{font-family:var(--font-mono);font-size:.92rem;color:var(--forest);font-weight:700;letter-spacing:2px;}
-  .max-guesses-note{font-family:var(--font-mono);font-size:.72rem;color:var(--steel);text-align:right;margin-bottom:8px;letter-spacing:.5px;}
+.highlight {
+  color: #38bdf8;
+  font-weight: bold;
+}
 
-  /* GUESS HISTORY */
-  .guess-list{display:flex;flex-direction:column;gap:10px;}
-  @keyframes slide-in{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-  .guess-card{background:var(--cream);border:1px solid var(--worn);border-radius:3px;padding:12px 14px;animation:slide-in .2s ease;}
-  .guess-card.taxon-card{border-left:3px solid var(--sage);}
-  .guess-card.loading-card{opacity:.6;}
-  .guess-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
-  .guess-name{font-family:var(--font-display);font-weight:700;font-size:1rem;}
-  .guess-sci{font-style:italic;color:var(--steel);font-size:.82rem;}
-  .taxon-card-left{display:flex;align-items:center;gap:8px;}
-  .taxon-level-label{font-family:var(--font-mono);font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--steel);background:var(--parchment);padding:1px 6px;border-radius:2px;border:1px solid var(--worn);}
-  .proximity-badge{font-family:var(--font-mono);font-size:.78rem;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.5px;flex-shrink:0;}
-  .prox-high{background:#d4edda;color:#1a4a28;border:1px solid #7cba8f;}
-  .prox-mid{background:#fff3cd;color:#5a3e00;border:1px solid #c9a227;}
-  .prox-low{background:#f8d7da;color:#5a1a1a;border:1px solid #c47070;}
-  .taxon-correct{background:#d4edda;color:#1a4a28;border:1px solid #7cba8f;}
-  .taxon-wrong{background:#f8d7da;color:#5a1a1a;border:1px solid #c47070;}
-  .tax-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
-  .tax-chip{font-family:var(--font-mono);font-size:.7rem;padding:2px 7px;border-radius:2px;letter-spacing:.3px;}
-  .tax-match{background:#c8e6c9;color:#1b5e20;border:1px solid #81c784;}
-  .tax-nomatch{background:#ffcdd2;color:#7f0000;border:1px solid #e57373;}
-  .tax-unknown{background:#f5f5f5;color:#666;border:1px solid #ccc;}
-  .tax-label{font-size:.62rem;opacity:.7;display:block;}
+.section {
+  margin-top: 25px;
+}
 
-  /* SPINNER */
-  .spin{display:inline-block;width:12px;height:12px;border:2px solid var(--worn);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:4px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-
-  /* TREE PANEL */
-  .tree-panel{position:sticky;top:16px;}
-  .tree-view-btn{font-family:var(--font-mono);font-size:.58rem;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;background:transparent;border:1px solid var(--worn);color:var(--steel);cursor:pointer;transition:all .12s;}
-  .tree-view-btn:first-child{border-radius:2px 0 0 2px;}
-  .tree-view-btn:last-child{border-radius:0 2px 2px 0;margin-left:-1px;}
-  .tree-view-btn.active{background:var(--forest);border-color:var(--forest);color:var(--cream);}
-  .current-level-badge{font-family:var(--font-mono);font-size:.65rem;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border-radius:3px;margin-bottom:12px;background:var(--cream);border:1px solid var(--worn);color:var(--steel);display:flex;align-items:center;gap:7px;}
-  .current-level-badge.active{border-color:var(--gold);color:var(--ink);}
-  .clb-label{background:var(--forest);color:var(--cream);padding:1px 7px;border-radius:2px;font-size:.6rem;}
-
-  /* LEGEND */
-  .tree-legend{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
-  .legend-item{display:flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.5px;text-transform:uppercase;color:var(--steel);}
-  .legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;border:1.5px solid transparent;}
-  .ld-animal{background:var(--gold);border-color:var(--gold);}
-  .ld-taxon{background:var(--sage);border-color:var(--sage);}
-  .ld-wrong{background:#e57373;border-color:#c47070;}
-  .ld-none{background:var(--cream);border-color:var(--worn);}
-
-  /* ── BRANCH VIEW ── */
-  /* Shows confirmed path as trunk + all wrong guesses as dead branches */
-  .branch-view{position:relative;}
-  .branch-item{display:flex;gap:0;min-height:32px;}
-  .branch-spine{width:18px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;}
-  .spine-seg{width:2px;background:var(--worn);flex:1;}
-  .spine-seg.confirmed{background:var(--gold);}
-  .spine-seg.by-taxon{background:var(--sage);}
-  .spine-seg.faint{opacity:.3;}
-  .spine-dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--worn);background:var(--cream);flex-shrink:0;z-index:1;}
-  .spine-dot.by-animal{background:var(--gold);border-color:var(--gold);}
-  .spine-dot.by-taxon{background:var(--sage);border-color:var(--sage);}
-  .branch-content{flex:1;padding:2px 0 6px 8px;}
-  .branch-header{display:flex;align-items:baseline;gap:7px;}
-  .bl-name{font-family:var(--font-mono);font-size:.58rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--steel);width:54px;flex-shrink:0;}
-  .bl-value{font-family:var(--font-mono);font-size:.78rem;font-style:italic;color:var(--ink);}
-  .bl-value.unknown{color:var(--worn);font-style:normal;}
-  /* Dead branches = wrong guesses at this level */
-  .dead-branches{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;}
-  .dead-chip{font-family:var(--font-mono);font-size:.62rem;padding:1px 7px 1px 5px;background:#fff2f2;color:#8b1a1a;border:1px solid #e8c0c0;border-radius:2px;display:inline-flex;align-items:center;gap:3px;}
-  .dead-chip::before{content:'✗';font-size:.6rem;opacity:.75;}
-
-  /* ── LIST VIEW ── */
-  /* Shows ONLY confirmed correct levels — clean summary, no dead ends */
-  .list-confirmed{display:flex;flex-direction:column;}
-  .lc-item{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid var(--worn);}
-  .lc-item:last-child{border-bottom:none;}
-  .lc-item.empty{opacity:.3;}
-  .lc-dot{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--worn);background:var(--cream);flex-shrink:0;margin-right:8px;transition:all .3s;}
-  .lc-dot.by-animal{background:var(--gold);border-color:var(--gold);}
-  .lc-dot.by-taxon{background:var(--sage);border-color:var(--sage);}
-  .lc-level{font-family:var(--font-mono);font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--steel);width:58px;flex-shrink:0;}
-  .lc-sep{color:var(--worn);margin:0 6px;font-family:var(--font-mono);font-size:.75rem;}
-  .lc-value{font-family:var(--font-mono);font-size:.78rem;font-style:italic;color:var(--ink);}
-  .lc-value.unknown{color:var(--worn);font-style:normal;letter-spacing:1px;}
-
-  /* NEXT POSSIBLE */
-  .next-taxons-scroll{max-height:130px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:5px;padding:2px 0;}
-  .next-taxon-btn{font-family:var(--font-mono);font-size:.63rem;letter-spacing:.5px;padding:3px 8px;background:var(--cream);border:1px solid var(--worn);color:var(--ink);cursor:pointer;border-radius:2px;transition:all .12s;white-space:nowrap;}
-  .next-taxon-btn:hover{background:var(--forest);color:var(--cream);border-color:var(--forest);}
-  .next-taxons-empty{font-style:italic;color:var(--worn);font-size:.82rem;}
-
-  /* FIELD NOTES */
-  .hint-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--worn);}
-  .hint-item:last-child{border-bottom:none;}
-  .hint-label{font-family:var(--font-mono);font-size:.7rem;letter-spacing:1px;text-transform:uppercase;color:var(--steel);width:80px;flex-shrink:0;padding-top:2px;}
-  .hint-value{font-size:.9rem;color:var(--ink);line-height:1.4;}
-  .hint-locked{font-style:italic;color:var(--worn);font-size:.85rem;}
-  .hint-unlock-note{font-size:.75rem;color:var(--steel);font-style:italic;margin-top:2px;}
-  .continent-pip{display:inline-block;background:var(--sage);color:var(--cream);font-family:var(--font-mono);font-size:.65rem;padding:1px 6px;border-radius:10px;margin:1px;letter-spacing:.3px;}
-
-  /* RESULT BANNER */
-  .result-banner{text-align:center;padding:28px;border:2px solid var(--gold);border-radius:4px;background:var(--parchment);margin-bottom:20px;display:none;animation:slide-in .3s ease;}
-  .result-banner.show{display:block;}
-  .result-banner h2{font-family:var(--font-display);font-size:1.8rem;color:var(--forest);margin-bottom:8px;}
-  .result-banner p{font-size:.95rem;color:var(--steel);margin-bottom:4px;}
-  .result-sci{font-style:italic;color:var(--gold);font-family:var(--font-mono);font-size:.9rem;}
-  .result-fact{font-style:italic;margin-top:12px;font-size:.95rem;color:var(--ink);border-left:3px solid var(--gold);padding-left:12px;text-align:left;max-height:120px;overflow-y:auto;}
-  .try-another-btn{margin-top:16px;display:inline-block;font-family:var(--font-display);font-size:.9rem;font-weight:700;padding:9px 22px;background:var(--forest);color:var(--cream);border:none;border-radius:3px;cursor:pointer;letter-spacing:.5px;transition:background .15s;}
-  .try-another-btn:hover{background:var(--sage);}
-  .practice-badge{display:inline-block;font-family:var(--font-mono);font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);padding:2px 8px;border-radius:2px;margin-bottom:10px;}
-
-  /* MISC */
-  .empty-state{text-align:center;padding:24px 0;color:var(--steel);font-style:italic;font-size:.95rem;}
-  .howto{margin-top:28px;padding:16px 20px;border:1px dashed var(--worn);border-radius:3px;font-size:.88rem;color:var(--steel);line-height:1.6;}
-  .howto strong{color:var(--ink);font-family:var(--font-display);}
-  ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--cream);}::-webkit-scrollbar-thumb{background:var(--worn);border-radius:3px;}
-  footer{margin-top:48px;text-align:center;font-family:var(--font-mono);font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--worn);border-top:1px dashed var(--worn);padding-top:16px;}
-  footer a{color:var(--gold);text-decoration:none;}
-  footer a:hover{color:var(--forest);}
+.tag {
+  display: inline-block;
+  background: #1e40af;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 4px;
+}
 </style>
 </head>
+
 <body>
-<div class="page-wrap">
+<div class="container">
 
-  <header>
-    <div class="title">Taxondle</div>
-    <div class="subtitle">Identify today's animal through the tree of life</div>
-    <div class="date-badge" id="dateBadge"></div>
-    <div class="attribution">by <a href="https://huggingface.co/spaces/Sbhat2026/Taxondle" target="_blank">Sbhat2026</a></div>
-  </header>
+<h2>Taxondle</h2>
+<input id="search" placeholder="Search animal..." autocomplete="off" />
+<div id="results"></div>
 
-  <div id="resultBanner" class="result-banner">
-    <div id="practiceBadge" class="practice-badge" style="display:none">Practice Mode</div>
-    <h2 id="resultTitle"></h2>
-    <p id="resultSubtitle"></p>
-    <p class="result-sci" id="resultSci"></p>
-    <p class="result-fact" id="resultFact"></p>
-    <button class="try-another-btn" id="tryAnotherBtn">Try Another Animal →</button>
-  </div>
+<div class="section">
+  <h3>Valid Taxonomic Groups</h3>
+  <div id="orders"></div>
+</div>
 
-  <div class="game-layout">
-    <!-- LEFT -->
-    <div>
-      <div class="panel">
-        <div class="panel-title">Make a Guess</div>
-
-        <div class="search-wrap">
-          <input type="text" class="search-input" id="searchInput"
-            placeholder="Type a common or scientific name…" autocomplete="off" />
-          <button class="guess-btn" id="guessBtn">Guess</button>
-          <div class="autocomplete-list" id="autocompleteList"></div>
-        </div>
-
-        <div class="search-hint">Guess an animal or any taxonomic group (e.g. <em>Mammalia</em>, <em>Felidae</em>, <em>Chordata</em>).</div>
-
-        <div class="action-row">
-          <button class="hint-spend-btn" id="nameHintBtn">
-            Name hint <span class="name-hint-cost">(−5 guesses)</span>
-          </button>
-          <button class="give-up-btn" id="giveUpBtn">Give Up</button>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-          <span class="name-hint-reveal" id="nameHintText"></span>
-          <span class="max-guesses-note" id="guessCounter">0 / 25 guesses used</span>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:16px">
-        <div class="panel-title">Guess History</div>
-        <div class="guess-list" id="guessList">
-          <div class="empty-state">Your guesses will appear here.</div>
-        </div>
-      </div>
-
-      <div class="howto">
-        <strong>How to play:</strong> Guess any animal to see how its full taxonomy (fetched live from Wikidata) compares to today's target.
-        Green chips match, red don't. Or guess a <em>taxon</em> directly (like <em>Aves</em> or <em>Felidae</em>) to confirm one level without picking a whole animal.
-        <br><br>
-        The <strong>Tree of Life</strong> fills in as levels are confirmed. Use <strong>Branch / List</strong> to switch views.
-        <strong>Next Possible</strong> shows all valid options at your current deepest confirmed level — click any to guess it instantly.
-        <br><br>
-        <strong>Name hint</strong> costs 5 guesses and reveals the first word (or first half for single-word names).
-        Diet and range are extracted automatically from Wikipedia. <strong>Proximity %</strong> reflects taxonomic closeness.
-      </div>
-    </div>
-
-    <!-- RIGHT -->
-    <div>
-      <div class="panel tree-panel">
-
-        <div class="panel-title-row">
-          <div class="panel-title">Tree of Life</div>
-          <div style="display:flex;gap:0">
-            <button class="tree-view-btn active" id="btnBranch" onclick="setTreeView('branch')">Branch</button>
-            <button class="tree-view-btn"        id="btnList"   onclick="setTreeView('list')">List</button>
-          </div>
-        </div>
-
-        <div class="current-level-badge" id="currentLevelBadge">
-          <span id="clbPrefix">Narrowing:</span>
-          <span class="clb-label" id="clbLabel">Kingdom</span>
-        </div>
-
-        <div class="tree-legend" id="treeLegend">
-          <div class="legend-item"><div class="legend-dot ld-animal"></div>Correct (animal)</div>
-          <div class="legend-item"><div class="legend-dot ld-taxon"></div>Correct (taxon)</div>
-          <div class="legend-item ld-wrong-item"><div class="legend-dot ld-wrong"></div>Wrong guess</div>
-          <div class="legend-item ld-none-item"><div class="legend-dot ld-none"></div>Unknown</div>
-        </div>
-
-        <div id="treeContainer"></div>
-
-        <div style="margin-top:16px">
-          <div class="panel-title" id="nextTaxonsTitle">Next Possible</div>
-          <div class="next-taxons-scroll" id="nextTaxonsList">
-            <span class="next-taxons-empty">Make a guess to see options.</span>
-          </div>
-        </div>
-
-        <div style="margin-top:16px">
-          <div class="panel-title">Field Notes</div>
-          <div class="hint-item">
-            <span class="hint-label">Diet</span>
-            <span class="hint-value" id="hintDiet"><span class="hint-locked">?????</span></span>
-          </div>
-          <div class="hint-item">
-            <span class="hint-label">Range</span>
-            <span class="hint-value" id="hintContinents"><span class="hint-locked">?????</span></span>
-          </div>
-          <div class="hint-unlock-note" id="hintNote">Diet unlocks after 3 guesses · Range after 5</div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <footer>
-    Taxon · Animal Classification Game ·
-    Made by <a href="https://huggingface.co/spaces/Sbhat2026/Taxondle" target="_blank">Sbhat2026</a>
-  </footer>
 </div>
 
 <script>
-// ─── CONFIG ──────────────────────────────────────────────────────────────────
-const LEVELS       = ['kingdom','phylum','class','order','family','genus','species'];
-const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
-const MAX_GUESSES  = 25;
-const DIET_UNLOCK  = 3;
-const RANGE_UNLOCK = 5;
-const NAME_HINT_COST = 5;
-const DIET_CATS = new Set(['Herbivore','Carnivore','Omnivore','Insectivore','Piscivore','Scavenger','Parasitoid']);
-
-// Maps Wikidata / taxobox rank labels to our 7 levels
-const RANK_MAP = {
-  kingdom:'kingdom', regnum:'kingdom',
-  phylum:'phylum', division:'phylum', divisio:'phylum',
-  class:'class', classis:'class',
-  order:'order', ordo:'order',
-  family:'family', familia:'family',
-  genus:'genus', species:'species',
-};
-
-// ─── CACHE & STATE ───────────────────────────────────────────────────────────
-const animalCache = new Map();
-let slimAnimals  = [];
-let taxonFlat    = [];
-let taxonTree    = {};
-let target       = null;
-let allGuesses   = [];
-let confirmedTaxons = {};
-let taxonSources    = {};
-let gameOver     = false;
-let isPractice   = false;
-let treeView     = 'branch';
-let nameHintUsed = false;
-let nameHintCost = 0;
-let filteredList = [];
+let animals = [];
+let currentTaxon = null;
 let selectedIndex = -1;
 
-function effectiveGuesses() { return allGuesses.length + nameHintCost; }
-function remainingGuesses()  { return MAX_GUESSES - effectiveGuesses(); }
+fetch('animals.json').then(r => r.json()).then(d => animals = d);
 
-// ─── WIKIDATA SPARQL (4.5s timeout) ──────────────────────────────────────────
-// Single P171* walk from species to kingdom — one request, all ancestors.
-async function fetchWikidataTaxonomy(scientificName) {
-  const ctrl = new AbortController();
-  const tid  = setTimeout(() => ctrl.abort(), 4500);
-  try {
-    const esc = scientificName.replace(/\\/g,'\\\\').replace(/"/g,'\\"');
-    const sparql = `SELECT ?rl ?n WHERE {
-  ?s wdt:P225 "${esc}" .
-  ?s wdt:P171* ?a .
-  ?a wdt:P225 ?n .
-  ?a wdt:P105 ?r .
-  ?r rdfs:label ?rl FILTER(lang(?rl)='en') .
-}`;
-    const resp = await fetch(
-      `https://query.wikidata.org/sparql?query=${encodeURIComponent(sparql)}&format=json`,
-      { headers:{ Accept:'application/sparql-results+json' }, signal:ctrl.signal }
+const input = document.getElementById('search');
+const results = document.getElementById('results');
+
+function highlight(text, query) {
+  const i = text.toLowerCase().indexOf(query);
+  if (i === -1) return text;
+  return text.slice(0, i) + '<span class="highlight">' +
+         text.slice(i, i + query.length) + '</span>' +
+         text.slice(i + query.length);
+}
+
+input.addEventListener('input', () => {
+  const q = input.value.toLowerCase().trim();
+  results.innerHTML = '';
+  selectedIndex = -1;
+
+  if (!q) return;
+
+  let matches = animals.filter(a =>
+    a.common_name.toLowerCase().startsWith(q) ||
+    a.scientific_name.toLowerCase().startsWith(q)
+  );
+
+  if (matches.length === 0) {
+    matches = animals.filter(a =>
+      a.common_name.toLowerCase().includes(q) ||
+      a.scientific_name.toLowerCase().includes(q)
     );
-    clearTimeout(tid);
-    if (!resp.ok) return {};
-    const data = await resp.json();
-    const result = {};
-    for (const b of data.results.bindings) {
-      const rank = RANK_MAP[(b.rl?.value||'').toLowerCase()];
-      const name = b.n?.value || '';
-      if (rank && name && !result[rank]) result[rank] = name;
-    }
-    return result;
-  } catch(e) { clearTimeout(tid); return {}; }
-}
-
-// ─── WIKIPEDIA WIKITEXT TAXOBOX ───────────────────────────────────────────────
-async function fetchWikipediaTaxobox(title) {
-  const url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&titles=${encodeURIComponent(title)}&rvprop=content&rvslots=main&format=json&origin=*`;
-  const r = await fetch(url);
-  if (!r.ok) return {};
-  const data = await r.json();
-  const wikitext = Object.values(data?.query?.pages||{})[0]?.revisions?.[0]?.slots?.main?.['*']||'';
-  return parseTaxobox(wikitext);
-}
-
-function parseTaxobox(wikitext) {
-  const result = {};
-  if (!wikitext) return result;
-  function strip(s) {
-    return s.replace(/\[\[(?:[^\]|]+\|)?([^\]]+)\]\]/g,'$1')
-            .replace(/\{\{[^}]*\}\}/g,'').replace(/'+/g,'')
-            .replace(/<[^>]+>/g,'').trim();
-  }
-  const fieldMap = {
-    regnum:'kingdom',kingdom:'kingdom',
-    phylum:'phylum',divisio:'phylum',division:'phylum',
-    classis:'class',class:'class',
-    ordo:'order',order:'order',
-    familia:'family',family:'family',
-    genus:'genus',species:'species',taxon:'_taxon',
-  };
-  const lines = wikitext.split('\n');
-  let inBox=false, depth=0;
-  for (const line of lines) {
-    const t = line.trim();
-    if (!inBox) {
-      if (/\{\{\s*(Taxobox|Automatic\s+taxobox|Speciesbox|Subspeciesbox)/i.test(t)) { inBox=true; depth=1; }
-      continue;
-    }
-    depth += (t.match(/\{\{/g)||[]).length;
-    depth -= (t.match(/\}\}/g)||[]).length;
-    if (depth<=0) break;
-    const m = t.match(/^\|\s*([a-z_]+)\s*=\s*(.+)/i);
-    if (!m) continue;
-    const lvl = fieldMap[m[1].toLowerCase().trim()];
-    const val = strip(m[2]);
-    if (lvl && val && !result[lvl]) result[lvl] = val;
-  }
-  if (result._taxon) {
-    const p = result._taxon.split(' ');
-    if (!result.genus && p[0])   result.genus   = p[0];
-    if (!result.species && p[1]) result.species = p[1];
-    delete result._taxon;
-  }
-  if (result.species) result.species = result.species.trim().split(/\s+/).pop();
-  return result;
-}
-
-// ─── TAXONOMY TEMPLATE WALKER (fallback for Automatic taxobox) ───────────────
-// Walks Template:Taxonomy/{taxon} chain when SPARQL + taxobox both leave gaps.
-async function walkTaxonomyTemplates(startName) {
-  const result = {};
-  let current = startName.split(' ')[0]; // start from genus
-  for (let i = 0; i < 9; i++) {
-    if (!current) break;
-    try {
-      const url = `https://en.wikipedia.org/w/api.php?action=query&prop=revisions&titles=Template:Taxonomy/${encodeURIComponent(current)}&rvprop=content&rvslots=main&format=json&origin=*`;
-      const r = await fetch(url, { signal: AbortSignal.timeout(2500) });
-      if (!r.ok) break;
-      const data = await r.json();
-      const wt = Object.values(data?.query?.pages||{})[0]?.revisions?.[0]?.slots?.main?.['*']||'';
-      const rm = wt.match(/\|\s*rank\s*=\s*([^\n|{}<>]+)/i);
-      const pm = wt.match(/\|\s*parent\s*=\s*([^\n|{}<>]+)/i);
-      if (!rm) break;
-      const rank = rm[1].trim().toLowerCase();
-      const mapped = RANK_MAP[rank];
-      if (mapped && !result[mapped]) result[mapped] = current;
-      if (!pm || rank === 'kingdom') break;
-      current = pm[1].trim();
-    } catch(e) { break; }
-  }
-  return result;
-}
-
-// ─── WIKIPEDIA SUMMARY ───────────────────────────────────────────────────────
-async function fetchWikipediaSummary(scientificName, commonName) {
-  const candidates = [scientificName.replace(/ /g,'_'), commonName ? commonName.replace(/ /g,'_') : null].filter(Boolean);
-  for (const title of candidates) {
-    try {
-      const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-      if (r.ok) { const d = await r.json(); if (d.extract?.length > 30) return d; }
-    } catch(_) {}
-  }
-  return {};
-}
-
-// ─── DIET DETECTION ──────────────────────────────────────────────────────────
-function detectDiet(text) {
-  if (!text) return '';
-  const t = text.toLowerCase();
-  const cats = [
-    [/\b(herbivore|herbivorous|folivore|frugivore|granivore|nectarivore|grazer|grazing|plant.eating|feeds on grass|feeds on leaves|feeds on vegetation|eats? plants|eats? leaves|eats? fruit|eats? seeds)\b/,'Herbivore'],
-    [/\b(insectivore|insectivorous|insect.eating|feeds on insects|eats? insects|myrmecophage|feeds on ants|feeds on termites)\b/,'Insectivore'],
-    [/\b(piscivore|piscivorous|fish.eating|feeds on fish|eats? fish)\b/,'Piscivore'],
-    [/\b(scavenger|scavenging|feeds on carrion|eats? carrion|detritivore)\b/,'Scavenger'],
-    [/\b(parasite|parasitoid|parasitic|endoparasit|ectoparasit)\b/,'Parasitoid'],
-    [/\b(omnivore|omnivorous|both plants and|plants and animals|plant and animal|eats? both)\b/,'Omnivore'],
-    [/\b(carnivore|carnivorous|meat.eating|apex predator|hypercarnivore|obligate carnivore)\b/,'Carnivore'],
-  ];
-  for (const [re,label] of cats) if (re.test(t)) return label;
-  const pats=[
-    /\bfeeds? (?:mainly |primarily |largely |mostly |exclusively |chiefly |on )?on ([^,.;(]{4,55})/i,
-    /\beats? (?:mainly |primarily |largely |mostly |exclusively |chiefly )?([^,.;(]{4,55})/i,
-    /\bdiet (?:consists? |is )?(?:mainly |primarily |chiefly )?(?:of )?([^,.;(]{4,55})/i,
-    /\bpreys? (?:mainly |primarily |chiefly )?on ([^,.;(]{4,55})/i,
-  ];
-  for (const pat of pats) {
-    const m = text.match(pat);
-    if (m) {
-      let p = m[1].trim().replace(/\s+/g,' ').replace(/\s+(and|or|which|that|including|such).*$/i,'').trim();
-      if (p.length>2 && p.length<=55) return p.charAt(0).toUpperCase()+p.slice(1);
-    }
-  }
-  return '';
-}
-
-// ─── CONTINENT DETECTION ─────────────────────────────────────────────────────
-function detectContinents(text) {
-  if (!text) return [];
-  const t=text.toLowerCase(), found=[];
-  if (/\b(africa|african|sub.saharan|sahara|madagascar|kenya|tanzania|nigeria|congo)\b/.test(t)) found.push('Africa');
-  if (/\b(asia|asian|south asia|southeast asia|east asia|india|china|japan|indonesia|borneo|sumatra|himalaya|siberia|middle east|korea|vietnam|thailand|philippines|malaysia)\b/.test(t)) found.push('Asia');
-  if (/\b(europe|european|britain|mediterranean|scandinavia|iberian|balkans|alps|france|germany|spain|italy)\b/.test(t)) found.push('Europe');
-  if (/\b(north america|canada|united states|u\.s\.|mexico|central america|caribbean|alaska|florida|california|guatemala)\b/.test(t)) found.push('North America');
-  if (/\b(south america|amazon|brazil|andes|patagonia|neotropical|colombia|peru|argentina|venezuela|ecuador|chile)\b/.test(t)) found.push('South America');
-  if (/\b(australia|australasia|new zealand|oceania|new guinea|papua|queensland|tasmania)\b/.test(t)) found.push('Australia');
-  if (/\b(antarctica|antarctic)\b/.test(t)) found.push('Antarctica');
-  return found;
-}
-
-// ─── MAIN FETCH: 3-layer taxonomy with fallback chain ─────────────────────────
-// 1) SPARQL + taxobox + summary all fire simultaneously
-// 2) If phylum/class/order/family still missing, walk taxonomy templates
-async function fetchAnimalData(scientificName, commonName) {
-  if (animalCache.has(scientificName)) return animalCache.get(scientificName);
-
-  const wikiTitle = scientificName.replace(/ /g,'_');
-  const [sparqlRes, boxRes, wikiRes] = await Promise.allSettled([
-    fetchWikidataTaxonomy(scientificName),
-    fetchWikipediaTaxobox(wikiTitle),
-    fetchWikipediaSummary(scientificName, commonName||scientificName),
-  ]);
-
-  const sparqlTax = sparqlRes.status==='fulfilled' ? sparqlRes.value : {};
-  const boxTax    = boxRes.status==='fulfilled'    ? boxRes.value   : {};
-  const wikiData  = wikiRes.status==='fulfilled'   ? wikiRes.value  : {};
-
-  // Merge: SPARQL wins, taxobox fills gaps
-  const taxonomy = {};
-  for (const lvl of LEVELS) taxonomy[lvl] = sparqlTax[lvl] || boxTax[lvl] || '';
-  if (scientificName.includes(' ')) {
-    const [g,...rest] = scientificName.split(' ');
-    if (!taxonomy.genus)   taxonomy.genus   = g;
-    if (!taxonomy.species) taxonomy.species = rest.join(' ');
   }
 
-  // If key levels still missing, walk taxonomy templates (handles Automatic taxobox)
-  const missing = ['phylum','class','order','family'].filter(l => !taxonomy[l]);
-  if (missing.length > 0) {
-    const walked = await walkTaxonomyTemplates(scientificName).catch(() => ({}));
-    for (const lvl of missing) { if (walked[lvl]) taxonomy[lvl] = walked[lvl]; }
-  }
+  matches.slice(0, 25).forEach((a, i) => {
+    const div = document.createElement('div');
+    div.className = 'result';
+    div.innerHTML = `${highlight(a.common_name, q)} (${highlight(a.scientific_name, q)})`;
 
-  const extract = wikiData.extract || '';
-  const result = {
-    common_name: commonName||scientificName, scientific_name: scientificName,
-    kingdom: taxonomy.kingdom||'Animalia', phylum: taxonomy.phylum||'',
-    class: taxonomy.class||'', order: taxonomy.order||'',
-    family: taxonomy.family||'', genus: taxonomy.genus||'', species: taxonomy.species||'',
-    notes: extract, diet: detectDiet(extract), continents: detectContinents(extract),
-  };
-  animalCache.set(scientificName, result);
-  return result;
-}
-
-// ─── DAILY / PRACTICE PICKS ──────────────────────────────────────────────────
-function dateToSeed() { const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
-function seededRandom(seed) { let s=seed; return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }; }
-function pickDailySlim()     { const r=seededRandom(dateToSeed()); return slimAnimals[Math.floor(r()*slimAnimals.length)]; }
-function pickRandomSlim(excl){ const p=slimAnimals.filter(a=>a.scientific_name!==excl); return p[Math.floor(Math.random()*p.length)]; }
-
-// ─── PROXIMITY ────────────────────────────────────────────────────────────────
-function calcProximity(g, t) {
-  let d=-1;
-  for (let i=0;i<LEVELS.length;i++) {
-    if ((g[LEVELS[i]]||'').toLowerCase()===(t[LEVELS[i]]||'').toLowerCase()) d=i; else break;
-  }
-  if (d===LEVELS.length-1) return 100;
-  if (d===-1) return 0;
-  const lvl=LEVELS[d], val=(t[lvl]||'').toLowerCase();
-  const cm={};
-  for (const a of animalCache.values()) { const v=(a[lvl]||'').toLowerCase(); if(v) cm[v]=(cm[v]||0)+1; }
-  if (!cm[val]) cm[val]=1;
-  const ms=Math.max(...Object.values(cm));
-  return Math.min(99,Math.round((0.65*(d+1)/LEVELS.length+0.35*Math.log(1+cm[val])/Math.log(1+ms))*100));
-}
-
-function levelMatchMap(g, t) {
-  const map={}; let seq=true;
-  for (const lvl of LEVELS) { const m=seq&&(g[lvl]||'').toLowerCase()===(t[lvl]||'').toLowerCase(); map[lvl]=m; if(!m) seq=false; }
-  return map;
-}
-
-// ─── CONFIRMED TAXONS ─────────────────────────────────────────────────────────
-function confirmFromAnimal(a) {
-  let seq=true;
-  for (const lvl of LEVELS) {
-    if (seq&&(a[lvl]||'').toLowerCase()===(target[lvl]||'').toLowerCase()) {
-      if (!confirmedTaxons[lvl]) { confirmedTaxons[lvl]=target[lvl]; taxonSources[lvl]='animal'; }
-    } else seq=false;
-  }
-}
-function confirmFromTaxon(level, value) {
-  if ((value||'').toLowerCase()===(target[level]||'').toLowerCase()) {
-    confirmedTaxons[level]=target[level]; taxonSources[level]='taxon'; return true;
-  }
-  return false;
-}
-function currentSeqIdx() { for(let i=0;i<LEVELS.length;i++) if(!confirmedTaxons[LEVELS[i]]) return i; return LEVELS.length; }
-
-// ─── GUESSED VALUES BY LEVEL (for branch view dead branches) ─────────────────
-function getGuessedByLevel() {
-  const byLevel = {};
-  LEVELS.forEach(l => byLevel[l] = []);
-  for (const g of allGuesses) {
-    if (g.type === 'taxon') {
-      if (!byLevel[g.level].find(x => x.value.toLowerCase() === g.value.toLowerCase()))
-        byLevel[g.level].push({ value:g.value, correct:g.correct });
-    } else {
-      LEVELS.forEach(l => {
-        const val = g.animalData[l];
-        if (!val) return;
-        const ex = byLevel[l].find(x => x.value.toLowerCase() === val.toLowerCase());
-        if (!ex) byLevel[l].push({ value:val, correct:g.matchMap[l] });
-        else if (g.matchMap[l] && !ex.correct) ex.correct = true;
-      });
-    }
-  }
-  return byLevel;
-}
-
-// ─── NEXT POSSIBLE ────────────────────────────────────────────────────────────
-function getNextPossible() {
-  const idx = currentSeqIdx();
-  if (idx >= LEVELS.length) return {level:null, levelLabel:'', taxons:[]};
-  const lvl = LEVELS[idx];
-  let taxons;
-  if (idx === 0) { taxons = ['Animalia']; }
-  else {
-    const parentLvl = LEVELS[idx-1], parentVal = confirmedTaxons[parentLvl];
-    taxons = parentVal ? (taxonTree[`${parentLvl}/${parentVal}`] || []) : taxonFlat.filter(t=>t.level===lvl).map(t=>t.value);
-  }
-  const s = new Set(taxons);
-  for (const a of animalCache.values()) { const v=a[lvl]; if(v) s.add(v); }
-  return {level:lvl, levelLabel:LEVEL_LABELS[idx], taxons:[...s].sort()};
-}
-
-// ─── TREE VIEW TOGGLE ────────────────────────────────────────────────────────
-function setTreeView(mode) {
-  treeView=mode;
-  document.getElementById('btnBranch').classList.toggle('active',mode==='branch');
-  document.getElementById('btnList').classList.toggle('active',mode==='list');
-  // Legend: show wrong-guess entry only in branch view
-  document.querySelector('.ld-wrong-item').style.display = mode==='branch' ? '' : 'none';
-  renderTree();
-}
-
-// ─── BRANCH VIEW — shows confirmed trunk + dead branches for wrong guesses ────
-function renderBranchView() {
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = '';
-  const byLevel = getGuessedByLevel();
-  const wrap = document.createElement('div');
-  wrap.className = 'branch-view';
-
-  LEVELS.forEach((lvl, i) => {
-    const confirmed = confirmedTaxons[lvl];
-    const src = taxonSources[lvl];
-    const wrong = byLevel[lvl].filter(x => !x.correct);
-    const isFirst = i === 0;
-    const isLast  = i === LEVELS.length - 1;
-
-    const item = document.createElement('div');
-    item.className = 'branch-item';
-
-    // Spine column: top segment → dot → bottom segment
-    const spine = document.createElement('div');
-    spine.className = 'branch-spine';
-
-    if (!isFirst) {
-      const topSeg = document.createElement('div');
-      // Top connector coloured by the level ABOVE's confirmation
-      const prevConfirmed = confirmedTaxons[LEVELS[i-1]];
-      const prevSrc = taxonSources[LEVELS[i-1]];
-      topSeg.className = 'spine-seg' + (prevConfirmed ? ' confirmed by-'+prevSrc : ' faint');
-      spine.appendChild(topSeg);
-    }
-
-    const dot = document.createElement('div');
-    dot.className = 'spine-dot' + (confirmed ? ' by-'+src : '');
-    spine.appendChild(dot);
-
-    if (!isLast) {
-      const botSeg = document.createElement('div');
-      botSeg.className = 'spine-seg' + (confirmed ? ' confirmed by-'+src : ' faint');
-      spine.appendChild(botSeg);
-    }
-
-    // Content column
-    const content = document.createElement('div');
-    content.className = 'branch-content';
-
-    const header = document.createElement('div');
-    header.className = 'branch-header';
-    header.innerHTML = `<span class="bl-name">${LEVEL_LABELS[i]}</span><span class="bl-value${confirmed?'':' unknown'}">${confirmed||'━━━━━'}</span>`;
-    content.appendChild(header);
-
-    if (wrong.length > 0) {
-      const deadDiv = document.createElement('div');
-      deadDiv.className = 'dead-branches';
-      wrong.forEach(wg => {
-        const chip = document.createElement('span');
-        chip.className = 'dead-chip';
-        chip.textContent = wg.value;
-        deadDiv.appendChild(chip);
-      });
-      content.appendChild(deadDiv);
-    }
-
-    item.appendChild(spine);
-    item.appendChild(content);
-    wrap.appendChild(item);
+    div.onclick = () => selectAnimal(a);
+    results.appendChild(div);
   });
+});
 
-  container.appendChild(wrap);
-}
+input.addEventListener('keydown', (e) => {
+  const items = document.querySelectorAll('.result');
 
-// ─── LIST VIEW — shows ONLY confirmed correct levels, clean summary ───────────
-function renderListView() {
-  const container = document.getElementById('treeContainer');
-  container.innerHTML = '';
-  const wrap = document.createElement('div');
-  wrap.className = 'list-confirmed';
-
-  LEVELS.forEach((lvl, i) => {
-    const confirmed = confirmedTaxons[lvl];
-    const src = taxonSources[lvl];
-    const row = document.createElement('div');
-    row.className = 'lc-item' + (confirmed ? '' : ' empty');
-    row.innerHTML = `<div class="lc-dot${confirmed?' by-'+src:''}"></div><div class="lc-level">${LEVEL_LABELS[i]}</div><div class="lc-sep">│</div><div class="lc-value${confirmed?'':' unknown'}">${confirmed||'━━━━━'}</div>`;
-    wrap.appendChild(row);
-  });
-
-  container.appendChild(wrap);
-}
-
-// ─── RENDER TREE (dispatches to branch or list) ───────────────────────────────
-function renderTree() {
-  if (treeView === 'branch') renderBranchView();
-  else renderListView();
-
-  const idx = currentSeqIdx();
-  const badge = document.getElementById('currentLevelBadge');
-  document.getElementById('clbPrefix').textContent = idx<LEVELS.length ? 'Narrowing:' : 'Status:';
-  document.getElementById('clbLabel').textContent  = idx<LEVELS.length ? LEVEL_LABELS[idx] : 'All confirmed!';
-  badge.className = 'current-level-badge' + (idx>0 ? ' active' : '');
-  renderNextPossible();
-}
-
-function renderNextPossible() {
-  const {level,levelLabel,taxons} = getNextPossible();
-  const container = document.getElementById('nextTaxonsList');
-  document.getElementById('nextTaxonsTitle').textContent = level ? `Possible ${levelLabel}s` : 'Next Possible';
-  container.innerHTML = '';
-  if (!level) { container.innerHTML='<span class="next-taxons-empty">All confirmed — guess the exact animal!</span>'; return; }
-  if (!taxons.length) { container.innerHTML='<span class="next-taxons-empty">Make a guess to narrow the options.</span>'; return; }
-  taxons.forEach(t => {
-    const btn = document.createElement('button'); btn.className='next-taxon-btn';
-    btn.textContent=t; btn.title=`Guess ${levelLabel}: ${t}`;
-    btn.addEventListener('click',()=>{ if(!gameOver) submitTaxonGuess(level,t); });
-    container.appendChild(btn);
-  });
-}
-
-// ─── HINTS ────────────────────────────────────────────────────────────────────
-function renderHints() {
-  const n = effectiveGuesses();
-  if (!target) return;
-  if (n>=DIET_UNLOCK||gameOver) {
-    const diet=target.diet;
-    document.getElementById('hintDiet').innerHTML = !diet ? '<em style="color:var(--steel)">—</em>'
-      : DIET_CATS.has(diet) ? `<strong>${diet}</strong>` : `<em>${diet}</em>`;
-  } else {
-    document.getElementById('hintDiet').innerHTML='<span class="hint-locked">?????</span>';
-  }
-  if (n>=RANGE_UNLOCK||gameOver)
-    document.getElementById('hintContinents').innerHTML = target.continents?.length
-      ? target.continents.map(c=>`<span class="continent-pip">${c}</span>`).join('')
-      : '<em style="color:var(--steel)">—</em>';
-  else
-    document.getElementById('hintContinents').innerHTML='<span class="hint-locked">?????</span>';
-  const parts=[];
-  if (n<DIET_UNLOCK&&!gameOver) parts.push(`Diet in ${DIET_UNLOCK-n} guess${DIET_UNLOCK-n===1?'':'es'}`);
-  if (n<RANGE_UNLOCK&&!gameOver) parts.push(`Range in ${RANGE_UNLOCK-n}`);
-  document.getElementById('hintNote').textContent=parts.join(' · ');
-}
-
-function updateCounter() {
-  const used=effectiveGuesses(), rem=remainingGuesses();
-  document.getElementById('guessCounter').textContent=`${used} / ${MAX_GUESSES} guesses used`;
-  const hb=document.getElementById('nameHintBtn');
-  if (!nameHintUsed&&!gameOver) hb.disabled=(rem<NAME_HINT_COST);
-}
-
-// ─── GUESS CARDS ──────────────────────────────────────────────────────────────
-function makeLoadingCard() {
-  const card=document.createElement('div');
-  card.className='guess-card loading-card'; card.id='loadingCard';
-  card.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:2px 0"><span class="spin"></span><span style="font-family:var(--font-mono);font-size:.75rem;color:var(--worn);letter-spacing:1px">Looking up taxonomy…</span></div>';
-  return card;
-}
-
-function makeAnimalCard(g) {
-  const {animalData,matchMap,proximity}=g;
-  const pc=proximity>=70?'prox-high':proximity>=40?'prox-mid':'prox-low';
-  const chips=LEVELS.map((lvl,i)=>{
-    const val=animalData[lvl];
-    const cls=!val?'tax-unknown':matchMap[lvl]?'tax-match':'tax-nomatch';
-    return `<div><span class="tax-chip ${cls}"><span class="tax-label">${LEVEL_LABELS[i]}</span>${val||'?'}</span></div>`;
-  }).join('');
-  const card=document.createElement('div'); card.className='guess-card';
-  card.innerHTML=`<div class="guess-card-header"><div><div class="guess-name">${animalData.common_name}</div><div class="guess-sci">${animalData.scientific_name}</div></div><span class="proximity-badge ${pc}">${proximity}%</span></div><div class="tax-row">${chips}</div>`;
-  return card;
-}
-
-function makeTaxonCard(g) {
-  const card=document.createElement('div'); card.className='guess-card taxon-card';
-  card.innerHTML=`<div class="guess-card-header"><div class="taxon-card-left"><span class="taxon-level-label">${g.levelLabel}</span><span class="guess-name">${g.value}</span></div><span class="proximity-badge ${g.correct?'taxon-correct':'taxon-wrong'}">${g.correct?'✓ Correct':'✗ Wrong'}</span></div>`;
-  return card;
-}
-
-function prependCard(card) {
-  const list=document.getElementById('guessList');
-  if (allGuesses.length===1) list.innerHTML='';
-  list.insertBefore(card,list.firstChild);
-}
-
-// ─── SUBMIT ANIMAL GUESS ──────────────────────────────────────────────────────
-async function submitAnimalGuess(slim) {
-  if (gameOver||remainingGuesses()<=0) return;
-  if (allGuesses.some(g=>g.type==='animal'&&g.animalData.scientific_name===slim.scientific_name)) { clearSearch(); return; }
-
-  const list=document.getElementById('guessList');
-  const loadCard=makeLoadingCard();
-  if (allGuesses.length===0) list.innerHTML='';
-  list.insertBefore(loadCard,list.firstChild);
-  setInputsEnabled(false);
-
-  let animalData;
-  try { animalData=await fetchAnimalData(slim.scientific_name,slim.common_name); }
-  catch(e) {
-    loadCard.remove();
-    if (allGuesses.length===0) list.innerHTML='<div class="empty-state">Your guesses will appear here.</div>';
-    setInputsEnabled(true); return;
+  if (e.key === 'ArrowDown') {
+    selectedIndex = (selectedIndex + 1) % items.length;
+  } else if (e.key === 'ArrowUp') {
+    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+  } else if (e.key === 'Enter' && items[selectedIndex]) {
+    items[selectedIndex].click();
   }
 
-  loadCard.remove(); setInputsEnabled(true);
-  const matchMap=levelMatchMap(animalData,target);
-  const proximity=calcProximity(animalData,target);
-  confirmFromAnimal(animalData);
-  const entry={type:'animal',animalData,matchMap,proximity};
-  allGuesses.unshift(entry);
-  prependCard(makeAnimalCard(entry));
-  renderTree(); renderHints(); updateCounter(); clearSearch();
-  if (animalData.scientific_name.toLowerCase()===target.scientific_name.toLowerCase()) { endGame(true); return; }
-  if (effectiveGuesses()>=MAX_GUESSES) endGame(false);
-}
-
-// ─── SUBMIT TAXON GUESS ───────────────────────────────────────────────────────
-function submitTaxonGuess(level, value) {
-  if (gameOver||remainingGuesses()<=0) return;
-  if (allGuesses.some(g=>g.type==='taxon'&&g.level===level&&g.value.toLowerCase()===value.toLowerCase())) { clearSearch(); return; }
-  if (confirmedTaxons[level]&&confirmedTaxons[level].toLowerCase()===value.toLowerCase()) { clearSearch(); return; }
-  const correct=confirmFromTaxon(level,value);
-  const idx=LEVELS.indexOf(level);
-  const entry={type:'taxon',level,levelLabel:LEVEL_LABELS[idx],value,correct};
-  allGuesses.unshift(entry);
-  const list=document.getElementById('guessList');
-  if (allGuesses.length===1) list.innerHTML='';
-  list.insertBefore(makeTaxonCard(entry),list.firstChild);
-  renderTree(); renderHints(); updateCounter(); clearSearch();
-  if (effectiveGuesses()>=MAX_GUESSES) endGame(false);
-}
-
-// ─── NAME HINT ────────────────────────────────────────────────────────────────
-function revealNameHint() {
-  if (nameHintUsed||gameOver||!target||remainingGuesses()<NAME_HINT_COST) return;
-  nameHintUsed=true; nameHintCost=NAME_HINT_COST;
-  const name=target.common_name, words=name.split(' ');
-  let hint;
-  if (words.length>=2) hint=words[0]+' '+'_'.repeat(words.slice(1).join(' ').length);
-  else { const h=Math.ceil(name.length/2); hint=name.slice(0,h)+'_'.repeat(name.length-h); }
-  document.getElementById('nameHintText').textContent=hint;
-  const btn=document.getElementById('nameHintBtn');
-  btn.disabled=true; btn.textContent='Name hint revealed';
-  updateCounter(); renderHints(); renderNextPossible();
-  if (effectiveGuesses()>=MAX_GUESSES) endGame(false);
-}
-
-// ─── GIVE UP ──────────────────────────────────────────────────────────────────
-function giveUp() {
-  if (gameOver) return;
-  endGame(false, true);
-}
-
-// ─── END GAME ─────────────────────────────────────────────────────────────────
-function endGame(won, gaveUp=false) {
-  gameOver=true;
-  LEVELS.forEach(l=>{ if(!confirmedTaxons[l]){confirmedTaxons[l]=target[l]; taxonSources[l]='animal';} });
-  renderTree(); renderHints();
-  document.getElementById('resultBanner').classList.add('show');
-  document.getElementById('practiceBadge').style.display=isPractice?'inline-block':'none';
-  document.getElementById('resultTitle').textContent = won ? '🎉 Correct!' : gaveUp ? '🏳 Gave Up' : '⏱ Out of guesses';
-  document.getElementById('resultSubtitle').textContent = won
-    ? `Identified in ${effectiveGuesses()} / ${MAX_GUESSES} guesses.`
-    : `The answer was:`;
-  document.getElementById('resultSci').textContent=`${target.common_name} — ${target.scientific_name}`;
-  document.getElementById('resultFact').textContent=target.notes||'';
-  setInputsEnabled(false);
-  document.getElementById('giveUpBtn').disabled=true;
-}
-
-// ─── TRY ANOTHER ──────────────────────────────────────────────────────────────
-async function tryAnother() {
-  const slim=pickRandomSlim(target?.scientific_name);
-  document.getElementById('resultBanner').classList.remove('show');
-  allGuesses=[]; confirmedTaxons={}; taxonSources={};
-  gameOver=false; isPractice=true; nameHintUsed=false; nameHintCost=0;
-  filteredList=[]; selectedIndex=-1;
-  document.getElementById('guessList').innerHTML='<div class="empty-state">Your guesses will appear here.</div>';
-  document.getElementById('nameHintText').textContent='';
-  document.getElementById('searchInput').value='';
-  const hb=document.getElementById('nameHintBtn');
-  hb.disabled=false; hb.innerHTML='Name hint <span class="name-hint-cost">(−5 guesses)</span>';
-  document.getElementById('giveUpBtn').disabled=false;
-  setInputsEnabled(true);
-  renderTree(); renderHints(); updateCounter();
-  target=await fetchAnimalData(slim.scientific_name,slim.common_name).catch(()=>null);
-  if (target) { renderTree(); renderHints(); updateCounter(); }
-}
-
-function setInputsEnabled(en) {
-  document.getElementById('searchInput').disabled=!en;
-  document.getElementById('guessBtn').disabled=!en;
-  if (!en) document.getElementById('autocompleteList').classList.remove('open');
-}
-
-// ─── AUTOCOMPLETE ────────────────────────────────────────────────────────────
-function updateAutocomplete(query) {
-  const q=query.trim().toLowerCase();
-  if (q.length<1) { filteredList=[]; document.getElementById('autocompleteList').classList.remove('open'); return; }
-
-  const animalMatches=slimAnimals
-    .filter(a=>a.common_name.toLowerCase().includes(q)||a.scientific_name.toLowerCase().includes(q))
-    .slice(0,5).map(a=>({type:'animal',slim:a}));
-
-  const taxMatches=taxonFlat
-    .filter(t=>t.value.toLowerCase().startsWith(q)||t.value.toLowerCase().includes(q))
-    .sort((a,b)=>{
-      const as=a.value.toLowerCase().startsWith(q), bs=b.value.toLowerCase().startsWith(q);
-      return (as&&!bs)?-1:(!as&&bs)?1:a.value.localeCompare(b.value);
-    }).slice(0,5);
-
-  filteredList=[...animalMatches,...taxMatches];
-  const list=document.getElementById('autocompleteList');
-  list.innerHTML='';
-  if (!filteredList.length) { list.classList.remove('open'); return; }
-
-  let lastType=null;
-  filteredList.forEach((item,i)=>{
-    if (item.type!==lastType) {
-      const sep=document.createElement('div'); sep.className='autocomplete-sep';
-      sep.textContent=item.type==='animal'?'Animals':'Taxonomic Groups';
-      list.appendChild(sep); lastType=item.type;
-    }
-    const el=document.createElement('div'); el.className='autocomplete-item'; el.dataset.idx=i;
-    if (item.type==='animal') {
-      el.innerHTML=`<span>${item.slim.common_name}</span><span class="sci">${item.slim.scientific_name}</span>`;
-      el.addEventListener('mousedown',e=>{ e.preventDefault(); submitAnimalGuess(item.slim); });
-    } else {
-      el.innerHTML=`<span>${item.value}</span><span class="taxon-level-pill">${item.levelLabel}</span>`;
-      el.addEventListener('mousedown',e=>{ e.preventDefault(); submitTaxonGuess(item.level,item.value); });
-    }
-    list.appendChild(el);
+  items.forEach((el, i) => {
+    el.classList.toggle('active', i === selectedIndex);
   });
-  list.classList.add('open'); selectedIndex=-1;
+});
+
+function selectAnimal(a) {
+  input.value = a.common_name;
+  results.innerHTML = '';
+  updateTaxon(a);
+  updateOrders();
 }
 
-function clearSearch() {
-  document.getElementById('searchInput').value='';
-  document.getElementById('autocompleteList').classList.remove('open');
-  filteredList=[]; selectedIndex=-1;
-}
-
-// ─── EVENTS ───────────────────────────────────────────────────────────────────
-function wireEvents() {
-  const input=document.getElementById('searchInput');
-  const list=document.getElementById('autocompleteList');
-  input.addEventListener('input',()=>updateAutocomplete(input.value));
-  input.addEventListener('keydown',e=>{
-    const items=[...list.querySelectorAll('.autocomplete-item')];
-    if (e.key==='ArrowDown'){e.preventDefault();selectedIndex=Math.min(selectedIndex+1,items.length-1);}
-    else if (e.key==='ArrowUp'){e.preventDefault();selectedIndex=Math.max(selectedIndex-1,-1);}
-    else if (e.key==='Enter'){
-      let item=null;
-      if (selectedIndex>=0&&items[selectedIndex]) item=filteredList[parseInt(items[selectedIndex].dataset.idx)];
-      else if (filteredList.length===1) item=filteredList[0];
-      if (item){if(item.type==='animal')submitAnimalGuess(item.slim);else submitTaxonGuess(item.level,item.value);}
-      return;
-    } else if (e.key==='Escape'){list.classList.remove('open');return;}
-    items.forEach((el,i)=>el.classList.toggle('selected',i===selectedIndex));
-  });
-  input.addEventListener('blur',()=>setTimeout(()=>list.classList.remove('open'),150));
-  document.getElementById('guessBtn').addEventListener('click',()=>{
-    if (!filteredList.length) return;
-    const items=[...document.querySelectorAll('#autocompleteList .autocomplete-item')];
-    let item;
-    if (selectedIndex>=0&&items[selectedIndex]) item=filteredList[parseInt(items[selectedIndex].dataset.idx)];
-    else item=filteredList[0];
-    if (item){if(item.type==='animal')submitAnimalGuess(item.slim);else submitTaxonGuess(item.level,item.value);}
-  });
-  document.getElementById('nameHintBtn').addEventListener('click',()=>{ if(!nameHintUsed&&!gameOver) revealNameHint(); });
-  document.getElementById('giveUpBtn').addEventListener('click',()=>{ if(!gameOver) giveUp(); });
-  document.getElementById('tryAnotherBtn').addEventListener('click',tryAnother);
-}
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-async function init() {
-  document.getElementById('dateBadge').textContent=
-    new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-
-  // Hide wrong-entry in legend until first guess (branch view only)
-  document.querySelector('.ld-wrong-item').style.display='none';
-
-  try {
-    const [ar,tr]=await Promise.all([fetch('animals.json'),fetch('taxons.json')]);
-    slimAnimals=await ar.json();
-    const taxData=await tr.json();
-    taxonFlat=taxData.flat||taxData;
-    taxonTree=taxData.tree||{};
-  } catch(e) {
-    document.body.innerHTML='<div style="padding:40px;font-family:serif;color:#600">Could not load data files. Serve with: <code>python -m http.server 8080</code></div>';
+function updateTaxon(a) {
+  if (!currentTaxon) {
+    currentTaxon = a.taxonomy[a.taxonomy.length - 1];
     return;
   }
 
-  wireEvents();
-  renderTree();
-  updateCounter();
-
-  const dailySlim=pickDailySlim();
-  try {
-    target=await fetchAnimalData(dailySlim.scientific_name, dailySlim.common_name);
-    renderTree(); renderHints(); updateCounter();
-  } catch(e) { console.error('Failed to load daily target:', e); }
+  for (let t of a.taxonomy) {
+    if (t === currentTaxon) {
+      currentTaxon = t;
+    }
+  }
 }
 
-init();
+function updateOrders() {
+  const container = document.getElementById('orders');
+  container.innerHTML = '';
+
+  if (!currentTaxon) return;
+
+  const filtered = animals.filter(a =>
+    a.taxonomy.includes(currentTaxon)
+  );
+
+  const orders = [...new Set(filtered.map(a => a.order))];
+
+  orders.forEach(o => {
+    const tag = document.createElement('div');
+    tag.className = 'tag';
+    tag.textContent = o;
+    container.appendChild(tag);
+  });
+}
+
 </script>
+
 </body>
 </html>
