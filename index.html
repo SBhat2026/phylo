@@ -7,105 +7,808 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
-/* keep all your existing CSS intact */
-.autocomplete-list {
-  max-height: 220px;
-  overflow-y: auto;
-}
+  :root {
+    --ink: #1c1a14;
+    --cream: #f4eed8;
+    --parchment: #ede6c8;
+    --worn: #d8ceac;
+    --gold: #b8921a;
+    --gold-light: #d4a843;
+    --forest: #2a4030;
+    --sage: #5a7a5e;
+    --rust: #8b3a2a;
+    --steel: #4a5568;
+    --match-full: #2d6a3f;
+    --match-partial: #7a5c0a;
+    --match-none: #6b2a1e;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-mono: 'Courier Prime', 'Courier New', monospace;
+    --font-body: 'Crimson Pro', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    min-height: 100vh;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  .page-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 36px 0 24px;
+    border-bottom: 2px solid var(--worn);
+    margin-bottom: 28px;
+    position: relative;
+  }
+  header::before {
+    content: '⬡ ⬡ ⬡';
+    display: block;
+    color: var(--gold);
+    font-size: 10px;
+    letter-spacing: 8px;
+    margin-bottom: 10px;
+  }
+  .title {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--forest);
+    line-height: 1;
+  }
+  .subtitle {
+    font-family: var(--font-body);
+    font-style: italic;
+    color: var(--steel);
+    font-size: 1.05rem;
+    margin-top: 6px;
+  }
+  .date-badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+
+  /* TWO COLUMN LAYOUT */
+  .game-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 620px) {
+    .game-layout { grid-template-columns: 1fr; }
+  }
+
+  /* PANELS */
+  .panel {
+    background: var(--parchment);
+    border: 1px solid var(--worn);
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.08);
+  }
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--worn);
+  }
+
+  /* SEARCH */
+  .search-wrap {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .search-input {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    padding: 10px 14px;
+    background: var(--cream);
+    border: 1.5px solid var(--worn);
+    border-radius: 3px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--gold); }
+  .search-input::placeholder { color: #a09070; font-style: italic; }
+
+  .guess-btn {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 10px 18px;
+    background: var(--forest);
+    color: var(--cream);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .guess-btn:hover { background: var(--sage); }
+  .guess-btn:disabled { background: var(--worn); cursor: default; }
+
+  /* AUTOCOMPLETE */
+  .autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--cream);
+    border: 1.5px solid var(--gold);
+    border-top: none;
+    border-radius: 0 0 3px 3px;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: none;
+  }
+  .autocomplete-list.open { display: block; }
+  .autocomplete-item {
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    border-bottom: 1px solid var(--worn);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.1s;
+  }
+  .autocomplete-item:last-child { border-bottom: none; }
+  .autocomplete-item:hover, .autocomplete-item.selected { background: var(--parchment); }
+  .autocomplete-item .sci { font-style: italic; color: var(--steel); font-size: 0.82rem; }
+  .search-hint { font-size: 0.82rem; color: var(--steel); font-style: italic; margin-bottom: 14px; }
+
+  /* GUESS HISTORY */
+  .guess-list { display: flex; flex-direction: column; gap: 10px; }
+  .guess-card {
+    background: var(--cream);
+    border: 1px solid var(--worn);
+    border-radius: 3px;
+    padding: 12px 14px;
+    animation: slide-in 0.2s ease;
+  }
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .guess-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .guess-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .guess-sci { font-style: italic; color: var(--steel); font-size: 0.82rem; }
+  .proximity-badge {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .prox-high { background: #d4edda; color: #1a4a28; border: 1px solid #7cba8f; }
+  .prox-mid  { background: #fff3cd; color: #5a3e00; border: 1px solid #c9a227; }
+  .prox-low  { background: #f8d7da; color: #5a1a1a; border: 1px solid #c47070; }
+
+  /* TAXONOMY DOTS */
+  .tax-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .tax-chip {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 2px;
+    letter-spacing: 0.3px;
+  }
+  .tax-match   { background: #c8e6c9; color: #1b5e20; border: 1px solid #81c784; }
+  .tax-nomatch { background: #ffcdd2; color: #7f0000; border: 1px solid #e57373; }
+  .tax-label { font-size: 0.62rem; opacity: 0.7; display: block; }
+
+  /* TREE OF LIFE PANEL */
+  .tree-panel { position: sticky; top: 16px; }
+  .tree-node {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-left: 2px solid var(--worn);
+    padding-left: 12px;
+    margin-left: 8px;
+    transition: all 0.3s;
+  }
+  .tree-node:first-child { border-left: none; margin-left: 0; padding-left: 0; }
+  .tree-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 2px solid var(--worn);
+    background: var(--cream);
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .tree-node.revealed .tree-dot {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .tree-node.revealed { border-left-color: var(--gold); }
+  .tree-level { font-size: 0.62rem; color: var(--steel); letter-spacing: 1px; text-transform: uppercase; }
+  .tree-value { color: var(--ink); font-style: italic; }
+  .tree-value.hidden { color: var(--worn); font-style: normal; }
+
+  /* HINTS PANEL */
+  .hint-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--worn);
+  }
+  .hint-item:last-child { border-bottom: none; }
+  .hint-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--steel);
+    width: 80px;
+    flex-shrink: 0;
+  }
+  .hint-value {
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+  .hint-locked {
+    font-style: italic;
+    color: var(--worn);
+    font-size: 0.85rem;
+  }
+  .hint-unlock-note {
+    font-size: 0.75rem;
+    color: var(--steel);
+    font-style: italic;
+    margin-top: 2px;
+  }
+  .reveal-btn {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .reveal-btn:hover { background: var(--gold); color: var(--cream); }
+
+  /* WIN / LOSE STATES */
+  .result-banner {
+    text-align: center;
+    padding: 28px;
+    border: 2px solid var(--gold);
+    border-radius: 4px;
+    background: var(--parchment);
+    margin-bottom: 20px;
+    display: none;
+    animation: slide-in 0.3s ease;
+  }
+  .result-banner.show { display: block; }
+  .result-banner h2 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    color: var(--forest);
+    margin-bottom: 8px;
+  }
+  .result-banner p {
+    font-size: 0.95rem;
+    color: var(--steel);
+    margin-bottom: 4px;
+  }
+  .result-sci { font-style: italic; color: var(--gold); font-family: var(--font-mono); font-size: 0.9rem; }
+  .result-fact { font-style: italic; margin-top: 12px; font-size: 1rem; color: var(--ink); border-left: 3px solid var(--gold); padding-left: 12px; text-align: left; }
+
+  .max-guesses-note {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--steel);
+    text-align: right;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--steel);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  .continent-pip {
+    display: inline-block;
+    background: var(--sage);
+    color: var(--cream);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin: 1px;
+    letter-spacing: 0.3px;
+  }
+
+  /* HOW TO PLAY */
+  .howto {
+    margin-top: 28px;
+    padding: 16px 20px;
+    border: 1px dashed var(--worn);
+    border-radius: 3px;
+    font-size: 0.88rem;
+    color: var(--steel);
+    line-height: 1.6;
+  }
+  .howto strong { color: var(--ink); font-family: var(--font-display); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--cream); }
+  ::-webkit-scrollbar-thumb { background: var(--worn); border-radius: 3px; }
 </style>
 </head>
 <body>
 <div class="page-wrap">
 
-  <!-- Keep existing header/game layout -->
+  <header>
+    <div class="title">Taxon</div>
+    <div class="subtitle">Identify today's animal through the tree of life</div>
+    <div class="date-badge" id="dateBadge"></div>
+  </header>
 
-  <div class="search-wrap">
-    <input id="search" class="search-input" placeholder="Search animal..." autocomplete="off">
-    <button id="guess-btn" class="guess-btn">Guess</button>
-    <div id="autocomplete" class="autocomplete-list"></div>
+  <div id="resultBanner" class="result-banner">
+    <h2 id="resultTitle"></h2>
+    <p id="resultSubtitle"></p>
+    <p class="result-sci" id="resultSci"></p>
+    <p class="result-fact" id="resultFact"></p>
   </div>
 
-  <div id="orders-panel" class="panel">
-    <div class="panel-title">Suggested Orders</div>
-    <div id="orders" class="tax-row"></div>
-  </div>
+  <div class="game-layout">
+    <!-- LEFT: SEARCH + GUESSES -->
+    <div>
+      <div class="panel" id="searchPanel">
+        <div class="panel-title">Make a Guess</div>
+        <div class="search-wrap" id="searchWrap">
+          <input
+            type="text"
+            class="search-input"
+            id="searchInput"
+            placeholder="Type a common or scientific name…"
+            autocomplete="off"
+          />
+          <button class="guess-btn" id="guessBtn">Guess</button>
+          <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+        <div class="search-hint">Guesses fill in the taxonomic tree. Hints unlock after 3 and 5 guesses.</div>
+        <div class="max-guesses-note" id="guessCounter">0 guesses</div>
+      </div>
 
+      <div class="panel" style="margin-top: 16px;">
+        <div class="panel-title">Guess History</div>
+        <div class="guess-list" id="guessList">
+          <div class="empty-state">Your guesses will appear here.</div>
+        </div>
+      </div>
+
+      <div class="howto">
+        <strong>How to play:</strong> Guess any animal to reveal how its taxonomy compares to today's target.
+        Green chips = matching taxonomic level. Red = no match.
+        The <em>Tree of Life</em> panel fills in as you identify each level.
+        <br><br>
+        <strong>Proximity %</strong> reflects how closely related your guess is, weighted by how many species share that taxonomic group — guessing within a species-rich genus scores higher than a monotypic one.
+      </div>
+    </div>
+
+    <!-- RIGHT: TREE + HINTS -->
+    <div>
+      <!-- TREE OF LIFE -->
+      <div class="panel tree-panel">
+        <div class="panel-title">Tree of Life</div>
+        <div id="treeContainer"></div>
+
+        <div style="margin-top: 20px;">
+          <div class="panel-title">Field Notes</div>
+          <div id="hintsContainer">
+            <div class="hint-item">
+              <span class="hint-label">Diet</span>
+              <span class="hint-value" id="hintDiet"><span class="hint-locked">?????</span></span>
+            </div>
+            <div class="hint-item">
+              <span class="hint-label">Range</span>
+              <span class="hint-value" id="hintContinents"><span class="hint-locked">?????</span></span>
+            </div>
+          </div>
+          <div class="hint-unlock-note" id="hintNote">Diet unlocks after 3 guesses · Range after 5</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const LEVELS = ['kingdom','phylum','class','order','family','genus','species'];
+const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
+const DIET_UNLOCK = 3;
+const RANGE_UNLOCK = 5;
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let animals = [];
-let correctPath = []; // Most specific correct taxon
-let targetAnimal = null; // your game sets this elsewhere
-const searchInput = document.getElementById("search");
-const autocomplete = document.getElementById("autocomplete");
-const ordersDiv = document.getElementById("orders");
+let target = null;
+let guesses = [];
+let selectedIndex = -1;
+let filteredList = [];
+let revealedLevels = new Set();
+let gameOver = false;
 
-// Load animals.json
-fetch('animals.json')
-  .then(r => r.json())
-  .then(data => animals = data);
-
-// Search logic: prefix-only, scrollable dropdown
-searchInput.addEventListener('input', () => {
-  const q = searchInput.value.trim().toLowerCase();
-  autocomplete.innerHTML = '';
-  if(!q) return;
-
-  const matches = animals.filter(a =>
-    a.common_name.toLowerCase().startsWith(q) ||
-    a.scientific_name.toLowerCase().startsWith(q)
-  ).slice(0,25);
-
-  matches.forEach(a => {
-    const div = document.createElement('div');
-    div.className = 'autocomplete-item';
-    div.textContent = `${a.common_name} (${a.scientific_name})`;
-    div.onclick = () => selectAnimal(a);
-    autocomplete.appendChild(div);
-  });
-
-  autocomplete.classList.toggle('open', matches.length > 0);
-});
-
-function selectAnimal(animal) {
-  searchInput.value = animal.common_name;
-  autocomplete.innerHTML = '';
-  updateCorrectPath(animal);
-  updateOrders();
+// ─── DAILY SEED (PRNG) ───────────────────────────────────────────────────────
+function dateToSeed() {
+  const d = new Date();
+  return d.getFullYear() * 10000 + (d.getMonth()+1) * 100 + d.getDate();
+}
+function seededRandom(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+function pickDaily(arr) {
+  const rng = seededRandom(dateToSeed());
+  return arr[Math.floor(rng() * arr.length)];
 }
 
-// Track deepest correct taxon (your existing green/red logic can keep marking)
-function updateCorrectPath(animal) {
-  if(!targetAnimal) return;
-  correctPath = [];
-  const levels = ["kingdom","phylum","class","order","family","genus","species"];
-  for(let i=0;i<levels.length;i++){
-    if(animal[levels[i]] && targetAnimal[levels[i]] &&
-       animal[levels[i]] === targetAnimal[levels[i]]){
-      correctPath.push(animal[levels[i]]);
-    } else break;
-  }
-}
-
-// Filter orders/families based on current correct path
-function updateOrders() {
-  ordersDiv.innerHTML = '';
-  if(correctPath.length===0) return;
-  const filtered = animals.filter(a => {
-    const levels = ["kingdom","phylum","class","order","family","genus","species"];
-    for(let i=0;i<correctPath.length;i++){
-      if(a[levels[i]] !== correctPath[i]) return false;
+// ─── PROXIMITY SCORING ───────────────────────────────────────────────────────
+function calcProximity(guess, target, allAnimals) {
+  // Find deepest matching level (must be sequential from kingdom down)
+  let deepestMatch = -1;
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (guess[LEVELS[i]].toLowerCase() === target[LEVELS[i]].toLowerCase()) {
+      deepestMatch = i;
+    } else {
+      break;
     }
-    return true;
+  }
+
+  if (deepestMatch === LEVELS.length - 1) return 100; // exact species match
+
+  if (deepestMatch === -1) {
+    // No match at all (shouldn't happen — all are Animalia)
+    return 0;
+  }
+
+  const matchedLevel = LEVELS[deepestMatch];
+  const matchedValue = target[matchedLevel].toLowerCase();
+
+  // How many animals in the dataset share this taxonomic value at this level?
+  const sharingCount = allAnimals.filter(a =>
+    a[matchedLevel].toLowerCase() === matchedValue
+  ).length;
+
+  // What's the maximum sharing count for this level across all values?
+  const countMap = {};
+  allAnimals.forEach(a => {
+    const v = a[matchedLevel].toLowerCase();
+    countMap[v] = (countMap[v] || 0) + 1;
   });
-  const uniqueOrders = [...new Set(filtered.map(a=>a.order))];
-  uniqueOrders.forEach(order=>{
-    const chip = document.createElement('div');
-    chip.className = 'tax-chip';
-    chip.textContent = order;
-    ordersDiv.appendChild(chip);
+  const maxSharing = Math.max(...Object.values(countMap));
+
+  // Level score: linear (0..1) based on deepest matched level index
+  // Level 0 (kingdom) = 1/7; Level 6 (species) = 7/7
+  const levelScore = (deepestMatch + 1) / LEVELS.length;
+
+  // Diversity score: log-scaled. Higher when matched group is larger (more species-rich).
+  // This rewards finding a species-rich genus over a monotypic one.
+  const diversityScore = Math.log(1 + sharingCount) / Math.log(1 + maxSharing);
+
+  // Blend: level drives ~65% of score, diversity modifier ~35%
+  const raw = 0.65 * levelScore + 0.35 * diversityScore;
+  return Math.min(99, Math.round(raw * 100));
+}
+
+function levelMatchMap(guess, target) {
+  // Returns object: { kingdom: true/false, phylum: true/false, ... }
+  const map = {};
+  let sequential = true;
+  for (const lvl of LEVELS) {
+    const match = sequential && guess[lvl].toLowerCase() === target[lvl].toLowerCase();
+    map[lvl] = match;
+    if (!match) sequential = false;
+  }
+  return map;
+}
+
+// ─── TREE OF LIFE RENDERING ──────────────────────────────────────────────────
+function renderTree() {
+  const container = document.getElementById('treeContainer');
+  container.innerHTML = '';
+  LEVELS.forEach((lvl, i) => {
+    const node = document.createElement('div');
+    node.className = 'tree-node' + (revealedLevels.has(lvl) ? ' revealed' : '');
+    node.style.paddingLeft = (i === 0 ? 0 : 12) + 'px';
+    node.innerHTML = `
+      <span class="tree-dot"></span>
+      <span>
+        <span class="tree-level">${LEVEL_LABELS[i]}</span>
+        <span class="tree-value ${revealedLevels.has(lvl) ? '' : 'hidden'}">
+          ${revealedLevels.has(lvl) ? target[lvl] : '━━━━━'}
+        </span>
+      </span>
+    `;
+    container.appendChild(node);
   });
 }
+
+// ─── HINT RENDERING ──────────────────────────────────────────────────────────
+function renderHints() {
+  const n = guesses.length;
+  const dietEl = document.getElementById('hintDiet');
+  const contEl = document.getElementById('hintContinents');
+  const noteEl = document.getElementById('hintNote');
+
+  if (n >= DIET_UNLOCK || gameOver) {
+    dietEl.innerHTML = `<strong>${target.diet}</strong>`;
+  } else {
+    dietEl.innerHTML = `<span class="hint-locked">?????</span>`;
+  }
+
+  if (n >= RANGE_UNLOCK || gameOver) {
+    contEl.innerHTML = target.continents.map(c =>
+      `<span class="continent-pip">${c}</span>`
+    ).join('');
+  } else {
+    contEl.innerHTML = `<span class="hint-locked">?????</span>`;
+  }
+
+  // Update unlock note
+  const parts = [];
+  if (n < DIET_UNLOCK && !gameOver) parts.push(`Diet in ${DIET_UNLOCK - n} guess${DIET_UNLOCK - n===1?'':'es'}`);
+  if (n < RANGE_UNLOCK && !gameOver) parts.push(`Range in ${RANGE_UNLOCK - n}`);
+  noteEl.textContent = parts.join(' · ');
+}
+
+// ─── GUESS CARD RENDERING ────────────────────────────────────────────────────
+function renderGuessCard(animal, matchMap, proximity) {
+  const prox = proximity;
+  let proxClass = prox >= 70 ? 'prox-high' : prox >= 40 ? 'prox-mid' : 'prox-low';
+
+  const chips = LEVELS.map((lvl, i) => {
+    const m = matchMap[lvl];
+    return `<div>
+      <span class="tax-chip ${m ? 'tax-match' : 'tax-nomatch'}">
+        <span class="tax-label">${LEVEL_LABELS[i]}</span>
+        ${animal[lvl]}
+      </span>
+    </div>`;
+  }).join('');
+
+  const card = document.createElement('div');
+  card.className = 'guess-card';
+  card.innerHTML = `
+    <div class="guess-card-header">
+      <div>
+        <div class="guess-name">${animal.common_name}</div>
+        <div class="guess-sci">${animal.scientific_name}</div>
+      </div>
+      <span class="proximity-badge ${proxClass}">${prox}%</span>
+    </div>
+    <div class="tax-row">${chips}</div>
+  `;
+  return card;
+}
+
+// ─── SUBMIT GUESS ────────────────────────────────────────────────────────────
+function submitGuess(animal) {
+  if (gameOver) return;
+  // Prevent duplicate
+  if (guesses.some(g => g.scientific_name === animal.scientific_name)) {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('autocompleteList').classList.remove('open');
+    return;
+  }
+
+  guesses.unshift(animal);  // newest first
+
+  const matchMap = levelMatchMap(animal, target);
+  const proximity = calcProximity(animal, target, animals);
+
+  // Update revealed levels
+  for (const lvl of LEVELS) {
+    if (matchMap[lvl]) revealedLevels.add(lvl);
+    else break;
+  }
+
+  // Render guess list
+  const list = document.getElementById('guessList');
+  if (guesses.length === 1) list.innerHTML = ''; // clear empty state
+  const card = renderGuessCard(animal, matchMap, proximity);
+  list.insertBefore(card, list.firstChild);
+
+  // Update counter
+  document.getElementById('guessCounter').textContent = `${guesses.length} guess${guesses.length===1?'':'es'}`;
+
+  renderTree();
+  renderHints();
+
+  // Check win
+  if (animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
+    endGame(true);
+    return;
+  }
+
+  // Clear input
+  document.getElementById('searchInput').value = '';
+  document.getElementById('autocompleteList').classList.remove('open');
+  filteredList = [];
+  selectedIndex = -1;
+}
+
+function endGame(won) {
+  gameOver = true;
+  // Reveal all levels
+  LEVELS.forEach(l => revealedLevels.add(l));
+  renderTree();
+  renderHints();
+
+  const banner = document.getElementById('resultBanner');
+  banner.classList.add('show');
+  document.getElementById('resultTitle').textContent = won
+    ? `🎉 Correct!`
+    : `The answer was…`;
+  document.getElementById('resultSubtitle').textContent =
+    won ? `You identified it in ${guesses.length} guess${guesses.length===1?'':'es'}.`
+        : `Better luck tomorrow.`;
+  document.getElementById('resultSci').textContent = `${target.common_name} — ${target.scientific_name}`;
+  document.getElementById('resultFact').textContent = target.notes || '';
+
+  document.getElementById('searchInput').disabled = true;
+  document.getElementById('guessBtn').disabled = true;
+}
+
+// ─── AUTOCOMPLETE ────────────────────────────────────────────────────────────
+function updateAutocomplete(query) {
+  const q = query.trim().toLowerCase();
+  if (q.length < 1) {
+    filteredList = [];
+    document.getElementById('autocompleteList').classList.remove('open');
+    return;
+  }
+  filteredList = animals.filter(a =>
+    a.common_name.toLowerCase().includes(q) ||
+    a.scientific_name.toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  const list = document.getElementById('autocompleteList');
+  list.innerHTML = '';
+  if (filteredList.length === 0) {
+    list.classList.remove('open');
+    return;
+  }
+  filteredList.forEach((a, i) => {
+    const item = document.createElement('div');
+    item.className = 'autocomplete-item';
+    item.innerHTML = `<span>${a.common_name}</span><span class="sci">${a.scientific_name}</span>`;
+    item.addEventListener('mousedown', e => {
+      e.preventDefault();
+      submitGuess(a);
+    });
+    list.appendChild(item);
+  });
+  list.classList.add('open');
+  selectedIndex = -1;
+}
+
+// ─── EVENT WIRING ────────────────────────────────────────────────────────────
+function wireEvents() {
+  const input = document.getElementById('searchInput');
+  const list = document.getElementById('autocompleteList');
+
+  input.addEventListener('input', () => updateAutocomplete(input.value));
+
+  input.addEventListener('keydown', e => {
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = Math.max(selectedIndex - 1, -1);
+    } else if (e.key === 'Enter') {
+      if (selectedIndex >= 0 && filteredList[selectedIndex]) {
+        submitGuess(filteredList[selectedIndex]);
+      } else if (filteredList.length === 1) {
+        submitGuess(filteredList[0]);
+      }
+      return;
+    } else if (e.key === 'Escape') {
+      list.classList.remove('open');
+      return;
+    }
+    items.forEach((el, i) => el.classList.toggle('selected', i === selectedIndex));
+  });
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => list.classList.remove('open'), 150);
+  });
+
+  document.getElementById('guessBtn').addEventListener('click', () => {
+    if (filteredList.length > 0) {
+      const idx = selectedIndex >= 0 ? selectedIndex : 0;
+      submitGuess(filteredList[idx]);
+    }
+  });
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+async function init() {
+  // Set date badge
+  const d = new Date();
+  document.getElementById('dateBadge').textContent =
+    d.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // Load animals
+  try {
+    const resp = await fetch('animals.json');
+    animals = await resp.json();
+  } catch(e) {
+    document.body.innerHTML = '<div style="padding:40px;font-family:serif;color:#600">Could not load animals.json — make sure you\'re serving from a local server. Run: <code>python -m http.server 8080</code></div>';
+    return;
+  }
+
+  target = pickDaily(animals);
+  renderTree();
+  renderHints();
+  wireEvents();
+}
+
+init();
 </script>
 </body>
 </html>
