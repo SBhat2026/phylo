@@ -103,6 +103,20 @@ header {
 }
 .mode-btn:hover { border-color: var(--blue); color: var(--blue); }
 .mode-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.mode-select {
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 20px;
+  border: 1.5px solid var(--sep);
+  background: var(--card);
+  color: var(--label2);
+  cursor: pointer;
+  transition: border-color .15s;
+  outline: none;
+}
+.mode-select:hover { border-color: var(--blue); color: var(--blue); }
 
 /* ── CARDS ── */
 .card {
@@ -624,6 +638,11 @@ header {
   <div class="date-badge" id="dateBadge"></div>
   <div class="header-actions">
     <button class="mode-btn" id="expertToggle" onclick="toggleExpert()">Expert Mode</button>
+    <select class="mode-select" id="maxGuessesSelect" onchange="setMaxGuesses(this.value)" title="Maximum guesses">
+      <option value="15">Limit: 15</option>
+      <option value="20" selected>Limit: 20</option>
+      <option value="25">Limit: 25</option>
+    </select>
     <button class="mode-btn" id="giveUpBtn" onclick="giveUp()" style="border-color:var(--red);color:var(--red)">Give Up</button>
   </div>
 </header>
@@ -942,6 +961,8 @@ let taxonIndex       = {};
 let practiceMode     = false;
 let expertFilteredList = [];
 let expertSelectedIdx  = -1;
+let maxGuesses         = 20;
+let expertGuessCount   = 0;
 
 // ═══════════════════════════════════════════════════════
 // DAILY SEED
@@ -957,6 +978,21 @@ function seededRandom(seed) {
 function pickDaily(arr) {
   const rng = seededRandom(dateToSeed());
   return arr[Math.floor(rng() * arr.length)];
+}
+
+// ═══════════════════════════════════════════════════════
+// GUESS COUNT HELPERS
+// ═══════════════════════════════════════════════════════
+function totalGuesses() { return guesses.length + expertGuessCount; }
+
+function updateGuessCounter() {
+  document.getElementById('guessCounter').textContent =
+    `${totalGuesses()} / ${maxGuesses} guess${totalGuesses() === 1 ? '' : 'es'}`;
+}
+
+function setMaxGuesses(val) {
+  maxGuesses = parseInt(val, 10);
+  updateGuessCounter();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1515,6 +1551,9 @@ function submitExpert() {
     return;
   }
 
+  expertGuessCount++;
+  updateGuessCounter();
+
   if (guessVal === targetVal) {
     revealedLevels.add(level);
     renderBranchTree();
@@ -1532,6 +1571,8 @@ function submitExpert() {
     resultEl.style.color = '#ff3b30';
     resultEl.textContent = `✗ "${guess}" is not the ${LEVEL_LABELS[LEVELS.indexOf(level)]}.`;
   }
+
+  if (totalGuesses() >= maxGuesses) { endGame(false); return; }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1656,8 +1697,7 @@ function submitGuess(animal) {
   if (guesses.length === 1) list.innerHTML = '';
   list.insertBefore(renderGuessCard(animal, matchMap, prox), list.firstChild);
 
-  document.getElementById('guessCounter').textContent =
-    `${guesses.length} guess${guesses.length === 1 ? '' : 'es'}`;
+  updateGuessCounter();
 
   renderBranchTree();
   renderHints();
@@ -1665,6 +1705,8 @@ function submitGuess(animal) {
   if (animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
     endGame(true); return;
   }
+
+  if (totalGuesses() >= maxGuesses) { endGame(false); return; }
 
   document.getElementById('searchInput').value = '';
   document.getElementById('autocompleteList').classList.remove('open');
@@ -1698,10 +1740,12 @@ async function endGame(won) {
 
   const banner = document.getElementById('resultBanner');
   banner.classList.add('show');
+  const total = totalGuesses();
+  const hitMax = !won && total >= maxGuesses;
   document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
   document.getElementById('resultSubtitle').textContent = won
-    ? `Identified in ${guesses.length} guess${guesses.length === 1 ? '' : 'es'}.`
-    : 'Better luck tomorrow.';
+    ? `Identified in ${total} guess${total === 1 ? '' : 'es'}.`
+    : hitMax ? `Out of guesses (${total} / ${maxGuesses}).` : 'Better luck tomorrow.';
   document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
   document.getElementById('resultFact').textContent = target.notes || '';
 
@@ -1820,6 +1864,7 @@ function startPractice() {
   selectedIdx  = -1;
   expertFilteredList = [];
   expertSelectedIdx  = -1;
+  expertGuessCount   = 0;
 
   // Pick a random animal different from today's daily
   const dailyAnimal = pickDaily(animals);
@@ -1846,6 +1891,7 @@ function startPractice() {
   document.getElementById('dateBadge').innerHTML =
     'Practice Mode &nbsp;<span class="practice-badge">Random Animal</span>';
 
+  updateGuessCounter();
   renderBranchTree();
   renderHints();
   buildDietPills();
@@ -1956,6 +2002,7 @@ async function init() {
   renderHints();
   buildDietPills();
   buildRangePills();
+  updateGuessCounter();
   wireEvents();
 }
 
