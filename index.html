@@ -494,6 +494,7 @@ header {
   <div class="date-badge" id="dateBadge"></div>
   <div class="header-actions">
     <button class="mode-btn" id="expertToggle" onclick="toggleExpert()">Expert Mode</button>
+    <button class="mode-btn" id="giveUpBtn" onclick="giveUp()" style="border-color:var(--red);color:var(--red)">Give Up</button>
   </div>
 </header>
 
@@ -866,6 +867,121 @@ function inferHabitat(animal) {
 }
 
 // ═══════════════════════════════════════════════════════
+// DIET INFERENCE
+// ═══════════════════════════════════════════════════════
+function inferDiet(animal) {
+  if (animal.diet && animal.diet.trim()) return animal.diet;
+
+  const notes  = (animal.notes        || '').toLowerCase();
+  const name   = (animal.common_name  || '').toLowerCase();
+  const order  = (animal.order        || '').toLowerCase();
+  const cls    = (animal.class        || '').toLowerCase();
+
+  // Infer from notes text using existing DIET_CATS keywords
+  for (const cat of DIET_CATS) {
+    if (cat.keys.some(k => notes.includes(k.toLowerCase()))) return cat.label;
+  }
+
+  // Order-level rules
+  const ORDER_DIET = {
+    'carnivora':       'Carnivore',
+    'cetacea':         'Carnivore',
+    'chiroptera':      'Insectivore',
+    'insectivora':     'Insectivore',
+    'tubulidentata':   'Insectivore',
+    'pilosa':          'Insectivore',
+    'pholidota':       'Insectivore',
+    'proboscidea':     'Herbivore',
+    'perissodactyla':  'Herbivore',
+    'artiodactyla':    'Herbivore',
+    'lagomorpha':      'Herbivore',
+    'testudines':      'Herbivore',
+    'rodentia':        'Omnivore',
+    'primates':        'Omnivore',
+    'squamata':        'Carnivore',
+    'crocodilia':      'Carnivore',
+    'accipitriformes': 'Carnivore',
+    'falconiformes':   'Carnivore',
+    'cathartiformes':  'Scavenger',
+    'strigiformes':    'Carnivore',
+    'sphenisciformes': 'Piscivore',
+    'columbiformes':   'Granivore',
+    'psittaciformes':  'Frugivore',
+    'passeriformes':      'Omnivore',
+    'anseriformes':       'Omnivore',
+    'anatoidea':          'Omnivore',
+    'piciformes':         'Omnivore',
+    'galliformes':        'Omnivore',
+    'gruiformes':         'Omnivore',
+    'tyrannida':          'Insectivore',
+    'muscicapoidea':      'Insectivore',
+    'caprimulgiformes':   'Insectivore',
+    'apodiformes':        'Insectivore',
+    'coraciiformes':      'Carnivore',
+    'charadriiformes':    'Carnivore',
+    'lari':               'Carnivore',
+    'pelecaniformes':     'Piscivore',
+    'suliformes':         'Piscivore',
+    'procellariiformes':  'Piscivore',
+    'psittacoidea':       'Frugivore',
+    // Marsupials / monotremes
+    'diprotodontia':      'Herbivore',
+    'phalangeroidea':     'Herbivore',
+    'didelphimorphia':    'Omnivore',
+    'peramelemorphia':    'Omnivore',
+    // Insectivores / shrews
+    'eulipotyphla':       'Insectivore',
+    'soricomorpha':       'Insectivore',
+    // Small mammal suborders
+    'microchiroptera':    'Insectivore',
+    'dipodoidea':         'Omnivore',
+    'scandentia':         'Omnivore',
+    'cingulata':          'Insectivore',
+    // Carnivore suborders
+    'feliformia':         'Carnivore',
+    'feloidea':           'Carnivore',
+    'cynoidea':           'Carnivore',
+    'ursoidea':           'Omnivore',
+    // Primate suborders
+    'platyrrhini':        'Omnivore',
+    'hominoidea':         'Omnivore',
+    'cercopithecoidea':   'Omnivore',
+    // Others
+    'sirenia':            'Herbivore',
+    'hyracoidea':         'Herbivore',
+    'cervoidea':          'Herbivore',
+    // Marine invertebrates
+    'malacostraca':       'Omnivore',
+    'cephalopoda':        'Carnivore',
+  };
+  if (ORDER_DIET[order]) return ORDER_DIET[order];
+
+  // Class-level rules
+  if (['actinopterygii','chondrichthyes','sarcopterygii'].includes(cls)) return 'Carnivore';
+  if (cls === 'aves') return 'Omnivore';       // generic bird fallback
+  if (cls === 'insecta') return 'Herbivore';   // most insects are plant-feeders
+  if (cls === 'arachnida') return 'Carnivore'; // spiders/scorpions
+  if (cls === 'amphibia') return 'Insectivore';
+  if (cls === 'reptilia') return 'Carnivore';
+  if (['gastropoda','bivalvia','polyplacophora'].includes(cls)) return 'Filter Feeder';
+  if (['hydrozoa','anthozoa','hexacorallia','scyphozoa'].includes(cls)) return 'Carnivore'; // jellyfish/coral
+  if (cls === 'asteroidea') return 'Carnivore'; // starfish
+
+  // Name-keyword fallback
+  const NAME_RULES = [
+    [['eagle','hawk','falcon','osprey','harrier','kite','condor','buzzard','kestrel','goshawk'], 'Carnivore'],
+    [['shark','barracuda','piranha','moray','crocodile','alligator'], 'Carnivore'],
+    [['bee','hummingbird','sunbird','sugarbird'], 'Nectarivore'],
+    [['antelope','gazelle','zebra','deer','bison','buffalo','elephant','rhino','hippo','koala','rabbit','hare','panda'], 'Herbivore'],
+  ];
+  for (const [words, diet] of NAME_RULES) {
+    if (words.some(w => name.includes(w))) return diet;
+  }
+
+  return 'Unknown';
+}
+
+// ═══════════════════════════════════════════════════════
 // DIET MATCHING
 // ═══════════════════════════════════════════════════════
 function matchesDietCat(diet, cat) {
@@ -1080,7 +1196,8 @@ function renderHints(forceAll) {
   const showRange   = forceAll || gameOver || rangeGuessedCorrect   || n >= RANGE_UNLOCK;
   const showHabitat = forceAll || gameOver || n >= HABITAT_UNLOCK;
 
-  dietEl.innerHTML    = showDiet    ? `<strong>${target.diet || 'Unknown'}</strong>` : '<span class="hint-locked">———</span>';
+  const dietLabel = inferDiet(target);
+  dietEl.innerHTML    = showDiet    ? `<strong>${dietLabel}</strong>` : '<span class="hint-locked">———</span>';
   contEl.innerHTML    = showRange   ? renderRangePips(target.continents)             : '<span class="hint-locked">———</span>';
   habitatEl.innerHTML = showHabitat ? `<strong>${inferHabitat(target)}</strong>`     : '<span class="hint-locked">———</span>';
 
@@ -1104,7 +1221,7 @@ function buildDietPills() {
     if (gameOver) { pill.classList.add('locked'); pill.disabled = true; }
     pill.addEventListener('click', () => {
       if (gameOver || dietGuessedCorrect || pill.classList.contains('locked')) return;
-      if (matchesDietCat(target.diet, cat)) {
+      if (matchesDietCat(inferDiet(target), cat)) {
         pill.classList.add('correct');
         dietGuessedCorrect = true;
         document.getElementById('dietMiniHint').textContent = '✓ Correct! Diet hint unlocked.';
@@ -1288,6 +1405,12 @@ function submitGuess(animal) {
 // ═══════════════════════════════════════════════════════
 // END GAME
 // ═══════════════════════════════════════════════════════
+function giveUp() {
+  if (gameOver) return;
+  document.getElementById('giveUpBtn').disabled = true;
+  endGame(false);
+}
+
 async function endGame(won) {
   gameOver = true;
   LEVELS.forEach(lv => revealedLevels.add(lv));
@@ -1314,6 +1437,7 @@ async function endGame(won) {
 
   document.getElementById('searchInput').disabled = true;
   document.getElementById('guessBtn').disabled    = true;
+  document.getElementById('giveUpBtn').disabled   = true;
   banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
