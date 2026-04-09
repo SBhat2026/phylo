@@ -7,28 +7,28 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── APPLE TOKENS ── */
+/* ── TOKENS ── */
 :root {
-  --bg:        #f2f2f7;
-  --card:      #ffffff;
-  --blue:      #007aff;
-  --blue-lt:   #e8f1ff;
-  --green:     #34c759;
-  --green-lt:  #e4f7ea;
-  --red:       #ff3b30;
-  --red-lt:    #ffeceb;
-  --orange:    #ff9500;
-  --label:     #000000;
-  --label2:    #3c3c43;
-  --label3:    #6c6c70;
-  --sep:       #c6c6c8;
-  --sep-lt:    #e5e5ea;
-  --fill:      #f2f2f7;
-  --fill2:     #e5e5ea;
-  --r:         12px;
-  --r-sm:      8px;
-  --shadow:    0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+  --bg:        #e8dfc8;        /* warm sandy tan */
+  --card:      #f8f2e0;        /* light parchment */
+  --blue:      #2a5fa8;        /* naturalist blue */
+  --blue-lt:   #d6e8f8;
+  --green:     #2e7d4f;
+  --green-lt:  #cce8d6;
+  --red:       #b83228;
+  --red-lt:    #f8dbd8;
+  --orange:    #c07820;
+  --label:     #1e1810;        /* warm near-black */
+  --label2:    #3d3020;
+  --label3:    #7a6a50;
+  --sep:       #c0a878;        /* tan border */
+  --sep-lt:    #d8c89c;
+  --fill:      #ede4cc;
+  --fill2:     #e0d4b4;
+  --r:         10px;
+  --r-sm:      7px;
+  --shadow:    0 1px 4px rgba(60,40,10,0.12), 0 1px 2px rgba(60,40,10,0.07);
+  --shadow-md: 0 4px 18px rgba(60,40,10,0.14), 0 2px 6px rgba(60,40,10,0.08);
   --font:      'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -36,6 +36,7 @@
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   background: var(--bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
   color: var(--label);
   font-family: var(--font);
   font-size: 15px;
@@ -459,7 +460,8 @@ header {
 #wikiTooltip {
   position: fixed;
   z-index: 1000;
-  width: 280px;
+  min-width: 200px;
+  max-width: 320px;
   background: var(--card);
   border-radius: var(--r);
   box-shadow: var(--shadow-md);
@@ -472,12 +474,103 @@ header {
   border: 1px solid var(--sep-lt);
 }
 #wikiTooltip.visible { opacity: 1; transform: translateY(0); }
-#wikiTooltip img { width: 100%; max-height: 150px; object-fit: cover; display: block; }
+#wikiTooltip img { width: 100%; height: auto; display: block; }
 .wiki-body { padding: 10px 12px 12px; }
 .wiki-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 1px; }
 .wiki-sci  { font-style: italic; color: var(--label3); font-size: 0.74rem; margin-bottom: 6px; }
 .wiki-text { color: var(--label2); line-height: 1.5; font-size: 0.81rem; }
 .wiki-loading { padding: 14px; color: var(--label3); font-size: 0.8rem; text-align: center; }
+
+/* ── TAXONOMY POPUP ── */
+.tax-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(30,24,16,0.55);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.tax-overlay.open { display: flex; }
+.tax-popup {
+  background: var(--card);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--sep);
+  max-width: 480px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 22px 24px 24px;
+  position: relative;
+  animation: slide-in .18s ease;
+}
+.tax-popup-close {
+  position: absolute;
+  top: 12px; right: 14px;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--label3);
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.tax-popup-close:hover { color: var(--label); }
+.tax-popup-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--label);
+  margin-bottom: 2px;
+  padding-right: 28px;
+}
+.tax-popup-sci {
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--blue);
+  margin-bottom: 18px;
+}
+.tax-popup-tree { display: flex; flex-direction: column; gap: 6px; }
+.tax-popup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+.tax-popup-level {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--label3);
+  width: 52px;
+  flex-shrink: 0;
+}
+.tax-popup-val {
+  flex: 1;
+  font-size: 0.86rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-style: italic;
+}
+.tax-popup-val.match   { background: var(--green-lt); color: #1a5c35; }
+.tax-popup-val.nomatch { background: var(--red-lt);   color: #8a1a14; }
+.tax-popup-target {
+  font-size: 0.78rem;
+  color: var(--label3);
+  white-space: nowrap;
+  font-style: italic;
+}
+.tax-popup-target::before { content: '→ '; color: var(--blue); font-style: normal; }
+.tax-popup-prox {
+  margin-top: 16px;
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--label3);
+}
+.tax-popup-prox strong { font-size: 1rem; color: var(--blue); }
+.guess-card { cursor: pointer; }
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 5px; }
@@ -568,7 +661,7 @@ header {
         <span class="card-title">Guess History</span>
       </div>
       <div class="guess-list" id="guessList">
-        <div class="empty-state">Hover a guess card to see its Wikipedia entry.</div>
+        <div class="empty-state">Hover a card to preview · Click to see full taxonomy tree.</div>
       </div>
     </div>
 
@@ -632,6 +725,17 @@ header {
     <div class="wiki-name" id="wikiName"></div>
     <div class="wiki-sci"  id="wikiSci"></div>
     <div class="wiki-text" id="wikiText"></div>
+  </div>
+</div>
+
+<!-- TAXONOMY POPUP -->
+<div class="tax-overlay" id="taxOverlay">
+  <div class="tax-popup" id="taxPopup">
+    <button class="tax-popup-close" onclick="closeTaxPopup()">×</button>
+    <div class="tax-popup-name" id="taxPopName"></div>
+    <div class="tax-popup-sci"  id="taxPopSci"></div>
+    <div class="tax-popup-tree" id="taxPopTree"></div>
+    <div class="tax-popup-prox" id="taxPopProx"></div>
   </div>
 </div>
 
@@ -1109,12 +1213,13 @@ function positionTooltip(el) {
   const rect = el.getBoundingClientRect();
   const vw   = window.innerWidth;
   const vh   = window.innerHeight;
-  const tw   = 280;
+  const tw   = Math.min(320, tooltip.offsetWidth || 280);
+  const th   = tooltip.offsetHeight || 300;
   let left = rect.right + 10;
   if (left + tw > vw - 8) left = rect.left - tw - 10;
   if (left < 8) left = 8;
   let top = rect.top;
-  if (top + 280 > vh - 8) top = vh - 288;
+  if (top + th > vh - 8) top = vh - th - 8;
   if (top < 8) top = 8;
   tooltip.style.left = left + 'px';
   tooltip.style.top  = top  + 'px';
@@ -1346,9 +1451,59 @@ function renderGuessCard(animal, matchMap, prox) {
   card.addEventListener('mouseenter', () => { hoverTimer = setTimeout(() => showTooltip(animal, card), 250); });
   card.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); hideTooltip(); });
   card.addEventListener('mousemove',  () => positionTooltip(card));
+  card.addEventListener('click', () => { clearTimeout(hoverTimer); hideTooltip(); showTaxPopup(animal, matchMap, prox); });
 
   return card;
 }
+
+// ═══════════════════════════════════════════════════════
+// TAXONOMY POPUP
+// ═══════════════════════════════════════════════════════
+function showTaxPopup(animal, matchMap, prox) {
+  document.getElementById('taxPopName').textContent = animal.common_name;
+  document.getElementById('taxPopSci').textContent  = animal.scientific_name;
+
+  const tree = document.getElementById('taxPopTree');
+  tree.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const matched = matchMap[lv];
+    const row = document.createElement('div');
+    row.className = 'tax-popup-row';
+
+    const lvEl = document.createElement('div');
+    lvEl.className = 'tax-popup-level';
+    lvEl.textContent = LEVEL_LABELS[i];
+
+    const val = document.createElement('div');
+    val.className = 'tax-popup-val ' + (matched ? 'match' : 'nomatch');
+    val.textContent = animal[lv] || '?';
+
+    row.appendChild(lvEl);
+    row.appendChild(val);
+
+    if (!matched) {
+      const tgt = document.createElement('div');
+      tgt.className = 'tax-popup-target';
+      tgt.textContent = target[lv] || '?';
+      row.appendChild(tgt);
+    }
+    tree.appendChild(row);
+  });
+
+  const proxClass = prox >= 70 ? 'prox-high' : prox >= 40 ? 'prox-mid' : 'prox-low';
+  document.getElementById('taxPopProx').innerHTML =
+    `Proximity: <strong class="${proxClass}">${prox}%</strong>`;
+
+  document.getElementById('taxOverlay').classList.add('open');
+}
+
+function closeTaxPopup() {
+  document.getElementById('taxOverlay').classList.remove('open');
+}
+
+document.getElementById('taxOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('taxOverlay')) closeTaxPopup();
+});
 
 // ═══════════════════════════════════════════════════════
 // FLASH
