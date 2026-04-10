@@ -527,6 +527,44 @@ header {
 #treeContainer { padding: 8px 0; }
 .tree-svg text { font-family: 'Inter', sans-serif; }
 
+/* ── SIDEBAR TABS ── */
+.sidebar-tabs {
+  display: flex;
+  gap: 3px;
+}
+.sidebar-tab {
+  font-size: 0.70rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--label3);
+  transition: background 0.12s, color 0.12s;
+  font-family: var(--font);
+}
+.sidebar-tab.active {
+  background: var(--fill2);
+  color: var(--label);
+}
+.sidebar-tab:hover:not(.active) {
+  background: var(--fill);
+}
+
+/* ── PHYLOGENY ── */
+#phyloContainer { padding: 8px 0; overflow-x: auto; }
+.phylo-empty {
+  text-align: center;
+  padding: 28px 0;
+  color: var(--label3);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+.phylo-svg text { font-family: 'Inter', sans-serif; }
+
 /* ── FIELD NOTES ── */
 .hint-item {
   display: flex;
@@ -851,12 +889,16 @@ header {
   <!-- RIGHT COLUMN / SIDEBAR -->
   <div class="sidebar">
 
-    <!-- BRANCHING TREE -->
+    <!-- BRANCHING TREE / PHYLOGENY -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Tree of Life</span>
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" id="tabTaxonomy"  onclick="switchSidebarTab('taxonomy')">Taxonomy</button>
+          <button class="sidebar-tab"        id="tabPhylogeny" onclick="switchSidebarTab('phylogeny')">Phylogeny</button>
+        </div>
       </div>
-      <div id="treeContainer" style="padding:8px 4px 12px"></div>
+      <div id="treeContainer"  style="padding:8px 4px 12px"></div>
+      <div id="phyloContainer" style="padding:8px 4px 12px; display:none"></div>
     </div>
 
     <!-- FIELD NOTES -->
@@ -1586,6 +1628,151 @@ function renderBranchTree() {
   });
 }
 
+// Render whichever sidebar view is currently active.
+function renderSidebar() {
+  renderBranchTree();
+  if (sidebarTab === 'phylogeny') renderPhylogeny();
+}
+
+// ═══════════════════════════════════════════════════════
+// SIDEBAR TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+let sidebarTab = 'taxonomy';
+
+function switchSidebarTab(tab) {
+  sidebarTab = tab;
+  document.getElementById('tabTaxonomy').classList.toggle('active',  tab === 'taxonomy');
+  document.getElementById('tabPhylogeny').classList.toggle('active', tab === 'phylogeny');
+  document.getElementById('treeContainer').style.display  = tab === 'taxonomy'  ? '' : 'none';
+  document.getElementById('phyloContainer').style.display = tab === 'phylogeny' ? '' : 'none';
+  if (tab === 'phylogeny') renderPhylogeny();
+}
+
+// ═══════════════════════════════════════════════════════
+// PHYLOGENY DENDROGRAM
+// ═══════════════════════════════════════════════════════
+
+// Build a trie keyed by taxonomy level→value.
+// Each node: { level, value, children[], leaf (animal|null) }
+function buildPhyloTrie(animalList) {
+  const root = { level: null, value: null, children: [], leaf: null };
+  for (const animal of animalList) {
+    let node = root;
+    for (const lv of LEVELS) {
+      const raw = (animal[lv] || '').trim();
+      let child = node.children.find(c => c.level === lv && c.value === raw);
+      if (!child) {
+        child = { level: lv, value: raw, children: [], leaf: null };
+        node.children.push(child);
+      }
+      node = child;
+    }
+    node.leaf = animal;   // species-level node is the leaf
+  }
+  return root;
+}
+
+// Collect leaf nodes in DFS order, then propagate Y upward.
+function layoutPhyloTrie(root, rowH) {
+  const leaves = [];
+  function collectLeaves(node) {
+    if (node.leaf) { leaves.push(node); return; }
+    node.children.forEach(collectLeaves);
+  }
+  collectLeaves(root);
+  leaves.forEach((n, i) => { n.y = i * rowH + rowH / 2; });
+
+  function propagateY(node) {
+    if (node.leaf) return;
+    node.children.forEach(propagateY);
+    node.y = (node.children[0].y + node.children[node.children.length - 1].y) / 2;
+  }
+  root.children.forEach(propagateY);
+  root.y = root.children.length
+    ? (root.children[0].y + root.children[root.children.length - 1].y) / 2
+    : rowH / 2;
+
+  return leaves.length;
+}
+
+function phyloNodeColor(level, value) {
+  if (!level || !revealedLevels.has(level)) return 'var(--sep)';
+  return (target[level] || '').toLowerCase() === (value || '').toLowerCase()
+    ? 'var(--green)'
+    : 'var(--red)';
+}
+
+function renderPhylogeny() {
+  const el = document.getElementById('phyloContainer');
+  if (!guesses.length) {
+    el.innerHTML = '<div class="phylo-empty">Guess an animal to see the phylogeny.</div>';
+    return;
+  }
+
+  const SVG_W  = 256;
+  const PAD_L  = 10;   // left of root line
+  const PAD_R  = 6;
+  const LABEL_W = 88;  // right-side leaf label column
+  const TREE_W  = SVG_W - PAD_L - LABEL_W - PAD_R;  // ~152px for the 7 rank columns
+  const ROW_H   = 24;
+
+  const root = buildPhyloTrie(guesses);
+  const leafCount = layoutPhyloTrie(root, ROW_H);
+  const SVG_H = leafCount * ROW_H + 8;
+
+  function levelX(lv) {
+    const i = LEVELS.indexOf(lv);  // 0–6
+    return PAD_L + (i + 1) / LEVELS.length * TREE_W;
+  }
+
+  const parts = [
+    `<svg class="phylo-svg" width="${SVG_W}" height="${SVG_H}" viewBox="0 0 ${SVG_W} ${SVG_H}">`
+  ];
+
+  // Draw a small horizontal "root tail" into the tree
+  if (root.children.length) {
+    const firstChildX = levelX(root.children[0].level);
+    parts.push(`<line x1="${PAD_L}" y1="${root.y}" x2="${firstChildX}" y2="${root.y}" stroke="var(--sep)" stroke-width="1.5"/>`);
+  }
+
+  function renderNode(node, parentX) {
+    if (!node.level) {
+      // virtual root — recurse with root's X as parentX
+      node.children.forEach(c => renderNode(c, PAD_L));
+      return;
+    }
+
+    const x     = levelX(node.level);
+    const color = phyloNodeColor(node.level, node.value);
+
+    // Horizontal line from parent bracket to this node's X
+    parts.push(`<line x1="${parentX}" y1="${node.y}" x2="${x}" y2="${node.y}" stroke="${color}" stroke-width="1.5"/>`);
+
+    if (node.leaf) {
+      // Terminal node — dot + common name
+      parts.push(`<circle cx="${x}" cy="${node.y}" r="3" fill="${color}"/>`);
+      const name = (node.leaf.common_name || '').length > 14
+        ? node.leaf.common_name.slice(0, 13) + '…'
+        : node.leaf.common_name;
+      parts.push(`<text x="${x + 6}" y="${node.y + 4}" font-size="10" fill="${color}" font-family="Inter,sans-serif">${name}</text>`);
+    } else {
+      // Internal node — vertical bracket + recurse
+      const topY = node.children[0].y;
+      const botY = node.children[node.children.length - 1].y;
+      parts.push(`<line x1="${x}" y1="${topY}" x2="${x}" y2="${botY}" stroke="${color}" stroke-width="1.5"/>`);
+
+      // Small tick mark at this node's branch point
+      parts.push(`<circle cx="${x}" cy="${node.y}" r="2.5" fill="${color}"/>`);
+
+      node.children.forEach(child => renderNode(child, x));
+    }
+  }
+
+  renderNode(root, PAD_L);
+  parts.push('</svg>');
+  el.innerHTML = parts.join('');
+}
+
 // ═══════════════════════════════════════════════════════
 // FIELD NOTES
 // ═══════════════════════════════════════════════════════
@@ -1745,7 +1932,7 @@ function submitExpert() {
 
   if (guessVal === targetVal) {
     revealedLevels.add(level);
-    renderBranchTree();
+    renderSidebar();
     resultEl.style.color = '#34c759';
     resultEl.textContent = `✓ Correct! ${LEVEL_LABELS[LEVELS.indexOf(level)]} revealed.`;
     input.value = '';
@@ -1890,7 +2077,7 @@ function submitGuess(animal) {
 
   updateGuessCounter();
 
-  renderBranchTree();
+  renderSidebar();
   renderHints();
 
   if (animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
@@ -1917,7 +2104,7 @@ function giveUp() {
 async function endGame(won) {
   gameOver = true;
   LEVELS.forEach(lv => revealedLevels.add(lv));
-  renderBranchTree();
+  renderSidebar();
   renderHints(true);
   document.querySelectorAll('.pill').forEach(p => { p.classList.add('locked'); p.disabled = true; });
 
@@ -2085,7 +2272,7 @@ function startPractice() {
     'Practice Mode &nbsp;<span class="practice-badge">Random Animal</span>';
 
   updateGuessCounter();
-  renderBranchTree();
+  renderSidebar();
   renderHints();
   buildDietPills();
   buildRangePills();
@@ -2185,7 +2372,7 @@ async function init() {
   target = pickDaily(animals);
   fetchWiki(target); // pre-warm
 
-  renderBranchTree();
+  renderSidebar();
   renderHints();
   buildDietPills();
   buildRangePills();
