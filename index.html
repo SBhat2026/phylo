@@ -1028,9 +1028,25 @@ function inferHabitat(animal) {
   if (ord === 'sphenisciformes') return 'Coastal / Ocean';
   if (['pelecaniformes','suliformes','phaethontiformes'].includes(ord)) return 'Coastal';
   if (cls === 'amphibia') {
-    if (n.includes('rainforest') || n.includes('tropical')) return 'Tropical Rainforest';
     if (n.includes('cave') || n.includes('subterranean'))   return 'Cave / Underground';
+    if (n.includes('rainforest') || n.includes('tropical')) return 'Tropical Rainforest';
     return 'Freshwater / Forest';
+  }
+  // Insects with aquatic larvae / life stages
+  if (cls === 'insecta') {
+    if (['odonata','plecoptera','ephemeroptera','trichoptera','megaloptera'].includes(ord)) return 'Freshwater';
+    if (ord === 'hemiptera' && (n.includes('aquatic') || n.includes('water') || n.includes('pond') || n.includes('stream'))) return 'Freshwater';
+    if (ord === 'coleoptera' && (n.includes('aquatic') || n.includes('water beetle') || n.includes('diving beetle') || n.includes('whirligig') || n.includes('water scavenger'))) return 'Freshwater';
+    if (n.includes('cave') || n.includes('subterranean')) return 'Cave / Underground';
+    if (n.includes('rainforest') || n.includes('rain forest') || n.includes('tropical forest') || n.includes('jungle')) return 'Tropical Rainforest';
+    if (n.includes('tropical')) return 'Tropical Forest';
+    if (n.includes('desert') || n.includes('arid')) return 'Desert';
+    if (n.includes('alpine') || n.includes('mountain') || n.includes('highland')) return 'Mountain';
+    if (n.includes('grassland') || n.includes('meadow') || n.includes('prairie') || n.includes('steppe')) return 'Grassland';
+    if (n.includes('wetland') || n.includes('swamp') || n.includes('marsh') || n.includes('bog') || n.includes('riparian')) return 'Wetland';
+    if (n.includes('forest') || n.includes('woodland') || n.includes('scrub')) return 'Forest';
+    if (n.includes('savanna') || n.includes('savannah')) return 'Savanna';
+    return 'Terrestrial';
   }
   if (n.includes('deep-sea') || n.includes('deep sea') || n.includes('abyssal')) return 'Deep Ocean';
   if (n.includes('coral reef') || n.includes('reef'))      return 'Coral Reef';

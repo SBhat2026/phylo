@@ -9,7 +9,7 @@
     "family": "Orycteropodidae",
     "genus": "Orycteropus",
     "species": "afer",
-    "diet": "",
+    "diet": "Insectivore",
     "continents": [
       "Africa",
       "South America"
@@ -271,7 +271,11 @@
     "genus": "Allenopithecus",
     "species": "nigroviridis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "The Allen's swamp monkey is a species of Old World monkey and the only member of the genus Allenopithecus."
   },
   {
@@ -552,7 +556,9 @@
     "genus": "Arabitragus",
     "species": "jayakari",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Middle East"
+    ],
     "notes": "The Arabian tahr is a species of tahr native to eastern Arabia."
   },
   {
@@ -666,7 +672,9 @@
     "genus": "Lagenorhynchus",
     "species": "acutus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "The Atlantic white-sided dolphin is a distinctively coloured dolphin found in the cool to temperate waters of the North Atlantic Ocean."
   },
   {
@@ -841,7 +849,9 @@
     "genus": "Hapalemur",
     "species": "simus",
     "diet": "Carnivore",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The greater bamboo lemur, also known as the broad-nosed bamboo lemur and the broad-nosed gentle lemur, is a species of lemur endemic to the island of Madagascar."
   },
   {
@@ -2097,8 +2107,10 @@
     "genus": "Peolagus",
     "species": "marjorita",
     "diet": "Herbivorous",
-    "continents": [],
-    "notes": ""
+    "continents": [
+      "Africa"
+    ],
+    "notes": "The Bunyoro rabbit or Uganda grass hare is a species of mammal in the family Leporidae."
   },
   {
     "common_name": "Chacma baboon",
@@ -2601,7 +2613,11 @@
     "genus": "Desmodus",
     "species": "rotundus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The common vampire bat is a small, leaf-nosed bat native to the Americas."
   },
   {
@@ -2647,7 +2663,9 @@
     "genus": "Microcebus",
     "species": "coquereli",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Madame Berthe's mouse lemur or Berthe's mouse lemur is the smallest of the mouse lemurs and the smallest primate in the world; the average body length is 9.2 cm (3.6 in) and seasonal weight is around …"
   },
   {
@@ -2872,7 +2890,9 @@
     "genus": "Phocoenoides",
     "species": "dalli",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Dall's porpoise is a species of porpoise endemic to the North Pacific."
   },
   {
@@ -2968,7 +2988,9 @@
     "genus": "Octodon",
     "species": "degus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The common degu, or, historically, the degu, is a small hystricomorpha rodent endemic to the Chilean matorral ecoregion of central Chile."
   },
   {
@@ -3067,7 +3089,9 @@
     "genus": "Propithecus",
     "species": "diadema",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The diademed sifaka, or diademed simpona, is an endangered species of sifaka, one of the lemurs endemic to certain rainforests in eastern Madagascar."
   },
   {
@@ -3098,7 +3122,9 @@
     "genus": "Ammodorcas",
     "species": "clarkei",
     "diet": "Herbivore",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The dibatag, or Clarke's gazelle, is a medium-sized slender antelope native to Ethiopia and Somalia."
   },
   {
@@ -3686,7 +3712,9 @@
     "genus": "Eupleres",
     "species": "goudotii",
     "diet": "Carnivore",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The eastern falanouc is a rare mongoose-like mammal in the carnivoran family Eupleridae endemic to Madagascar."
   },
   {
@@ -3717,7 +3745,9 @@
     "genus": "Pseudorca",
     "species": "crassidens",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The false killer whale is a species of oceanic dolphin that is the only extant representative of the genus Pseudorca."
   },
   {
@@ -3908,7 +3938,9 @@
     "genus": "Phaner",
     "species": "furcifer",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Masoala fork-marked lemur, also known as the eastern fork-marked lemur or Masoala fork-crowned lemur, is a species of lemur found in the coastal forests of northeastern Madagascar."
   },
   {
@@ -4051,7 +4083,9 @@
     "genus": "Theropithecus",
     "species": "gelada",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The gelada, sometimes called the bleeding-heart monkey or the gelada baboon, is a species of Old World monkey found only in the Ethiopian Highlands, living at elevations of 1,800–4,400 m (5,900–14,400…"
   },
   {
@@ -4147,7 +4181,9 @@
     "genus": "Taurotragus",
     "species": "derbianus",
     "diet": "Herbivore",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The giant eland, also known as Lord Derby's eland or greater eland, is an open-forest and savanna antelope."
   },
   {
@@ -4761,7 +4797,11 @@
     "genus": "Pagophilus",
     "species": "groenlandicus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America",
+      "Atlantic Ocean",
+      "Arctic Ocean"
+    ],
     "notes": "The harp seal, also known as the saddleback seal or Greenland seal, is a species of earless seal, or true seal, native to the northernmost Atlantic Ocean and Arctic Ocean."
   },
   {
@@ -4993,7 +5033,9 @@
     "genus": "Cystophora",
     "species": "cristata",
     "diet": "Carnivore",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "The hooded seal or bladdernose seal is a large phocid found only in the central and western North Atlantic, ranging from Svalbard in the east to the Gulf of St."
   },
   {
@@ -5103,7 +5145,9 @@
     "genus": "Damaliscus",
     "species": "hunteri",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The hirola, also called the Hunter's hartebeest or Hunter's antelope, is a critically endangered antelope species found as of now, only in Kenya along the border of Somalia."
   },
   {
@@ -6049,7 +6093,9 @@
     "genus": "Globicephala",
     "species": "melas",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The long-finned pilot whale or pothead whale is a large species of oceanic dolphin."
   },
   {
@@ -6424,7 +6470,9 @@
     "genus": "Monachus",
     "species": "monachus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Mediterranean Sea"
+    ],
     "notes": "The Mediterranean monk seal is a monk seal belonging to the family Phocidae."
   },
   {
@@ -6455,7 +6503,9 @@
     "genus": "Peponocephala",
     "species": "electra",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The melon-headed whale, also known less commonly as the electra dolphin, little killer whale, or many-toothed blackfish, is a toothed whale of the oceanic dolphin family (Delphinidae)."
   },
   {
@@ -6519,7 +6569,9 @@
     "genus": "Eulemur",
     "species": "mongoz",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The mongoose lemur is a small primate in the family Lemuridae, native to Madagascar and introduced to the Comoros Islands."
   },
   {
@@ -6782,7 +6834,9 @@
     "genus": "Mungotictis",
     "species": "decemlineata",
     "diet": "Carnivore",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The narrow-striped mongoose, also known as the boky-boky in Malagasy, is a member of the family Eupleridae endemic to Madagascar."
   },
   {
@@ -7026,7 +7080,9 @@
     "genus": "Lemmus",
     "species": "lemmus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Europe"
+    ],
     "notes": "The Norway lemming, also known as the Norwegian lemming is a common species of lemming found in northern Fennoscandia, where it is the only vertebrate species endemic to the region."
   },
   {
@@ -7242,7 +7298,9 @@
     "genus": "Lagenorhynchus",
     "species": "obliquidens",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The Pacific white-sided dolphin, also known as the hookfin porpoise, is an active dolphin found in the cool or temperate waters of the North Pacific Ocean."
   },
   {
@@ -7735,7 +7793,9 @@
     "genus": "Feresa",
     "species": "attenuata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The pygmy killer whale is a poorly known and rarely seen oceanic dolphin."
   },
   {
@@ -7979,7 +8039,11 @@
     "genus": "Pygathrix",
     "species": "nemaeus",
     "diet": "Herbivore",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The red-shanked douc is an arboreal and diurnal Old World monkey belonging to the Colobinae subfamily."
   },
   {
@@ -8025,7 +8089,9 @@
     "genus": "Lepilemur",
     "species": "ruficaudatus",
     "diet": "Herbivore",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The red-tailed sportive lemur, or red-tailed weasel lemur, is native to Madagascar like all lemurs."
   },
   {
@@ -8210,7 +8276,10 @@
     "genus": "Desmana",
     "species": "moschata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe"
+    ],
     "notes": "The Russian desman is a small semiaquatic mammal that inhabits the Volga, Don and Ural River basins in Russia."
   },
   {
@@ -8238,7 +8307,10 @@
     "genus": "Martes",
     "species": "zibellina",
     "diet": "Omnivore",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe"
+    ],
     "notes": "The sable is a species of marten, a small omnivorous mammal primarily inhabiting the forest environments of Russia, from the Ural Mountains throughout Siberia, and northern Mongolia."
   },
   {
@@ -8271,7 +8343,7 @@
     "continents": [
       "Asia"
     ],
-    "notes": "Sambar or Sambhar may refer to:Sambar deer, a species of deer\nSambar (dish), a lentil-based dish common in India and Sri Lanka\nSambar (film), an Indian Malayalam-language film by Navas Kallara\nSambhar, Rajasthan, a city ..."
+    "notes": "The sambar is a large deer native to the Indian subcontinent, South China and Southeast Asia."
   },
   {
     "common_name": "Sand cat",
@@ -8314,7 +8386,9 @@
     "genus": "Enhydra",
     "species": "lutris",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The sea otter is a marine mammal native to the coasts of the northern and eastern North Pacific Ocean."
   },
   {
@@ -8706,7 +8780,9 @@
     "genus": "Stenella",
     "species": "coeruleoalba",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The striped dolphin is a dolphin found in temperate and tropical waters of all the world's oceans."
   },
   {
@@ -9938,7 +10014,11 @@
     "genus": "Callipepla",
     "species": "californica",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The California quail, also known as the California valley quail or Valley quail, is a small ground-dwelling bird in the New World quail family."
   },
   {
@@ -10786,7 +10866,11 @@
     "genus": "Aquila",
     "species": "chrysaetos",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The golden eagle is a bird of prey living in the Northern Hemisphere."
   },
   {
@@ -12612,7 +12696,9 @@
     "genus": "Furcifer",
     "species": "lateralis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The carpet chameleon, also known as the jewel chameleon or white-lined chameleon, is a species of chameleon that is endemic to eastern Madagascar."
   },
   {
@@ -12915,7 +13001,9 @@
     "genus": "Bothriechis",
     "species": "schlegelii",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "Bothriechis schlegelii, known commonly as the highland eyelash-pitviper, Schlegel's eyelash-pitviper, eyelash viper or eyelash palm viper, is a species of pit viper in the family Viperidae, native to Colombia."
   },
   {
@@ -13244,7 +13332,9 @@
     "genus": "Amblyrhynchus",
     "species": "cristatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The marine iguana, also known as the sea iguana, saltwater iguana, or Galápagos marine iguana, is a species of iguana found only on the Galápagos Islands (Ecuador)."
   },
   {
@@ -13395,7 +13485,9 @@
     "genus": "Calumma",
     "species": "parsonii",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Parson's chameleon is a species of chameleon in the family Chamaeleonidae that is endemic to eastern and northern Madagascar."
   },
   {
@@ -13546,7 +13638,12 @@
     "genus": "Corucia",
     "species": "zebrata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America",
+      "Australia"
+    ],
     "notes": "The Solomon Islands skink, also known as prehensile-tailed skink, monkey-tailed skink, giant skink, zebra skink, and monkey skink, is an arboreal species of skink endemic to the Solomon Islands archipelago."
   },
   {
@@ -13602,7 +13699,11 @@
     "genus": "Gekko",
     "species": "gecko",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The tokay gecko is a nocturnal arboreal gecko in the genus Gekko, the true geckos."
   },
   {
@@ -13706,7 +13807,9 @@
     "genus": "Dendrobates",
     "species": "azureus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The blue poison dart frog or blue poison arrow frog is a poison dart frog found in the \"forest islands\" surrounded by the Sipaliwini Savanna in southern Suriname."
   },
   {
@@ -13813,7 +13916,9 @@
     "genus": "Eleutherodactylus",
     "species": "coqui",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "Coquí is a common name for several species of small frogs in the genus Eleutherodactylus, native to Puerto Rico."
   },
   {
@@ -13889,7 +13994,9 @@
     "genus": "Phyllobates",
     "species": "terribilis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The golden poison frog, also known as the golden dart frog or golden poison arrow frog, is a poison dart frog endemic from the rainforests of Colombia."
   },
   {
@@ -13903,7 +14010,11 @@
     "genus": "Dryophytes",
     "species": "versicolor",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The gray treefrog is a species of small arboreal frog in the family Hylidae."
   },
   {
@@ -14242,7 +14353,9 @@
     "genus": "Acipenser",
     "species": "oxyrinchus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "The Atlantic sturgeon is a large species of sturgeon native to both sides of the Atlantic Ocean, and associated river basins."
   },
   {
@@ -14300,7 +14413,9 @@
     "genus": "Prionace",
     "species": "glauca",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The blue shark, also known as the great blue shark, is a species of requiem shark in the family Carcharhinidae which inhabits deep waters in the world's temperate and tropical oceans."
   },
   {
@@ -14549,7 +14664,9 @@
     "genus": "Mola",
     "species": "mola",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The ocean sunfish, also known as the common mola, is one of the largest bony fish in the world."
   },
   {
@@ -14610,7 +14727,16 @@
     "genus": "Carcharias",
     "species": "taurus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "The sand tiger shark, spotted ragged-tooth shark, or blue-nurse sand tiger, is a species of shark that inhabits subtropical and temperate waters worldwide."
   },
   {
@@ -14624,7 +14750,11 @@
     "genus": "Petromyzon",
     "species": "marinus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The sea lamprey is a parasitic lamprey native to the Northern Hemisphere."
   },
   {
@@ -14668,7 +14798,9 @@
     "genus": "Oncorhynchus",
     "species": "nerka",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The sockeye salmon, also called red salmon, kokanee salmon, blueback salmon, or simply sockeye, is an anadromous species of salmon found in the Northern Pacific Ocean and rivers discharging into it."
   },
   {
@@ -14758,7 +14890,10 @@
     "genus": "Paralithodes",
     "species": "camtschaticus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America",
+      "Pacific Ocean"
+    ],
     "notes": "The red king crab, also called Kamchatka crab or Alaskan king crab, is a species of king crab native to cold waters in the North Pacific Ocean and adjacent seas, but also introduced to the Barents Sea."
   },
   {
@@ -14934,7 +15069,10 @@
     "genus": "Pieris",
     "species": "brassicae",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe"
+    ],
     "notes": "Cabbage white or cabbage butterfly may refer to:Pieris brassicae, or large white, a Palearctic butterfly\nPieris rapae, or small white, a Palearctic butterfly that has been introduced to many other parts of the world"
   },
   {
@@ -15097,7 +15235,9 @@
     "genus": "Vampyroteuthis",
     "species": "infernalis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The vampire squid is a small cephalopod found throughout temperate and tropical oceans in extreme deep sea conditions."
   },
   {
@@ -15173,7 +15313,9 @@
     "genus": "Blattella",
     "species": "germanica",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Europe"
+    ],
     "notes": "The German cockroach, colloquially known as the croton bug, is a species of small cockroach, typically about 1.1 to 1.6 cm long."
   },
   {
@@ -15233,7 +15375,9 @@
     "genus": "Architeuthis",
     "species": "dux",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The giant squid is a species of deep-ocean dwelling squid in the family Architeuthidae."
   },
   {
@@ -15261,7 +15405,9 @@
     "genus": "Lepas",
     "species": "anatifera",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "Goose barnacles, also called percebes, turtle-claw barnacles, stalked barnacles, gooseneck barnacles, are filter-feeding crustaceans that live attached to hard surfaces of rocks and flotsam in the ocean intertidal zone."
   },
   {
@@ -15320,7 +15466,16 @@
     "genus": "Turritopsis",
     "species": "dohrnii",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Turritopsis dohrnii, also known as the immortal jellyfish, is a species of small, biologically immortal Medusozoa (jellyfish) found worldwide in temperate to tropic waters."
   },
   {
@@ -15392,7 +15547,9 @@
     "genus": "Gromphadorhina",
     "species": "portentosa",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Madagascar hissing cockroach, also known as the hissing cockroach, Malagasy hissing cockroach or simply hisser, is one of the largest species of cockroach, reaching 5 to 7.5 centimetres at maturity."
   },
   {
@@ -15508,7 +15665,9 @@
     "genus": "Panulirus",
     "species": "versicolor",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Panulirus versicolor is a species of spiny lobster that lives in tropical reefs in the Indo-Pacific."
   },
   {
@@ -15580,7 +15739,11 @@
     "genus": "Formica",
     "species": "rufa",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "Formica rufa, also known as the red wood ant, southern wood ant, or horse ant, is a boreal member of the Formica rufa group of ants, and is the type species for that group, being described already by Linnaeus."
   },
   {
@@ -15713,7 +15876,9 @@
     "genus": "Euplectella",
     "species": "aspergillum",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The Venus' flower basket is a species of glass sponge found in the deep waters of the Pacific Ocean, usually at depths below 500 m (1,600 ft)."
   },
   {
@@ -15759,7 +15924,11 @@
     "genus": "Salticus",
     "species": "scenicus",
     "diet": "Insectivore",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The zebra spider commonly called zebra jumping spider and zebra back spider is a common jumping spider of the Northern Hemisphere."
   },
   {
@@ -15968,7 +16137,9 @@
     "genus": "Ursus",
     "species": "arctos",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Kodiak bear, also known as the Kodiak brown bear and sometimes the Alaskan brown bear, inhabits the islands of the Kodiak Archipelago in southwest Alaska."
   },
   {
@@ -16012,7 +16183,9 @@
     "genus": "Liomys",
     "species": "irroratus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Mexican spiny pocket mouse is a species of rodent in the family Heteromyidae."
   },
   {
@@ -16218,7 +16391,9 @@
     "genus": "Conepatus",
     "species": "humboldtii",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "Humboldt's hog-nosed skunk, also known as the Patagonian hog-nosed skunk, is a species of hog-nosed skunk indigenous to the open grassy areas in the Patagonian regions of South Argentina and Chile."
   },
   {
@@ -16264,7 +16439,9 @@
     "genus": "Axis",
     "species": "calamianensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Calamian deer, also known as Calamian hog deer, is an endangered species of deer found only in the Calamian Islands of Palawan province in the Philippines."
   },
   {
@@ -16278,7 +16455,9 @@
     "genus": "Urogale",
     "species": "everetti",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Mindanao treeshrew, also called the Philippine tree shrew, is a species of treeshrew endemic to the Mindanao region in the Philippines."
   },
   {
@@ -16292,7 +16471,9 @@
     "genus": "Diplomesodon",
     "species": "pulchellum",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The piebald shrew is a shrew found in the Turan Lowland east of the Caspian Sea in Iran, Turkmenistan and Uzbekistan."
   },
   {
@@ -16336,7 +16517,9 @@
     "genus": "Mysateles",
     "species": "prehensilis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The prehensile-tailed hutia is a small, furry, rat-like mammal found only in forests on Cuba."
   },
   {
@@ -16732,7 +16915,9 @@
     "genus": "Hippocamelus",
     "species": "bisulcus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The south Andean deer, also known as the southern guemal, south Andean huemul, southern huemul, or Chilean huemul or  güemul, is an endangered species of deer native to the mountains of Argentina and Chile."
   },
   {
@@ -16762,7 +16947,9 @@
     "genus": "Phloeomys",
     "species": "cumingi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The southern giant slender-tailed cloud rat or southern Luzon giant cloud rat, also known as bugkon in Filipino, is a vulnerable species of rodent in the family Muridae, found only in southern Luzon in the Philippines."
   },
   {
@@ -16868,7 +17055,9 @@
     "genus": "Mesoplodon",
     "species": "bidens",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "Sowerby's beaked whale, also known as the North Atlantic or North Sea beaked whale, is a species of toothed whale."
   },
   {
@@ -16930,7 +17119,9 @@
     "genus": "Ausralophocaena",
     "species": "dioptrica",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Southern Ocean"
+    ],
     "notes": "The spectacled porpoise is a small to midsize porpoise indigenous to the Southern Ocean."
   },
   {
@@ -17221,7 +17412,9 @@
     "genus": "Macrogalidia",
     "species": "musschenbroekii",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Sulawesi palm civet, also known as Sulawesi civet, musang and brown palm civet is a little-known viverrid endemic to Sulawesi."
   },
   {
@@ -17283,7 +17476,9 @@
     "genus": "Capricornis",
     "species": "swinhoei",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Taiwanese serow also known as the Formosan serow, is a small species of bovid that is endemic to Taiwan."
   },
   {
@@ -17405,7 +17600,9 @@
     "genus": "Heteromys",
     "species": "anomalus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The Trinidad spiny pocket mouse is a species of rodent in the family Heteromyidae."
   },
   {
@@ -17447,7 +17644,9 @@
     "genus": "Crocidura",
     "species": "mutesae",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Ugandan musk shrew is a species of mammal in the family Soricidae."
   },
   {
@@ -17503,7 +17702,11 @@
     "genus": "Oecomys",
     "species": "concolor",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "Oecomys concolor, also known as the unicolored oecomys, unicolored rice rat, or unicolored arboreal rice rat, is a species of rodent in the genus Oecomys of family Cricetidae."
   },
   {
@@ -17561,7 +17764,9 @@
     "genus": "Pteropus",
     "species": "anetianus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The Vanuatu flying fox or white flying fox is a species of flying fox in the family Pteropodidae."
   },
   {
@@ -17679,7 +17884,9 @@
     "genus": "Lepilemur",
     "species": "mustelinus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The weasel sportive lemur, also known as the greater sportive lemur, weasel lemur, or greater weasel lemur, is a species of lemur endemic to Madagascar."
   },
   {
@@ -18572,7 +18779,10 @@
     "genus": "Melanocorypha",
     "species": "yeltoniensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe"
+    ],
     "notes": "The black lark is a species of lark in the family Alaudidae found in south-eastern Russia and Kazakhstan."
   },
   {
@@ -18764,7 +18974,9 @@
     "genus": "Pheucticus",
     "species": "tibialis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America"
+    ],
     "notes": "The black-thighed grosbeak is a large seed-eating bird in the family Cardinalidae, which is endemic to the mountains of Costa Rica and western Panama."
   },
   {
@@ -18989,7 +19201,11 @@
     "genus": "Luscinia",
     "species": "svecica",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "The bluethroat is a small passerine bird in the Old World flycatcher family."
   },
   {
@@ -19167,7 +19383,9 @@
     "genus": "Cyanoliseus",
     "species": "patagonus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The burrowing parrot, also known as the burrowing parakeet or the Patagonian conure, is a species of parrot native to Argentina and Chile."
   },
   {
@@ -19213,7 +19431,9 @@
     "genus": "Daption",
     "species": "capense",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Southern Ocean"
+    ],
     "notes": "The pintado petrel, also called the Cape petrel, or Cape fulmar, is a common seabird of the Southern Ocean from the family Procellariidae."
   },
   {
@@ -19379,7 +19599,9 @@
     "genus": "Coeligena",
     "species": "torquata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The collared inca is a species of hummingbird found in humid Andean forests from western Venezuela through Colombia and Ecuador to Peru."
   },
   {
@@ -19393,7 +19615,9 @@
     "genus": "Myioborus",
     "species": "torquatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America"
+    ],
     "notes": "The collared whitestart, also known as the collared redstart, is a tropical New World warbler endemic to the mountains of Costa Rica and western-central Panama."
   },
   {
@@ -19465,7 +19689,9 @@
     "genus": "Pelecanoides",
     "species": "urinatrix",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Southern Ocean"
+    ],
     "notes": "The common diving petrel , also known as the smaller diving petrel or simply the diving petrel, is a diving petrel, one of four very similar auk-like small petrels of the southern oceans."
   },
   {
@@ -19596,7 +19822,11 @@
     "genus": "Gallinago",
     "species": "gallinago",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "The common snipe is a small, stocky wader native to the Old World, where it breeds in marshes, bogs, tundra and wet meadows."
   },
   {
@@ -19610,7 +19840,9 @@
     "genus": "Dryotriorchis",
     "species": "spectabilis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Congo serpent eagle is a species of bird of prey in the family Accipitridae."
   },
   {
@@ -19787,7 +20019,9 @@
     "genus": "Todus",
     "species": "multicolor",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Cuban tody is a bird species in the family Todidae that is restricted to Cuba and the adjacent islands."
   },
   {
@@ -20253,7 +20487,11 @@
     "genus": "Molothrus",
     "species": "oryzivorus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The giant cowbird is a large passerine bird in the New World family Icteridae."
   },
   {
@@ -20311,7 +20549,11 @@
     "genus": "Vermivora",
     "species": "chrysoptera",
     "diet": "Insectivore",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The golden-winged warbler is a small migratory insectivorous bird in the New World warbler family Parulidae."
   },
   {
@@ -20431,7 +20673,11 @@
     "genus": "Leptotila",
     "species": "plumbeiceps",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The grey-headed dove (Leptotila plumbeiceps) is a large New World dove."
   },
   {
@@ -20844,7 +21090,9 @@
     "genus": "Podiceps",
     "species": "gallardoi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The hooded grebe is a medium-sized grebe found in the southern region of Argentina."
   },
   {
@@ -20858,7 +21106,11 @@
     "genus": "Necrosyrtes",
     "species": "monachus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "The  hooded vulture is an Old World vulture in the order Accipitriformes, which also includes eagles, kites, buzzards and hawks."
   },
   {
@@ -20932,7 +21184,11 @@
     "genus": "Eremophila",
     "species": "alpestris",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The horned lark or shore lark is a species of lark in the family Alaudidae found across the northern hemisphere."
   },
   {
@@ -21104,7 +21360,9 @@
     "genus": "Corvus",
     "species": "jamaicensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Jamaican crow is a comparatively small corvid."
   },
   {
@@ -21118,7 +21376,9 @@
     "genus": "Siphonorhis",
     "species": "americana",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Jamaican poorwill, also known as the Jamaican pauraque or Jamaican least pauraque, is a species of nightjar in the family Caprimulgidae."
   },
   {
@@ -21164,7 +21424,9 @@
     "genus": "Padda",
     "species": "oryzivora",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Java sparrow, also known as the Java finch, Java rice sparrow or Java rice bird, is a small passerine bird."
   },
   {
@@ -21647,7 +21909,9 @@
     "genus": "Lophotibis",
     "species": "cristatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Madagascar ibis, also known as the Madagascar crested ibis, white-winged ibis or crested wood ibis, is a medium-sized, brown-plumaged ibis."
   },
   {
@@ -21661,7 +21925,9 @@
     "genus": "Alectroenas",
     "species": "madagascariensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Madagascar blue pigeon or Madagascan blue pigeon is a species of bird in the family Columbidae."
   },
   {
@@ -21675,7 +21941,9 @@
     "genus": "Treron",
     "species": "australis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Madagascar green pigeon or Madagascan green pigeon is a species of bird in the family Columbidae."
   },
   {
@@ -21689,7 +21957,9 @@
     "genus": "Motacilla",
     "species": "flaviventris",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Madagascar wagtail is a species of wagtail in the family Motacillidae."
   },
   {
@@ -21749,7 +22019,9 @@
     "genus": "Eupetes",
     "species": "macrocerus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The rail-babbler or Malaysian rail-babbler is a brown and pied rail-like ground-living bird."
   },
   {
@@ -21809,7 +22081,9 @@
     "genus": "Pseudonestor",
     "species": "xanthophrys",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The kiwikiu or Maui parrotbill is a species of Hawaiian honeycreeper endemic to the island of Maui in Hawaii."
   },
   {
@@ -22096,7 +22370,11 @@
     "genus": "Parula",
     "species": "americana",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The northern parula is a small New World warbler."
   },
   {
@@ -22326,7 +22604,11 @@
     "genus": "Seiurus",
     "species": "aurocapilla",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The ovenbird is a small songbird of the New World warbler family Parulidae."
   },
   {
@@ -22426,7 +22708,11 @@
     "genus": "Psittrichas",
     "species": "fulgidus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "Pesquet's parrot, also known as the Dracula parrot or as the vulturine parrot, is a member of the Old World parrot family Psittaculidae."
   },
   {
@@ -22515,7 +22801,11 @@
     "genus": "Protonotaria",
     "species": "citrea",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The prothonotary warbler is a small songbird of the New World warbler family."
   },
   {
@@ -22664,7 +22954,11 @@
     "genus": "Acrocephalus",
     "species": "schoenobaenus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "The sedge warbler is an Old World warbler in the genus Acrocephalus."
   },
   {
@@ -22694,7 +22988,9 @@
     "genus": "Alectroenas",
     "species": "pulcherrimus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Seychelles blue pigeon, also known as the Seychelles blue fruit dove, is a medium-sized pigeon which inhabits woodland areas of the granitic Seychelles archipelago."
   },
   {
@@ -22722,7 +23018,11 @@
     "genus": "Molothrus",
     "species": "bonariensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The shiny cowbird is a passerine bird in the New World family Icteridae."
   },
   {
@@ -22808,7 +23108,11 @@
     "genus": "Rostrhamus",
     "species": "sociabilis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "The snail kite is a bird of prey within the family Accipitridae, which also includes the eagles, hawks, and Old World vultures."
   },
   {
@@ -22926,7 +23230,10 @@
     "genus": "Pulsatrix",
     "species": "perspicillata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "South America"
+    ],
     "notes": "The spectacled owl also called a Murucututu, is a large tropical owl native to the neotropics."
   },
   {
@@ -23068,7 +23375,9 @@
     "genus": "Monias",
     "species": "benschi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The subdesert mesite is a ground-dwelling bird endemic to Madagascar."
   },
   {
@@ -23096,7 +23405,11 @@
     "genus": "Eurypyga",
     "species": "helias",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The sunbittern is a bittern-like bird of tropical regions of the Americas, and the sole member of the family Eurypygidae and genus Eurypyga."
   },
   {
@@ -23110,7 +23423,10 @@
     "genus": "Tersina",
     "species": "viridis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "South America"
+    ],
     "notes": "The swallow tanager is a species of Neotropic bird in the tanager family Thraupidae."
   },
   {
@@ -23262,7 +23578,9 @@
     "genus": "Fratercula",
     "species": "cirrhata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The tufted puffin, also known as crested puffin, is a relatively abundant medium-sized pelagic seabird in the auk family (Alcidae) found throughout the North Pacific Ocean."
   },
   {
@@ -23320,7 +23638,9 @@
     "genus": "Phylloscopus",
     "species": "bodongoensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Uganda woodland warbler is a species of Old World warbler in the family Phylloscopidae."
   },
   {
@@ -23334,7 +23654,11 @@
     "genus": "Ficedula",
     "species": "superciliaris",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The ultramarine flycatcher or the white-browed blue flycatcher is a small arboreal Old World flycatcher in the Ficedula genus."
   },
   {
@@ -23474,7 +23798,9 @@
     "genus": "Acryllium",
     "species": "vulturinum",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The  vulturine guinea fowl  is the largest extant species of guinea fowl."
   },
   {
@@ -23628,7 +23954,9 @@
     "genus": "Philepitta",
     "species": "castanea",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The velvet asity is a bird species in the family Philepittidae that is endemic to Madagascar."
   },
   {
@@ -23656,7 +23984,9 @@
     "genus": "Odontophorus",
     "species": "columbianus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The Venezuelan wood quail is a bird species in the family Odontophoridae, the New World quail."
   },
   {
@@ -23670,7 +24000,10 @@
     "genus": "Calochaetes",
     "species": "coccineus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "South America"
+    ],
     "notes": "The vermilion tanager is a species of Neotropical bird in the tanager family Thraupidae."
   },
   {
@@ -23829,7 +24162,11 @@
     "genus": "Leucopternis",
     "species": "albicollis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The white hawk is a bird of prey breeding in the tropical New World of the family Accipitridae."
   },
   {
@@ -23857,7 +24194,9 @@
     "genus": "Mesitornis",
     "species": "variegatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The white-breasted mesite or white-breasted roatelo is a ground-dwelling bird endemic to Madagascar."
   },
   {
@@ -23917,7 +24256,11 @@
     "genus": "Brachypteryx",
     "species": "montana",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "The Javan shortwing is a species of bird that is placed in the Old World flycatcher family Muscicapidae."
   },
   {
@@ -24128,7 +24471,11 @@
     "genus": "Pogonocichla",
     "species": "stellata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe"
+    ],
     "notes": "The white-starred robin is a species of bird in the Old World flycatcher and chat family Muscicapidae."
   },
   {
@@ -24963,7 +25310,9 @@
     "genus": "Geoemyda",
     "species": "spengleri",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The black-breasted leaf turtle, also commonly called the Vietnamese leaf turtle or the black-breasted hill turtle, a species of turtle."
   },
   {
@@ -25787,7 +26136,12 @@
     "genus": "Abronia",
     "species": "aurita",
     "diet": "Omnivore",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America"
+    ],
     "notes": "Cope's arboreal alligator lizard is a species of lizard found in two isolated locations in Guatemala, one in the Alta Verapaz Department and one in the Jalapa Department."
   },
   {
@@ -26107,7 +26461,11 @@
     "genus": "Brachylophus",
     "species": "fasciatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "Brachylophus fasciatus, the Lau banded iguana, is an arboreal species of lizard endemic to the Lau Islands of the eastern part of the Fijian archipelago."
   },
   {
@@ -26337,7 +26695,9 @@
     "genus": "Varanus",
     "species": "olivaceus",
     "diet": "Carnivore",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Gray's monitor is a large monitor lizard known only from lowland dipterocarp forest in southern Luzon, Catanduanes, and Polillo Island, all islands in the Philippines."
   },
   {
@@ -26447,7 +26807,9 @@
     "genus": "Uroplatus",
     "species": "henkeli",
     "diet": "Insectivore",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Uroplatus is a genus of geckos, commonly referred to as leaf-tail geckos or flat-tailed geckos, which are endemic to Madagascar and its coastal islands, such as Nosy Be."
   },
   {
@@ -26674,7 +27036,9 @@
     "genus": "Furcifur",
     "species": "campani",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The jewelled chameleon, also commonly known as Campan's chameleon or the Madagascar forest chameleon, is a species of lizard in the family Chamaeleonidae."
   },
   {
@@ -27037,7 +27401,9 @@
     "genus": "Phelsuma",
     "species": "madagascariensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Madagascar day gecko is a diurnal species of gecko."
   },
   {
@@ -27069,7 +27435,9 @@
     "genus": "Acrantophis",
     "species": "madagascariensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Acrantophis madagascariensis is a species of boid snake in the subfamily Sanziniinae that is endemic to the island of Madagascar."
   },
   {
@@ -27278,7 +27646,9 @@
     "genus": "Oplurus",
     "species": "cyclurus",
     "diet": "Insectivore",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Oplurus cyclurus, also known commonly as the Madagascar swift and Merrem's Madagascar swift, is a species of lizard in the family Opluridae."
   },
   {
@@ -27654,7 +28024,9 @@
     "genus": "Aipysurus",
     "species": "laevis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Aipysurus laevis is a species of venomous sea snake found in the Indo-Pacific."
   },
   {
@@ -27816,7 +28188,9 @@
     "genus": "Bitis",
     "species": "peringueyi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Bitis peringueyi, also known as the Peringuey's adder, Peringuey's desert adder or desert sidewinding adder, is a viper species found in Namibia and southern Angola."
   },
   {
@@ -27830,7 +28204,9 @@
     "genus": "Trapelus",
     "species": "persicus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "Trapelus persicus, Olivier's agama or Baluch ground agama, is a species of agama found in Syria, Lebanon, Jordan, Saudi Arabia, Iraq, and Iran."
   },
   {
@@ -27874,7 +28250,9 @@
     "genus": "Naja",
     "species": "philippinensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Philippine cobra also called Philippine spitting cobra or northern Philippine cobra, is a stocky, highly venomous species of spitting cobra native to the northern regions of the Philippines."
   },
   {
@@ -27888,7 +28266,9 @@
     "genus": "Heosemys",
     "species": "leytensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "Siebenrockiella leytensis is a species of freshwater turtle endemic to the Philippines."
   },
   {
@@ -27974,7 +28354,9 @@
     "genus": "Chilabothrus",
     "species": "inornatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Puerto Rican boa, most commonly known as Culebrón, is a large species of boa endemic to Puerto Rico."
   },
   {
@@ -28244,7 +28626,9 @@
     "genus": "Pseudemys",
     "species": "rubriventris",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "Red-bellied turtle can refer to several turtle species:Pseudemys alabamensis, the Alabama red-bellied turtle\nPseudemys nelsoni, the Florida red-bellied turtle\nPseudemys rubriventris, the Northern red-bellied turtle\nRed-b..."
   },
   {
@@ -28701,7 +29085,10 @@
     "genus": "Pseudotrapelus",
     "species": "sinaitus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia"
+    ],
     "notes": "The Sinai agama is an agamid lizard found in the Sinai Peninsula (Egypt), Jordan, Syria."
   },
   {
@@ -29011,7 +29398,9 @@
     "genus": "Leucocephalon",
     "species": "yuwonoi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Sulawesi forest turtle is a critically endangered species of turtle in the family Geoemydidae."
   },
   {
@@ -29087,7 +29476,9 @@
     "genus": "Gopherus",
     "species": "polyphemus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Texas tortoise is a species of tortoise in the family Testudinidae."
   },
   {
@@ -29187,7 +29578,10 @@
     "genus": "Spilotes",
     "species": "pullatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "South America"
+    ],
     "notes": "Spilotes pullatus, commonly known as the chicken snake, tropical chicken snake, or yellow rat snake, is a species of large nonvenomous colubrid snake endemic to the Neotropics."
   },
   {
@@ -29569,7 +29963,9 @@
     "genus": "Ailuronyx",
     "species": "trachygaster",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The giant bronze gecko is a species of lizard in the family Gekkonidae endemic to Seychelles."
   },
   {
@@ -29599,7 +29995,9 @@
     "genus": "Pelamis",
     "species": "platurus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "The yellow-bellied sea snake is an extremely venomous species of snake from the subfamily Hydrophiinae found in tropical oceanic waters around the world except for the Atlantic Ocean."
   },
   {
@@ -29773,7 +30171,11 @@
     "genus": "Aneides",
     "species": "lugubris",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The arboreal salamander is a species of climbing salamander."
   },
   {
@@ -29803,7 +30205,9 @@
     "genus": "Triturus",
     "species": "vittatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The southern banded newt is a species of salamander in the family Salamandridae found in Armenia, Iraq, Israel, Jordan, Lebanon, Syria, and Turkey."
   },
   {
@@ -29995,7 +30399,9 @@
     "genus": "Dicamptodon",
     "species": "ensatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The California giant salamander is a species of salamander in the family Ambystomatidae."
   },
   {
@@ -30115,7 +30521,9 @@
     "genus": "Bufo",
     "species": "blombergi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "Blomberg's toad, also known as the Colombian giant toad, is a very large species of toad in the family Bufonidae."
   },
   {
@@ -30145,7 +30553,9 @@
     "genus": "Smilisca",
     "species": "baudinii",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America"
+    ],
     "notes": "The common Mexican tree frog is a nocturnal species of tree frog whose native range extends from the Sonoran Desert and the Lower Rio Grande Valley of Texas south to Costa Rica."
   },
   {
@@ -30348,7 +30758,9 @@
     "genus": "Ameerega",
     "species": "bilinguis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "Ameerega bilinguis, the Ecuador poison frog, is a species of frogs in the family Dendrobatidae found in Colombia, Ecuador, and possibly Peru."
   },
   {
@@ -30376,7 +30788,9 @@
     "genus": "Ensatina",
     "species": "eschscholtzii",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Europe"
+    ],
     "notes": "The ensatina is a species complex of plethodontid (lungless) salamanders found in coniferous forests, oak woodland and chaparral from British Columbia, through Washington, Oregon, across California, all the way down to B..."
   },
   {
@@ -30436,7 +30850,10 @@
     "genus": "Onychodactylus",
     "species": "fischeri",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe"
+    ],
     "notes": "Onychodactylus fischeri, also known as Fischer's clawed salamander or Russian clawed salamander, is a lungless salamander found in the Russian Far East."
   },
   {
@@ -30614,7 +31031,9 @@
     "genus": "Dendrobates",
     "species": "histrionicus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The harlequin poison frog, also known as harlequin poison-dart frog, is a species of poison dart frog endemic to the Chocó region of western Colombia."
   },
   {
@@ -30836,7 +31255,9 @@
     "genus": "Osteopilus",
     "species": "ocellatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Jamaican laughing frog is a species of frog in the family Hylidae."
   },
   {
@@ -30910,7 +31331,9 @@
     "genus": "Trachycephalus",
     "species": "jordani",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "Jordan's casque-headed tree frog is a species of frog in the family Hylidae found in Colombia, Ecuador, and Peru."
   },
   {
@@ -30924,7 +31347,9 @@
     "genus": "Cacosternum",
     "species": "leleupi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Katanga caco or Katanga metal frog is a species of frog in the family Pyxicephalidae, endemic to Democratic Republic of the Congo."
   },
   {
@@ -30998,7 +31423,9 @@
     "genus": "Xenopus",
     "species": "vestitus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Kivu clawed frog is a species of frog in the family Pipidae found in the Democratic Republic of the Congo, Rwanda, and Uganda."
   },
   {
@@ -31012,7 +31439,9 @@
     "genus": "Karsenia",
     "species": "koreana",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Korean crevice salamander is a species of lungless salamander."
   },
   {
@@ -31070,7 +31499,9 @@
     "genus": "Boophis",
     "species": "madagascariensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Boophis madagascariensis is a species of frog in the family Mantellidae."
   },
   {
@@ -31084,7 +31515,9 @@
     "genus": "Mantella",
     "species": "madagascariensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Mantella madagascariensis, common names Malagasy painted mantella, Madagascan mantella, Madagascar golden frog, Malagasy mantella and painted mantella, is a species of frog in the family Mantellidae."
   },
   {
@@ -31098,7 +31531,9 @@
     "genus": "Heterixalus",
     "species": "madagascariensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Heterixalus madagascariensis is a species of frog in the family Hyperoliidae endemic to Madagascar."
   },
   {
@@ -31156,7 +31591,9 @@
     "genus": "Rana",
     "species": "luctuosa",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "Abavorana luctuosa, also known as the Malaysian frog, mahogany frog or purple frog, is a species of true frog."
   },
   {
@@ -31231,7 +31668,9 @@
     "genus": "Epipedobates",
     "species": "boulengeri",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The marbled poison frog or marbled poison-arrow frog is a species of frog in the family Dendrobatidae found in western Colombia and northwestern Ecuador, at elevations of 10–1,500 m (33–4,921 ft) asl."
   },
   {
@@ -31261,7 +31700,9 @@
     "genus": "Xenopus",
     "species": "borealis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Marsabit clawed frog is a species of frog in the family Pipidae found in Kenya, Tanzania, and possibly Uganda."
   },
   {
@@ -31306,7 +31747,9 @@
     "genus": "Ichthyophis",
     "species": "bannanicus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Koh Tao Island caecilian is a species of amphibian in the family Ichthyophiidae found in Cambodia, Laos, Myanmar, Thailand, and Vietnam."
   },
   {
@@ -31320,7 +31763,9 @@
     "genus": "Rhinophrynus",
     "species": "dorsalis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Mexican burrowing toad is the single living representative of the family Rhinophrynidae."
   },
   {
@@ -31410,7 +31855,9 @@
     "genus": "Centrolene",
     "species": "prosoblepon",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America"
+    ],
     "notes": "Espadarana prosoblepon is a species of frog in the family Centrolenidae, commonly known as the emerald glass frog or Nicaragua giant glass frog."
   },
   {
@@ -31558,7 +32005,9 @@
     "genus": "Eleutherodactylus",
     "species": "peruvianus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "Pristimantis peruvianus is a species of frog in the family Strabomantidae."
   },
   {
@@ -31632,7 +32081,9 @@
     "genus": "Scaphiophryne",
     "species": "gottlebei",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Scaphiophryne gottlebei, commonly known as the Malagasy rainbow frog, ornate hopper, rainbow burrowing frog, red rain frog or Gottlebe's narrow-mouthed frog, is one of the most highly decorated frogs from Madagascar."
   },
   {
@@ -32134,7 +32585,9 @@
     "genus": "Nesomantis",
     "species": "thomasseti",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Thomasset's Seychelles frog or Thomasset's frog is a species of frog in the family Sooglossidae."
   },
   {
@@ -32148,7 +32601,9 @@
     "genus": "Mannophryne",
     "species": "trinitatis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The yellow-throated frog, Trinidadian stream frog, or Trinidad poison frog is a diurnal species of frog in the family Aromobatidae that is endemic to the island of Trinidad in the Republic of Trinidad and Tobago."
   },
   {
@@ -32206,7 +32661,9 @@
     "genus": "Xenopus",
     "species": "ruwenzoriensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Uganda clawed frog is a species of frog in the family Pipidae found in Uganda and possibly the Democratic Republic of the Congo."
   },
   {
@@ -32264,7 +32721,9 @@
     "genus": "Hoplophryne",
     "species": "rogers",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Hoplophryne rogersi, also known as the Tanzania banana frog, Usambara banana frog, Usambara blue-bellied frog, and Roger's three-fingered frog, is a species of frog in the family Microhylidae."
   },
   {
@@ -32468,7 +32927,9 @@
     "genus": "Dallia",
     "species": "pectoralis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Alaska blackfish is a species of freshwater fish in the esocid family (Esocidae) of order Salmoniformes."
   },
   {
@@ -32482,7 +32943,9 @@
     "genus": "Gadus",
     "species": "chalcogrammus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The Alaska pollock or walleye pollock is a marine fish species of the cod genus Gadus and family Gadidae."
   },
   {
@@ -32556,7 +33019,10 @@
     "genus": "Engraulis",
     "species": "ringens",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America",
+      "Pacific Ocean"
+    ],
     "notes": "The Peruvian anchoveta is a species of fish of the anchovy family, Engraulidae, from the Southeast Pacific Ocean."
   },
   {
@@ -32807,7 +33273,9 @@
     "genus": "Coelorhyncus",
     "species": "fasciatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Southern Ocean"
+    ],
     "notes": "The banded whiptail is a species of rattail found circumpolar in the Great Southern Ocean at depths of between 70 and 1,100 m."
   },
   {
@@ -32967,7 +33435,10 @@
     "genus": "Galeus",
     "species": "melastomus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean",
+      "Mediterranean Sea"
+    ],
     "notes": "The blackmouth catshark is a species of deepwater catshark, belonging to the family Pentanchidae, common in the northeastern Atlantic Ocean from Iceland to Senegal, including the Mediterranean Sea."
   },
   {
@@ -32981,7 +33452,9 @@
     "genus": "Synodontis",
     "species": "nigriventris",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Synodontis nigriventris, the blotched upside-down catfish, is a species of upside-down catfish native to the Congo Basin of Cameroon, the Democratic Republic of the Congo and the Republic of the Congo."
   },
   {
@@ -33173,7 +33646,9 @@
     "genus": "Marcusenius",
     "species": "macrolepidotus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Europe"
+    ],
     "notes": "The Bulldog is a British breed of dog of mastiff type."
   },
   {
@@ -33243,7 +33718,11 @@
     "genus": "Mallotus",
     "species": "villosus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean",
+      "Atlantic Ocean",
+      "Arctic Ocean"
+    ],
     "notes": "The capelin or caplin is a small forage fish of the smelt family found in the North Atlantic, North Pacific and Arctic oceans."
   },
   {
@@ -33319,7 +33798,9 @@
     "genus": "Oncorhynchus",
     "species": "keta",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The chum salmon, also known as dog salmon or keta salmon, is a species of anadromous salmonid fish from the genus Oncorhynchus native to the coastal rivers of the North Pacific and the Beringian Arctic."
   },
   {
@@ -33406,7 +33887,9 @@
     "genus": "Amphiprion",
     "species": "percula",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Clownfish or anemonefishes are saltwater fish found in the warm and tropical waters of the Indo-Pacific."
   },
   {
@@ -33462,7 +33945,10 @@
     "genus": "Dasyatis",
     "species": "pastinaca",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean",
+      "Mediterranean Sea"
+    ],
     "notes": "The common stingray is a species of stingray in the family Dasyatidae, found in the northeastern Atlantic Ocean and the Mediterranean and Black Seas."
   },
   {
@@ -33565,7 +34051,9 @@
     "genus": "Draculo",
     "species": "celetus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Draculo is a genus of dragonets found mainly in the tropical waters of the western Indo-Pacific."
   },
   {
@@ -33834,7 +34322,9 @@
     "genus": "Jordanella",
     "species": "floridae",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The flagfish, also known as the American flagfish or Florida flagfish, is a species of pupfish, a type of killifish from the family Cyprinodontidae which is endemic to Florida."
   },
   {
@@ -34026,7 +34516,9 @@
     "genus": "Oncorhynchus",
     "species": "aguabonita",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The California golden trout is a species of trout native to California."
   },
   {
@@ -34126,7 +34618,9 @@
     "genus": "Arothron",
     "species": "meleagris",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Arothron meleagris, commonly known as the guineafowl puffer or golden puffer, is a pufferfish from the Indo-Pacific, and Eastern Pacific."
   },
   {
@@ -34140,7 +34634,11 @@
     "genus": "Poecilia",
     "species": "reticulata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "North America",
+      "South America"
+    ],
     "notes": "The guppy, also known as the millionfish or rainbow fish, is a member of the family Poeciliidae and, akin to most New World members of the family, is considered a livebearer."
   },
   {
@@ -34361,7 +34859,9 @@
     "genus": "Antigonia",
     "species": "rubescens",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Antigonia rubescens, the Indo-Pacific boarfish or sharpsnout deepsea boarfish, is a species of marine ray-finned fish belonging to the family Caproidae, the boarfishes."
   },
   {
@@ -34533,7 +35033,9 @@
     "genus": "Teixeirichthys",
     "species": "jordani",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "Jordan's damsel is a species of ray-finned fish from the family Pomacentridae, the damselfishes and clownfishes, it is the only species in the monotypic genus Teixeirichthys."
   },
   {
@@ -34637,7 +35139,9 @@
     "genus": "Chiloglanis",
     "species": "kalambo",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Kalombo suckermouth is a species of upside-down catfish endemic to Tanzania where it occurs in the Kalambo River."
   },
   {
@@ -34845,7 +35349,9 @@
     "genus": "Paraschistura",
     "species": "kessleri",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "Kessler's loach, or the Pishin Lora loach, is a species of stone loach found in the countries of Iran, Afghanistan and Pakistan, from the Gulf of Oman to the Caspian Sea."
   },
   {
@@ -34903,7 +35409,9 @@
     "genus": "Laeops",
     "species": "natalensis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Laeops is a genus of small lefteye flounders from the Indo-Pacific."
   },
   {
@@ -34975,7 +35483,16 @@
     "genus": "Elops",
     "species": "saurus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Elops is a genus of marine ray-finned fish found worldwide, and the only extant member of the ancient family Elopidae."
   },
   {
@@ -35061,7 +35578,9 @@
     "genus": "Polypterus",
     "species": "weeksii",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Polypterus weeksii, the mottled bichir, is a fish in the family Polypteridae found in the central basin of the Congo River."
   },
   {
@@ -35089,7 +35608,9 @@
     "genus": "Chanos",
     "species": "chanos",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The milkfish is a widespread species of ray-finned fish found throughout the Indo-Pacific."
   },
   {
@@ -35163,7 +35684,9 @@
     "genus": "Myctophum",
     "species": "affine",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "Myctophum affine, the metallic lanternfish, is a species of lanternfish native to the Atlantic Ocean."
   },
   {
@@ -35219,7 +35742,9 @@
     "genus": "Tetraodon",
     "species": "lineatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The fahaka pufferfish, also known as the Nile puffer, globe fish, lined puffer, is a tropical freshwater pufferfish found in the upper Nile, Chad, Senegal, Gambia, Geba, Volta and Turkana basins in West, Northeast and Ea..."
   },
   {
@@ -35347,7 +35872,9 @@
     "genus": "Lampris",
     "species": "guttatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The opah, also commonly known as moonfish, sunfish, cowfish, kingfish, and redfin ocean pan are large, colorful, deep-bodied pelagic lampriform fishes comprising the genus Lampris, of the small family Lampridae."
   },
   {
@@ -35491,7 +36018,9 @@
     "genus": "Lamna",
     "species": "nasus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "The porbeagle or porbeagle shark is a species of mackerel shark in the family Lamnidae, distributed widely in the cold and temperate marine waters of the North Atlantic and Southern Hemisphere."
   },
   {
@@ -35505,7 +36034,9 @@
     "genus": "Coregonu",
     "species": "lavaretus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Europe"
+    ],
     "notes": "The powan is a kind of freshwater whitefish endemic to two lochs in Scotland, Loch Lomond and Loch Eck."
   },
   {
@@ -35547,7 +36078,9 @@
     "genus": "Pomatoschistus",
     "species": "quagga",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Mediterranean Sea"
+    ],
     "notes": "Pomatoschistus quagga, the Quagga goby, is a species of goby native to the western part of the Mediterranean Sea and the Adriatic Sea."
   },
   {
@@ -35575,7 +36108,9 @@
     "genus": "Chimaera",
     "species": "monstrosa",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Mediterranean Sea"
+    ],
     "notes": "Chimaera monstrosa, commonly known as the rabbit fish or rat fish, is a northeast Atlantic and Mediterranean species of cartilaginous fish in the family Chimaeridae."
   },
   {
@@ -35619,7 +36154,10 @@
     "genus": "Equetus",
     "species": "lanceolatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean",
+      "Mediterranean Sea"
+    ],
     "notes": "The red mullets or surmullets are two species of goatfish, Mullus barbatus and Mullus surmuletus, found in the Mediterranean Sea, east North Atlantic Ocean, and the Black Sea."
   },
   {
@@ -35675,7 +36213,9 @@
     "genus": "Botia",
     "species": "lohachata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "Botia lohachata, the reticulate loach, painted loch or Pakistani loach, is a species of freshwater ray-finned fish belonging to the family Botiidae, the pointface loaches."
   },
   {
@@ -35745,7 +36285,10 @@
     "genus": "Nematistius",
     "species": "pectoralis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America",
+      "Pacific Ocean"
+    ],
     "notes": "The roosterfish is a unique species of marine carangiform fish found in the warmer shallow waters of the southeastern Pacific Ocean, from Baja California south to Peru."
   },
   {
@@ -35773,7 +36316,9 @@
     "genus": "Urobatis",
     "species": "halleri",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The round stingray or Haller's round ray and Little round stingray is a species of round ray, family Urotrygonidae, found in the coastal waters of the tropical and subtropical parts of the northeastern Pacific Ocean."
   },
   {
@@ -35787,7 +36332,9 @@
     "genus": "Gramma",
     "species": "loreto",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "The royal gramma, also known as the fairy basslet, is a species of fish in the family Grammatidae native to reef environments of the tropical western Atlantic Ocean."
   },
   {
@@ -35801,7 +36348,9 @@
     "genus": "Terranatos",
     "species": "dolichopterus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "The saberfin killie is a species of killifish from the family Rivulidae endemic to the Orinoco River basin of Venezuela."
   },
   {
@@ -35888,7 +36437,10 @@
     "genus": "Fodiator",
     "species": "acutus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean",
+      "Atlantic Ocean"
+    ],
     "notes": "Fodiator acutus, the sharpchin flyingfish, is a species of flying fish in the genus Fodiator endemic to the northeast Pacific Ocean and the eastern Atlantic Ocean."
   },
   {
@@ -36091,7 +36643,10 @@
     "genus": "Sardinella",
     "species": "aurita",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean",
+      "Mediterranean Sea"
+    ],
     "notes": "The round sardinella is a species of ray-finned fish in the genus Sardinella found in both sides of the Atlantic Ocean and the Mediterranean Sea."
   },
   {
@@ -36237,7 +36792,9 @@
     "genus": "Hydrolagus",
     "species": "colliei",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The spotted ratfish is a chimaera found in the north-eastern Pacific Ocean."
   },
   {
@@ -36599,7 +37156,9 @@
     "genus": "Alopias",
     "species": "vulpinus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "Thresher sharks are large mackerel sharks of the family Alopiidae found in all temperate and tropical oceans of the world; the family contains three extant species, all within the genus Alopias."
   },
   {
@@ -36627,7 +37186,10 @@
     "genus": "Hoplias",
     "species": "malabaricus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "South America"
+    ],
     "notes": "The Erythrinidae are a family of fishes found in rivers and other freshwater habitats from Costa Rica south as far as Argentina."
   },
   {
@@ -36669,7 +37231,9 @@
     "genus": "Brosme",
     "species": "brosme",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean"
+    ],
     "notes": "The cusk is a benthic, deep-water fish found in the North Atlantic, characterized by a single long-based dorsal fin, a chin barbel, and a distinctive long, tapering body."
   },
   {
@@ -36697,7 +37261,9 @@
     "genus": "Lophotus",
     "species": "capellei",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "The North Pacific crestfish is characterized by a long, silvery, ribbon-like body with a prominent dorsal crest on its head and specialized ink-secreting glands."
   },
   {
@@ -36711,7 +37277,9 @@
     "genus": "Cyclothone",
     "species": "microdon",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The veiled anglemouth, Cyclothone microdon, is a bristlemouth of the family Gonostomatidae, abundant in all the world's oceans at depths of 300–2,500 meters."
   },
   {
@@ -36845,7 +37413,9 @@
     "genus": "Botia",
     "species": "almorhae",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The yoyo loach, Almora loach or Pakistani loach is a freshwater fish belonging to the loach family Botiidae."
   },
   {
@@ -37123,7 +37693,10 @@
     "genus": "Lymantria",
     "species": "monacha",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe"
+    ],
     "notes": "The black arches or nun moth is a small Palaearctic moth."
   },
   {
@@ -37207,7 +37780,16 @@
     "genus": "Glaucus",
     "species": "atlanticus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Glaucus atlanticus is a pelagic nudibranch in the family Glaucidae, known for its bright blue coloration and drifting lifestyle. It is a gastropod mollusk found globally in tropical and temperate oceans, often feeding on venomous cnidarians like the Portuguese man o' war."
   },
   {
@@ -37397,7 +37979,11 @@
     "genus": "Chironomus",
     "species": "plumosus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "Chironomus plumosus, also known as the buzzer midge, is a species of nonbiting midge (Chironomidae) that occurs throughout areas in the Northern Hemisphere."
   },
   {
@@ -37425,7 +38011,16 @@
     "genus": "Tachcines",
     "species": "asynamorus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "The orthopteran family Rhaphidophoridae of the suborder Ensifera has a worldwide distribution."
   },
   {
@@ -37583,7 +38178,9 @@
     "genus": "Styllophora",
     "species": "pistillata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Smooth cauliflower is a key reef-building coral species in the Indo-Pacific used frequently in laboratory research due to its robustness and four genetically distinct clades"
   },
   {
@@ -37830,7 +38427,16 @@
     "genus": "Pholcus",
     "species": "phalangioides",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Pholcus phalangioides, commonly known as the cosmopolitan cellar spider, long-bodied cellar spider, or one of various types called a daddy long-legs spider, is a spider of the family Pholcidae."
   },
   {
@@ -37960,7 +38566,9 @@
     "genus": "Ectopsocus",
     "species": "briggsi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Europe"
+    ],
     "notes": "Ectopsocus briggsi is a species of Psocoptera from the family Ectopsocidae family that can be found in Great Britain and Ireland."
   },
   {
@@ -38107,7 +38715,9 @@
     "genus": "Haliotis",
     "species": "tuberculata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Mediterranean Sea"
+    ],
     "notes": "The green ormer is a northeast Atlantic and Mediterranean species of sea snail, a coastal marine gastropod mollusc in the family Haliotidae, the abalone or ormer snails."
   },
   {
@@ -38195,7 +38805,16 @@
     "genus": "Androctonus",
     "species": "australis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Fattail scorpion or fat-tailed scorpion is the common name given to scorpions of the genus Androctonus, one of the most dangerous groups of scorpion species worldwide."
   },
   {
@@ -38784,7 +39403,9 @@
     "genus": "Panchlora",
     "species": "nivea",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "Panchlora nivea, the Cuban cockroach or green banana cockroach, is a small species of cockroach in the subfamily Panchlorinae."
   },
   {
@@ -38840,7 +39461,10 @@
     "genus": "Palomena",
     "species": "prasina",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe"
+    ],
     "notes": "The green shield bug is a Palearctic shield bug species in the family Pentatomidae."
   },
   {
@@ -38868,7 +39492,16 @@
     "genus": "Micaria",
     "species": "formicaria",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Ground spiders comprise Gnaphosidae, the seventh largest spider family with about 2,500 described species in over 100 genera distributed worldwide."
   },
   {
@@ -38926,7 +39559,16 @@
     "genus": "Tegenaria",
     "species": "domestica",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "The barn funnel weaveris a widely distributed spider in the family Agelenidae (funnel-web spiders). Originally European, it is now cosmopolitan, living in close association with humans."
   },
   {
@@ -38968,7 +39610,10 @@
     "genus": "Acrocinus",
     "species": "longimanus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "South America"
+    ],
     "notes": "The harlequin beetle is a large and distinctly colored species of longhorn beetle from the Neotropics and the only member of the genus Acrocinus."
   },
   {
@@ -39042,7 +39687,10 @@
     "genus": "Morpho",
     "species": "rhetenor",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "South America"
+    ],
     "notes": "Morpho rhetenor, the Rhetenor blue morpho, is a Neotropical butterfly of the family Nymphalidae."
   },
   {
@@ -39289,7 +39937,11 @@
     "genus": "Oeneis",
     "species": "jutta",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "Oeneis jutta, the Jutta Arctic or Baltic grayling, is a species of butterfly in the subfamily Satyrinae with a Circumboreal distribution."
   },
   {
@@ -39431,7 +40083,16 @@
     "genus": "Pyrops",
     "species": "candelaria",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "The family Fulgoridae is a large group of hemipteran insects, especially abundant and diverse in the tropics, containing over 125 genera worldwide."
   },
   {
@@ -39559,7 +40220,10 @@
     "genus": "Sepiola",
     "species": "rondeleti",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean",
+      "Mediterranean Sea"
+    ],
     "notes": "Sepiola rondeletii, also known as the dwarf bobtail, is a species of bobtail squid native to the northeastern Atlantic Ocean and the Mediterranean Sea, including the Strait of Sicily, Aegean Sea, Adriatic Sea, Sea of Mar..."
   },
   {
@@ -39587,7 +40251,9 @@
     "genus": "Cyanea",
     "species": "arctica",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Arctic Ocean"
+    ],
     "notes": "The lion's mane jellyfish is recognized as a giant, cold-water species found in the Northern Atlantic and Arctic Oceans, known for its red color and massive tentacles"
   },
   {
@@ -39629,7 +40295,11 @@
     "genus": "Tetragnatha",
     "species": "extensa",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "Tetragnatha extensa is a species of spider found across the Northern Hemisphere."
   },
   {
@@ -39685,7 +40355,9 @@
     "genus": "Liphistius",
     "species": "malayanus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "Liphistius malayanus, also known as the Malayan black trapdoor spider or the black armored trapdoor spider, is a species of trapdoor spider that is native to Malaysia."
   },
   {
@@ -39755,7 +40427,16 @@
     "genus": "Pyralis",
     "species": "farinalis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Pyralis farinalis, the meal moth, is a cosmopolitan moth of the family Pyralidae."
   },
   {
@@ -39769,7 +40450,9 @@
     "genus": "Semicassis",
     "species": "granulata",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Mediterranean Sea"
+    ],
     "notes": "Semicassis undulata is a Mediterranean species of medium-sized sea snail, a marine gastropod mollusc in the subfamily Cassinae, the helmet snails and bonnet snails."
   },
   {
@@ -39817,7 +40500,16 @@
     "genus": "Colletes",
     "species": "cunicularius",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "The Andrenidae are a large, nearly cosmopolitan family of solitary, ground-nesting bees."
   },
   {
@@ -39862,7 +40554,10 @@
     "genus": "Tonicella",
     "species": "marmorea",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Atlantic Ocean",
+      "Arctic Ocean"
+    ],
     "notes": "Tonicella marmorea is a species of chiton, a polyplacophoran mollusc found in the Arctic Ocean and the North Atlantic Ocean."
   },
   {
@@ -39935,7 +40630,16 @@
     "genus": "Linphyia",
     "species": "triangularis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Linyphiidae, spiders commonly known as sheet weavers, or money spiders is a family of very small spiders comprising around 5,000 described species in around 650 genera worldwide."
   },
   {
@@ -40141,7 +40845,9 @@
     "genus": "Eunice",
     "species": "viridis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "Palola viridis, commonly known as the palolo worm, Samoan palolo worm, balolo, wawo, or nyale, is a Polychaeta species from the waters of some of the Pacific islands, including Samoa, Tonga, Fiji, Vanuatu, the Solomon Is..."
   },
   {
@@ -40183,7 +40889,10 @@
     "genus": "Fulgora",
     "species": "laternaria",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Central America",
+      "South America"
+    ],
     "notes": "Fulgora laternaria is a species of Neotropical fulgorid planthopper."
   },
   {
@@ -40281,7 +40990,11 @@
     "genus": "Diprion",
     "species": "pini",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "The Diprionidae are a small family of conifer-feeding sawflies restricted to the Northern Hemisphere, with some 140 species in 13 genera."
   },
   {
@@ -40312,7 +41025,16 @@
     "genus": "Eumenes",
     "species": "pomiformis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Potter wasps, the Eumeninae, are a cosmopolitan wasp group currently considered a subfamily of Vespidae, but sometimes recognized in the past as a separate family, Eumenidae."
   },
   {
@@ -40700,7 +41422,9 @@
     "genus": "Pseudocolochirus",
     "species": "violaceus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Pacific Ocean"
+    ],
     "notes": "Sea apple is the common name for the colorful and somewhat round sea cucumbers of the genus Pseudocolochirus, found in Indo-Pacific waters."
   },
   {
@@ -40714,7 +41438,9 @@
     "genus": "Aphrodita",
     "species": "aculeata",
     "diet": "Detritivore",
-    "continents": [],
+    "continents": [
+      "Mediterranean Sea"
+    ],
     "notes": "the sea mouse, is a species of marine polychaete worm and is a free-living, segmented bristleworm found in the Atlantic and Mediterranean."
   },
   {
@@ -40798,7 +41524,16 @@
     "genus": "Bipalium",
     "species": "kewense",
     "diet": "Carnivore",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "Bipalium kewense, also known as the shovel-headed garden worm, is a species of large predatory land planarian with a cosmopolitan distribution."
   },
   {
@@ -40873,7 +41608,11 @@
     "genus": "Boreus",
     "species": "hyemalis",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "Boreidae, commonly called snow scorpionflies, or in the British Isles, snow fleas are a very small family of scorpionflies, containing only around 30 species, all of which are boreal or high-altitude species in the North..."
   },
   {
@@ -40887,7 +41626,16 @@
     "genus": "Stratiomys",
     "species": "chamaeleon",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa",
+      "Asia",
+      "Europe",
+      "North America",
+      "Central America",
+      "South America",
+      "Australia",
+      "Antarctica"
+    ],
     "notes": "The family contains over 2,700 species in over 380 extant genera worldwide."
   },
   {
@@ -41736,7 +42484,9 @@
     "genus": "Aphelinus",
     "species": "mali",
     "diet": "Parasitoid",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Aphelinus mali is a parasitoid wasp that exploits the woolly apple aphid, a pest of apple trees."
   },
   {
@@ -41836,7 +42586,11 @@
     "genus": "Scatophaga",
     "species": "stercoraria",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe",
+      "North America"
+    ],
     "notes": "Scathophaga stercoraria, commonly known as the yellow dung fly  or the golden dung fly, is one of the most familiar and abundant flies in many parts of the Northern Hemisphere."
   },
   {
