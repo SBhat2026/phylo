@@ -56,6 +56,29 @@ body {
   .game-layout { grid-template-columns: 1fr; }
   .sidebar { position: static !important; }
 }
+@media (max-width: 520px) {
+  .page-wrap { padding: 0 10px 60px; }
+  .title { font-size: 1.8rem; letter-spacing: -1px; }
+  .header-actions { gap: 5px; flex-wrap: wrap; justify-content: center; }
+  .mode-btn { font-size: 0.72rem; padding: 5px 12px; }
+  .mode-select { font-size: 0.72rem; padding: 4px 8px; }
+  .search-input { font-size: 0.88rem; padding: 9px 11px; }
+  .primary-btn { padding: 9px 14px; font-size: 0.82rem; }
+  .card-body, .guess-list { padding: 12px 12px; }
+  .hint-item { padding: 9px 12px; }
+  .mini-section { padding: 10px 12px; }
+  .howto { padding: 12px 12px; font-size: 0.8rem; }
+  .pill { font-size: 0.68rem; padding: 4px 10px; }
+  .expert-panel { padding: 10px 12px; }
+  .expert-levels { gap: 4px; }
+  .expert-lvl-pill { font-size: 0.65rem; padding: 3px 9px; }
+  .expert-input { font-size: 0.82rem; padding: 7px 10px; }
+  .expert-check-btn { padding: 7px 11px; font-size: 0.78rem; }
+  .guess-name { font-size: 0.85rem; }
+  .tax-chip { font-size: 0.62rem; padding: 2px 6px 2px; }
+  .result-banner h2 { font-size: 1.2rem; }
+  .result-img-wrap img, .result-img-wrap .no-img { width: 70px; height: 70px; }
+}
 
 /* ── HEADER ── */
 header {
@@ -103,6 +126,12 @@ header {
 }
 .mode-btn:hover { border-color: var(--blue); color: var(--blue); }
 .mode-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.diff-btn#diffEasy.active   { background: var(--green);  border-color: var(--green);  color: #fff; }
+.diff-btn#diffMedium.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+.diff-btn#diffHard.active   { background: var(--red);    border-color: var(--red);    color: #fff; }
+.diff-btn#diffEasy:not(.active):hover   { border-color: var(--green);  color: var(--green); }
+.diff-btn#diffMedium:not(.active):hover { border-color: var(--orange); color: var(--orange); }
+.diff-btn#diffHard:not(.active):hover   { border-color: var(--red);    color: var(--red); }
 .mode-select {
   font-family: var(--font);
   font-size: 0.78rem;
@@ -231,9 +260,8 @@ header {
   border-radius: var(--r-sm);
   padding: 12px 14px;
   margin-top: 10px;
+  flex-direction: column;
   gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
 }
 .expert-panel.open { display: flex; }
 .expert-label {
@@ -242,12 +270,49 @@ header {
   color: var(--blue);
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  width: 100%;
-  margin-bottom: -2px;
+}
+/* Level pill row */
+.expert-levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.expert-lvl-pill {
+  font-family: var(--font);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 11px;
+  border-radius: 14px;
+  border: 1.5px solid var(--sep);
+  background: var(--card);
+  color: var(--label2);
+  cursor: pointer;
+  transition: all .12s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.expert-lvl-pill:hover:not(.revealed) { border-color: var(--blue); color: var(--blue); }
+.expert-lvl-pill.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.expert-lvl-pill.revealed { background: var(--green-lt); border-color: var(--green); color: var(--green); cursor: default; pointer-events: none; }
+.expert-lvl-pill.has-wrong:not(.active) { border-color: var(--orange); color: var(--orange); }
+.expert-wrong-badge {
+  font-size: 0.58rem;
+  background: var(--orange);
+  color: #fff;
+  border-radius: 7px;
+  padding: 0 4px;
+  line-height: 1.5;
+}
+.expert-lvl-pill.active .expert-wrong-badge { background: rgba(255,255,255,0.3); }
+/* Input row */
+.expert-input-row {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
 }
 .expert-input {
   flex: 1;
-  min-width: 130px;
   font-family: var(--font);
   font-size: 0.88rem;
   padding: 8px 12px;
@@ -257,19 +322,9 @@ header {
   color: var(--label);
   outline: none;
   transition: border-color .15s;
+  width: 100%;
 }
 .expert-input:focus { border-color: var(--blue); }
-.expert-select {
-  font-family: var(--font);
-  font-size: 0.85rem;
-  padding: 8px 10px;
-  background: #fff;
-  border: 1.5px solid var(--sep);
-  border-radius: var(--r-sm);
-  color: var(--label);
-  outline: none;
-  cursor: pointer;
-}
 .expert-check-btn {
   font-family: var(--font);
   font-size: 0.82rem;
@@ -281,14 +336,44 @@ header {
   border-radius: var(--r-sm);
   cursor: pointer;
   transition: opacity .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .expert-check-btn:hover { opacity: .85; }
 .expert-result {
-  width: 100%;
   font-size: 0.78rem;
   color: var(--blue);
   font-weight: 500;
   min-height: 16px;
+}
+
+/* ── TREE REVEAL ANIMATIONS (desktop only) ── */
+@keyframes tree-branch-draw {
+  from { stroke-dashoffset: 36; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes tree-node-pop {
+  from { transform: scale(0); }
+  60%  { transform: scale(1.4); }
+  to   { transform: scale(1); }
+}
+@keyframes tree-label-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (min-width: 769px) {
+  .tree-branch-new {
+    stroke-dasharray: 36;
+    animation: tree-branch-draw .35s ease-out forwards;
+  }
+  .tree-node-new {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: tree-node-pop .4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .tree-label-new {
+    animation: tree-label-fade .3s ease .2s both;
+  }
 }
 
 /* ── MINI-GUESS PANELS ── */
@@ -371,10 +456,35 @@ header {
   cursor: default;
   transition: box-shadow .15s;
   position: relative;
-  animation: slide-in .2s ease;
+  animation: card-enter .35s cubic-bezier(0.34, 1.25, 0.64, 1) both;
 }
 .guess-card:hover { box-shadow: var(--shadow); }
 @keyframes slide-in { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+@keyframes card-enter {
+  0%   { opacity: 0; transform: translateY(-18px) scale(0.96); }
+  65%  { opacity: 1; transform: translateY(3px) scale(1.005); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes chip-flip {
+  0%   { opacity: 0; transform: perspective(300px) rotateX(-80deg) scaleY(0.6); }
+  55%  { transform: perspective(300px) rotateX(10deg) scaleY(1.06); }
+  100% { opacity: 1; transform: perspective(300px) rotateX(0deg) scaleY(1); }
+}
+@keyframes sep-pop {
+  from { opacity: 0; transform: scaleX(0.2); }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+.guess-card .tax-chip {
+  opacity: 0;
+  animation: chip-flip .32s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+  transform-origin: top center;
+  display: inline-block;
+}
+.guess-card .tax-sep {
+  opacity: 0;
+  animation: sep-pop .15s ease forwards;
+  display: inline-block;
+}
 .guess-card-header {
   display: flex;
   justify-content: space-between;
@@ -499,9 +609,8 @@ header {
 .expert-input-wrap {
   position: relative;
   flex: 1;
-  min-width: 130px;
+  min-width: 0;
 }
-.expert-input-wrap .expert-input { width: 100%; flex: unset; min-width: unset; }
 
 /* ── PRACTICE MODE ── */
 .practice-btn {
@@ -637,12 +746,10 @@ header {
   <div class="subtitle">Identify today's animal through the tree of life</div>
   <div class="date-badge" id="dateBadge"></div>
   <div class="header-actions">
-    <button class="mode-btn" id="expertToggle" onclick="toggleExpert()">Expert Mode</button>
-    <select class="mode-select" id="maxGuessesSelect" onchange="setMaxGuesses(this.value)" title="Maximum guesses">
-      <option value="15">Limit: 15</option>
-      <option value="20" selected>Limit: 20</option>
-      <option value="25">Limit: 25</option>
-    </select>
+    <button class="mode-btn diff-btn" id="diffEasy"   onclick="setDifficulty('easy')">Easy</button>
+    <button class="mode-btn diff-btn" id="diffMedium" onclick="setDifficulty('medium')">Medium</button>
+    <button class="mode-btn diff-btn active" id="diffHard" onclick="setDifficulty('hard')">Hard</button>
+    <button class="mode-btn" id="expertToggle" onclick="toggleExpert()">Expert</button>
     <button class="mode-btn" id="giveUpBtn" onclick="giveUp()" style="border-color:var(--red);color:var(--red)">Give Up</button>
   </div>
 </header>
@@ -684,18 +791,20 @@ header {
         <!-- EXPERT MODE PANEL -->
         <div class="expert-panel" id="expertPanel">
           <span class="expert-label">Expert Mode — Guess a Taxonomic Level</span>
-          <div class="expert-input-wrap">
-            <input type="text" class="expert-input" id="expertInput" placeholder="e.g. Felidae…" autocomplete="off"/>
-            <div class="autocomplete-list" id="expertAutocompleteList"></div>
+          <div class="expert-levels" id="expertLevelPills">
+            <button class="expert-lvl-pill" data-level="phylum"  onclick="setExpertLevel('phylum')">Phylum</button>
+            <button class="expert-lvl-pill" data-level="class"   onclick="setExpertLevel('class')">Class</button>
+            <button class="expert-lvl-pill" data-level="order"   onclick="setExpertLevel('order')">Order</button>
+            <button class="expert-lvl-pill active" data-level="family" onclick="setExpertLevel('family')">Family</button>
+            <button class="expert-lvl-pill" data-level="genus"   onclick="setExpertLevel('genus')">Genus</button>
           </div>
-          <select class="expert-select" id="expertLevel">
-            <option value="phylum">Phylum</option>
-            <option value="class">Class</option>
-            <option value="order">Order</option>
-            <option value="family" selected>Family</option>
-            <option value="genus">Genus</option>
-          </select>
-          <button class="expert-check-btn" onclick="submitExpert()">Check</button>
+          <div class="expert-input-row">
+            <div class="expert-input-wrap">
+              <input type="text" class="expert-input" id="expertInput" placeholder="e.g. Felidae…" autocomplete="off"/>
+              <div class="autocomplete-list" id="expertAutocompleteList"></div>
+            </div>
+            <button class="expert-check-btn" onclick="submitExpert()">Check</button>
+          </div>
           <div class="expert-result" id="expertResult"></div>
         </div>
       </div>
@@ -806,9 +915,15 @@ header {
 const LEVELS       = ['kingdom','phylum','class','order','family','genus','species'];
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
 
-const DIET_UNLOCK    = 3;
-const RANGE_UNLOCK   = 5;
-const HABITAT_UNLOCK = 7;
+const DIFFICULTIES = {
+  easy:   { maxGuesses: 30, dietUnlock: 1, rangeUnlock: 2, habitatUnlock: 3 },
+  medium: { maxGuesses: 20, dietUnlock: 2, rangeUnlock: 3, habitatUnlock: 5 },
+  hard:   { maxGuesses: 12, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 7 },
+};
+let currentDifficulty = 'hard';
+let dietUnlock    = 3;
+let rangeUnlock   = 5;
+let habitatUnlock = 7;
 
 const OCEAN_REGIONS = new Set([
   'Pacific Ocean','Atlantic Ocean','Indian Ocean','Arctic Ocean','Southern Ocean',
@@ -957,12 +1072,14 @@ let expertWrong         = new Set();
 
 const wikiCache     = new Map();
 const wikiTaxonCache = new Map();
-let taxonIndex       = {};
-let practiceMode     = false;
+let taxonIndex         = {};
+let practiceMode       = false;
 let expertFilteredList = [];
 let expertSelectedIdx  = -1;
-let maxGuesses         = 20;
+let maxGuesses         = 12;
 let expertGuessCount   = 0;
+let expertCurrentLevel = 'family';
+let prevRevealedLevels = new Set();
 
 // ═══════════════════════════════════════════════════════
 // DAILY SEED
@@ -990,9 +1107,19 @@ function updateGuessCounter() {
     `${totalGuesses()} / ${maxGuesses} guess${totalGuesses() === 1 ? '' : 'es'}`;
 }
 
-function setMaxGuesses(val) {
-  maxGuesses = parseInt(val, 10);
+function setDifficulty(diff) {
+  if (gameOver) return; // don't change mid-game
+  currentDifficulty = diff;
+  const cfg = DIFFICULTIES[diff];
+  maxGuesses    = cfg.maxGuesses;
+  dietUnlock    = cfg.dietUnlock;
+  rangeUnlock   = cfg.rangeUnlock;
+  habitatUnlock = cfg.habitatUnlock;
+  ['easy','medium','hard'].forEach(d => {
+    document.getElementById('diff' + d[0].toUpperCase() + d.slice(1)).classList.toggle('active', d === diff);
+  });
   updateGuessCounter();
+  renderHints();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1400,8 +1527,8 @@ function renderBranchTree() {
   const PAD_T  = 24;
   const PAD_B  = 16;
   const H = PAD_T + LEVELS.length * ROW_H + PAD_B;
-  const spineX = 100; // spine x position
-  const branchLen = 40; // label column starts here from spine
+  const spineX = 100;
+  const branchLen = 40;
 
   let svgParts = [`<svg class="tree-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`];
 
@@ -1412,24 +1539,28 @@ function renderBranchTree() {
 
   LEVELS.forEach((lv, i) => {
     const revealed = revealedLevels.has(lv);
+    const isNew    = revealed && !prevRevealedLevels.has(lv);
     const y = PAD_T + i * ROW_H;
-    const color  = revealed ? '#007aff' : '#c6c6c8';
-    const fillC  = revealed ? '#007aff' : '#f2f2f7';
-    const val    = revealed ? (target[lv] || '?') : '──────';
+    const color    = revealed ? '#007aff' : '#c6c6c8';
+    const fillC    = revealed ? '#007aff' : '#f2f2f7';
+    const val      = revealed ? (target[lv] || '?') : '──────';
     const valColor = revealed ? '#000000' : '#c6c6c8';
 
-    // Horizontal branch line to value label (right side)
-    svgParts.push(`<line x1="${spineX}" y1="${y}" x2="${spineX + branchLen - 4}" y2="${y}" stroke="${color}" stroke-width="1.5"/>`);
+    // Horizontal branch line (animated when newly revealed)
+    const branchCls = isNew ? ' class="tree-branch-new"' : '';
+    svgParts.push(`<line${branchCls} x1="${spineX}" y1="${y}" x2="${spineX + branchLen - 4}" y2="${y}" stroke="${color}" stroke-width="1.5"/>`);
 
-    // Node circle
-    svgParts.push(`<circle cx="${spineX}" cy="${y}" r="${NODE_R}" fill="${fillC}" stroke="${color}" stroke-width="2"/>`);
+    // Node circle (animated when newly revealed)
+    const nodeCls = isNew ? ' class="tree-node-new"' : '';
+    svgParts.push(`<circle${nodeCls} cx="${spineX}" cy="${y}" r="${NODE_R}" fill="${fillC}" stroke="${color}" stroke-width="2"/>`);
 
     // Rank label (left of spine)
     svgParts.push(`<text x="${spineX - 10}" y="${y - 6}" text-anchor="end" font-size="8" fill="#6c6c70" font-family="Inter,sans-serif" font-weight="600" letter-spacing="0.3">${LEVEL_LABELS[i].toUpperCase()}</text>`);
 
-    // Value (right of branch)
+    // Value label (animated when newly revealed)
     const fontStyle = revealed ? 'italic' : 'normal';
-    svgParts.push(`<text x="${spineX + branchLen}" y="${y + 4}" text-anchor="start" font-size="11" fill="${valColor}" font-family="Inter,sans-serif" font-style="${fontStyle}">${val}</text>`);
+    const labelCls  = isNew ? ' class="tree-label-new"' : '';
+    svgParts.push(`<text${labelCls} x="${spineX + branchLen}" y="${y + 4}" text-anchor="start" font-size="11" fill="${valColor}" font-family="Inter,sans-serif" font-style="${fontStyle}">${val}</text>`);
 
     // Hover target for wiki tooltip on revealed non-kingdom non-species levels
     if (revealed && lv !== 'kingdom' && lv !== 'species') {
@@ -1439,6 +1570,7 @@ function renderBranchTree() {
   });
 
   svgParts.push('</svg>');
+  prevRevealedLevels = new Set(revealedLevels);
   document.getElementById('treeContainer').innerHTML = svgParts.join('');
 
   // Wire taxon wiki tooltips on revealed nodes
@@ -1464,9 +1596,9 @@ function renderHints(forceAll) {
   const habitatEl = document.getElementById('hintHabitat');
   const noteEl    = document.getElementById('hintNote');
 
-  const showDiet    = forceAll || gameOver || dietGuessedCorrect    || n >= DIET_UNLOCK;
-  const showRange   = forceAll || gameOver || rangeGuessedCorrect   || n >= RANGE_UNLOCK;
-  const showHabitat = forceAll || gameOver || n >= HABITAT_UNLOCK;
+  const showDiet    = forceAll || gameOver || dietGuessedCorrect    || n >= dietUnlock;
+  const showRange   = forceAll || gameOver || rangeGuessedCorrect   || n >= rangeUnlock;
+  const showHabitat = forceAll || gameOver || n >= habitatUnlock;
 
   const dietLabel = inferDiet(target);
   dietEl.innerHTML    = showDiet    ? `<strong>${dietLabel}</strong>` : '<span class="hint-locked">———</span>';
@@ -1474,9 +1606,9 @@ function renderHints(forceAll) {
   habitatEl.innerHTML = showHabitat ? `<strong>${inferHabitat(target)}</strong>`     : '<span class="hint-locked">———</span>';
 
   const parts = [];
-  if (!showDiet)    parts.push(`Diet: ${Math.max(0, DIET_UNLOCK - n)} guess${DIET_UNLOCK-n===1?'':'es'} or guess above`);
-  if (!showRange)   parts.push(`Range: ${Math.max(0, RANGE_UNLOCK - n)} or guess above`);
-  if (!showHabitat) parts.push(`Habitat: after ${HABITAT_UNLOCK} guesses`);
+  if (!showDiet)    parts.push(`Diet: ${Math.max(0, dietUnlock - n)} guess${dietUnlock-n===1?'':'es'} or guess above`);
+  if (!showRange)   parts.push(`Range: ${Math.max(0, rangeUnlock - n)} or guess above`);
+  if (!showHabitat) parts.push(`Habitat: after ${habitatUnlock} guesses`);
   noteEl.textContent = parts.join(' · ');
 }
 
@@ -1542,17 +1674,58 @@ function buildRangePills() {
 // ═══════════════════════════════════════════════════════
 // EXPERT MODE
 // ═══════════════════════════════════════════════════════
+function setExpertLevel(level) {
+  if (revealedLevels.has(level)) return; // already revealed, can't guess it
+  expertCurrentLevel = level;
+  updateExpertLevelPills();
+  const input = document.getElementById('expertInput');
+  input.value = '';
+  input.focus();
+  document.getElementById('expertAutocompleteList').classList.remove('open');
+  expertFilteredList = [];
+  expertSelectedIdx  = -1;
+  document.getElementById('expertResult').textContent = '';
+}
+
+function updateExpertLevelPills() {
+  document.querySelectorAll('.expert-lvl-pill').forEach(pill => {
+    const lv = pill.getAttribute('data-level');
+    const wrongCount = [...expertWrong].filter(k => k.startsWith(lv + ':')).length;
+    pill.classList.toggle('active',    lv === expertCurrentLevel && !revealedLevels.has(lv));
+    pill.classList.toggle('revealed',  revealedLevels.has(lv));
+    pill.classList.toggle('has-wrong', wrongCount > 0 && !revealedLevels.has(lv));
+    // Badge showing wrong attempt count
+    const badge = pill.querySelector('.expert-wrong-badge');
+    if (wrongCount > 0 && !revealedLevels.has(lv)) {
+      if (!badge) {
+        const b = document.createElement('span');
+        b.className = 'expert-wrong-badge';
+        b.textContent = wrongCount;
+        pill.appendChild(b);
+      } else {
+        badge.textContent = wrongCount;
+      }
+    } else if (badge) {
+      badge.remove();
+    }
+  });
+}
+
 function toggleExpert() {
   expertMode = !expertMode;
   document.getElementById('expertPanel').classList.toggle('open', expertMode);
   document.getElementById('expertToggle').classList.toggle('active', expertMode);
+  if (expertMode) {
+    updateExpertLevelPills();
+    document.getElementById('expertInput').focus();
+  }
 }
 
 function submitExpert() {
   if (gameOver) return;
-  const input = document.getElementById('expertInput');
-  const level = document.getElementById('expertLevel').value;
-  const guess = input.value.trim();
+  const input   = document.getElementById('expertInput');
+  const level   = expertCurrentLevel;
+  const guess   = input.value.trim();
   const resultEl = document.getElementById('expertResult');
 
   if (!guess) { resultEl.style.color = '#ff3b30'; resultEl.textContent = 'Type a value first.'; return; }
@@ -1576,18 +1749,18 @@ function submitExpert() {
     resultEl.style.color = '#34c759';
     resultEl.textContent = `✓ Correct! ${LEVEL_LABELS[LEVELS.indexOf(level)]} revealed.`;
     input.value = '';
-    // Also reveal all matched levels above
-    let seq = true;
-    for (const lv of LEVELS) {
-      if (seq && revealedLevels.has(lv)) { /* already marked */ }
-      else { seq = false; }
-    }
+    // Advance to next unrevealed level
+    const nextLv = LEVELS.find(lv => !revealedLevels.has(lv) && lv !== 'kingdom' && lv !== 'species');
+    if (nextLv) expertCurrentLevel = nextLv;
   } else {
     expertWrong.add(key);
     resultEl.style.color = '#ff3b30';
     resultEl.textContent = `✗ "${guess}" is not the ${LEVEL_LABELS[LEVELS.indexOf(level)]}.`;
+    input.value = '';
+    input.focus();
   }
 
+  updateExpertLevelPills();
   if (totalGuesses() >= maxGuesses) { endGame(false); return; }
 }
 
@@ -1601,8 +1774,10 @@ function renderGuessCard(animal, matchMap, prox) {
   for (let i = 0; i < LEVELS.length; i++) {
     const lv = LEVELS[i];
     const m  = matchMap[lv];
-    if (i > 0) chips.push('<span class="tax-sep">›</span>');
-    chips.push(`<span class="tax-chip ${m ? 'tax-match' : 'tax-nomatch'}">
+    const chipDelay = 260 + i * 90;
+    const sepDelay  = chipDelay - 45;
+    if (i > 0) chips.push(`<span class="tax-sep" style="animation-delay:${sepDelay}ms">›</span>`);
+    chips.push(`<span class="tax-chip ${m ? 'tax-match' : 'tax-nomatch'}" style="animation-delay:${chipDelay}ms">
       <span class="tax-label">${LEVEL_LABELS[i]}</span>${animal[lv] || '?'}</span>`);
     if (!m) break;
   }
@@ -1830,7 +2005,7 @@ function scoreTaxonMatch(val, q) {
 function updateExpertAutocomplete(query) {
   const q     = query.trim().toLowerCase();
   const list  = document.getElementById('expertAutocompleteList');
-  const level = document.getElementById('expertLevel').value;
+  const level = expertCurrentLevel;
   if (!list) return;
   if (q.length < 1) { expertFilteredList = []; list.classList.remove('open'); return; }
 
@@ -1881,6 +2056,8 @@ function startPractice() {
   expertFilteredList = [];
   expertSelectedIdx  = -1;
   expertGuessCount   = 0;
+  expertCurrentLevel = 'family';
+  prevRevealedLevels = new Set();
 
   // Pick a random animal different from today's daily
   const dailyAnimal = pickDaily(animals);
@@ -1912,6 +2089,7 @@ function startPractice() {
   renderHints();
   buildDietPills();
   buildRangePills();
+  updateExpertLevelPills();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1974,17 +2152,10 @@ function wireEvents() {
 
   expertInput.addEventListener('blur', () => setTimeout(() => expertList.classList.remove('open'), 160));
 
-  document.getElementById('expertLevel').addEventListener('change', () => {
-    expertList.classList.remove('open');
-    expertFilteredList = [];
-    expertSelectedIdx  = -1;
-    if (expertInput.value) updateExpertAutocomplete(expertInput.value);
-  });
-
   document.addEventListener('scroll', hideTooltip, { passive: true });
   document.addEventListener('click', e => {
     if (!e.target.closest('.guess-card') && !e.target.closest('#wikiTooltip')) hideTooltip();
-    if (!e.target.closest('.expert-input-wrap') && !e.target.closest('.expert-select')) {
+    if (!e.target.closest('.expert-input-wrap') && !e.target.closest('.expert-lvl-pill')) {
       expertList.classList.remove('open');
     }
   });
@@ -2019,6 +2190,7 @@ async function init() {
   buildDietPills();
   buildRangePills();
   updateGuessCounter();
+  updateExpertLevelPills();
   wireEvents();
 }
 

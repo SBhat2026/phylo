@@ -11814,7 +11814,9 @@
     "genus": "Corvus",
     "species": "moneduloides",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The New Caledonian crow is a medium-sized member of the family Corvidae, native to New Caledonia."
   },
   {
@@ -14680,7 +14682,9 @@
     "genus": "Pygocentrus",
     "species": "nattereri",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "South America"
+    ],
     "notes": "A piranha is any of a number of freshwater fish species in the subfamily Serrasalminae, of the family Serrasalmidae, in the order Characiformes."
   },
   {
@@ -14814,7 +14818,10 @@
     "genus": "Megalops",
     "species": "atlanticus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America",
+      "Atlantic Ocean"
+    ],
     "notes": "They are the only extant members of the family Megalopidae."
   },
   {
@@ -14986,7 +14993,7 @@
     "species": "mactans",
     "diet": "",
     "continents": [],
-    "notes": ""
+    "notes": "Latrodectus mactans, known as southern black widow or simply black widow, and the shoe-button spider, is a venomous species of spider in the genus Latrodectus."
   },
   {
     "common_name": "Blue dasher",
@@ -15563,7 +15570,9 @@
     "genus": "Anopheles",
     "species": "gambiae",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The Anopheles gambiae complex consists of at least seven morphologically indistinguishable species of mosquitoes in the genus Anopheles."
   },
   {
@@ -15635,8 +15644,10 @@
     "genus": "Lumbricus",
     "species": "terrestris",
     "diet": "",
-    "continents": [],
-    "notes": "Nightcrawler or nightcrawlers may refer to"
+    "continents": [
+      "Europe"
+    ],
+    "notes": "Lumbricus terrestris is a large, reddish worm species thought to be native to Western Europe, now widely distributed around the world."
   },
   {
     "common_name": "Orchid mantis",
@@ -15953,10 +15964,12 @@
     "class": "",
     "order": "",
     "family": "",
-    "genus": "",
+    "genus": "Animalia",
     "species": "",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Animals are multicellular, eukaryotic organisms belonging to the biological kingdom Animalia."
   },
   {
@@ -16123,7 +16136,9 @@
     "genus": "Gerbilliscus",
     "species": "kempi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "gambianus to be synonyms, however the IUCN has assessed each taxon as were they different species."
   },
   {
@@ -17538,7 +17553,9 @@
     "genus": "Spermophilus",
     "species": "tridecemlineatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "The thirteen-lined ground squirrel, also known as the striped gopher, leopard ground squirrel, and squinny, is a species of hibernating ground squirrel that is widely distributed over grasslands and prairies of North Ame..."
   },
   {
@@ -17616,7 +17633,9 @@
     "genus": "Damaliscus",
     "species": "lunatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The common tsessebe or sassaby is the southern, nominate subspecies of Damaliscus lunatus, although some authorities have recognised it as an independent species."
   },
   {
@@ -18490,7 +18509,9 @@
     "genus": "Turdoides",
     "species": "squamiceps",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Middle East"
+    ],
     "notes": "The Arabian babbler is a passerine bird until recently placed in the genus Turdoides."
   },
   {
@@ -18599,7 +18620,9 @@
     "genus": "Oceanodroma",
     "species": "castro",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Middle East"
+    ],
     "notes": "The band-rumped storm petrel, Madeiran storm petrel, or Harcourt's storm petrel is a species of storm petrel in the family Hydrobatidae."
   },
   {
@@ -20063,7 +20086,10 @@
     "genus": "Calidris",
     "species": "ferruginea",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia",
+      "Europe"
+    ],
     "notes": "The curlew sandpiper is a small migratory wader."
   },
   {
@@ -20401,7 +20427,9 @@
     "genus": "Macronous",
     "species": "ptilosus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "The fluffy-backed tit-babbler is a species of bird in the family Timaliidae."
   },
   {
@@ -21440,7 +21468,9 @@
     "genus": "Spizaetus",
     "species": "bartelsi",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Asia"
+    ],
     "notes": "The Javan hawk-eagle is a medium-sized, dark brown raptor in the family Accipitridae."
   },
   {
@@ -21468,7 +21498,9 @@
     "genus": "Rhynochetos",
     "species": "jubatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The kagu or cagou is a crested, long-legged, and bluish-grey bird endemic to the dense mountain forests of New Caledonia."
   },
   {
@@ -22852,7 +22884,7 @@
     "species": "carunculatus",
     "diet": "",
     "continents": [],
-    "notes": ""
+    "notes": "Their taxonomic family is also known as that of the \"wattlebirds\" and includes the two species of kōkako, and the extinct huia."
   },
   {
     "common_name": "Sandwich tern",
@@ -26383,7 +26415,9 @@
     "genus": "Testudo",
     "species": "kleinmanni",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Africa"
+    ],
     "notes": "Kleinmann's tortoise, also called commonly the Egyptian tortoise, Leith's tortoise, and the Negev tortoise, is a critically endangered species of cryptodire turtle in the family Testudinidae."
   },
   {
@@ -26525,7 +26559,9 @@
     "genus": "Agkistrodon",
     "species": "piscivorus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "North America"
+    ],
     "notes": "Agkistrodon piscivorus is a species of venomous snake, a pit viper in the subfamily Crotalinae of the family Viperidae."
   },
   {
@@ -27860,7 +27896,7 @@
     "species": "clelia",
     "diet": "",
     "continents": [],
-    "notes": "Mussurana can refer to the following snake genera:Mussurana\nClelia\nBoiruna"
+    "notes": "Clelia clelia, commonly known as the mussurana, black mussurana or windward cribo, is a species of snake in the subfamily Dipsadinae of the family Colubridae."
   },
   {
     "common_name": "Natal black snake",
@@ -27887,7 +27923,9 @@
     "genus": "Rhacodactylus",
     "species": "auriculatus",
     "diet": "",
-    "continents": [],
+    "continents": [
+      "Australia"
+    ],
     "notes": "The gargoyle gecko, knob-headed giant gecko, New Caledonia bumpy gecko, or New Caledonian bumpy gecko is a species of gecko found only on the southern end of the island of New Caledonia."
   },
   {
@@ -28011,7 +28049,7 @@
     "species": "ocellata",
     "diet": "",
     "continents": [],
-    "notes": "Two species of lizard are named ocellated tegu:Cercosaura bassleri\nCercosaura ocellata"
+    "notes": "Cercosaura ocellata, the ocellated tegu, is a species of lizard in the family Gymnophthalmidae."
   },
   {
     "common_name": "Olive-brown sea snake",
@@ -28310,8 +28348,11 @@
     "genus": "Crotalus",
     "species": "viridis",
     "diet": "",
-    "continents": [],
-    "notes": "Prairie rattlesnake may refer to:Crotalus viridis, a.k.a."
+    "continents": [
+      "North America",
+      "Central America"
+    ],
+    "notes": "The prairie rattlesnake or Great Plains rattlesnake is a venomous pit viper species native to the western United States, southwestern Canada, and northern Mexico."
   },
   {
     "common_name": "Prairie ringneck snake",
@@ -28505,7 +28546,7 @@
       "North America",
       "Australia"
     ],
-    "notes": "Rainbow snake may refer to:Farancia erytrogramma, a species of snake native to the southeastern United States\nRainbow Serpent, an Aboriginal Australian religious figure"
+    "notes": "Farancia erytrogramma is a species of large, nonvenomous, highly amphibious colubrid snake, endemic to the coastal plains of the southeastern United States."
   },
   {
     "common_name": "Rainbow water snake",
