@@ -787,7 +787,7 @@ header {
     <button class="mode-btn diff-btn" id="diffEasy"   onclick="setDifficulty('easy')">Easy</button>
     <button class="mode-btn diff-btn" id="diffMedium" onclick="setDifficulty('medium')">Medium</button>
     <button class="mode-btn diff-btn active" id="diffHard" onclick="setDifficulty('hard')">Hard</button>
-    <button class="mode-btn" id="expertToggle" onclick="toggleExpert()">Expert</button>
+    <button class="mode-btn" id="expertToggle" onclick="toggleExpert()">Taxonomist Mode</button>
     <button class="mode-btn" id="giveUpBtn" onclick="giveUp()" style="border-color:var(--red);color:var(--red)">Give Up</button>
   </div>
 </header>
@@ -828,7 +828,7 @@ header {
 
         <!-- EXPERT MODE PANEL -->
         <div class="expert-panel" id="expertPanel">
-          <span class="expert-label">Expert Mode — Guess a Taxonomic Level</span>
+          <span class="expert-label">Taxonomist Mode — Guess a Taxonomic Level</span>
           <div class="expert-levels" id="expertLevelPills">
             <button class="expert-lvl-pill" data-level="phylum"  onclick="setExpertLevel('phylum')">Phylum</button>
             <button class="expert-lvl-pill" data-level="class"   onclick="setExpertLevel('class')">Class</button>
@@ -958,9 +958,9 @@ const LEVELS       = ['kingdom','phylum','class','order','family','genus','speci
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
 
 const DIFFICULTIES = {
-  easy:   { maxGuesses: 30, dietUnlock: 1, rangeUnlock: 2, habitatUnlock: 3 },
+  easy:   { maxGuesses: 20, dietUnlock: 1, rangeUnlock: 2, habitatUnlock: 3 },
   medium: { maxGuesses: 20, dietUnlock: 2, rangeUnlock: 3, habitatUnlock: 5 },
-  hard:   { maxGuesses: 12, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 7 },
+  hard:   { maxGuesses: 20, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 7 },
 };
 let currentDifficulty = 'hard';
 let dietUnlock    = 3;
@@ -1095,9 +1095,30 @@ const RANGE_OPTS = [
 ];
 
 // ═══════════════════════════════════════════════════════
+// POOL HELPERS — filter animals by difficulty tier
+// ═══════════════════════════════════════════════════════
+function getPool() {
+  if (currentDifficulty === 'easy')   return animals.filter(a => (a.tier || 3) === 1);
+  if (currentDifficulty === 'medium') return animals.filter(a => (a.tier || 3) <= 2);
+  return animals;
+}
+
+// Diet categories that appear in the given pool
+function getActiveDietCats(pool) {
+  return DIET_CATS.filter(cat => pool.some(a => matchesDietCat(inferDiet(a), cat)));
+}
+
+// Range regions that appear in the given pool
+function getActiveRangeOpts(pool) {
+  const all = new Set(pool.flatMap(a => a.continents || []));
+  return RANGE_OPTS.filter(r => all.has(r));
+}
+
+// ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
 let animals      = [];
+let currentPool  = [];   // filtered to current difficulty
 let target       = null;
 let guesses      = [];
 let selectedIdx  = -1;
@@ -1118,7 +1139,7 @@ let taxonIndex         = {};
 let practiceMode       = false;
 let expertFilteredList = [];
 let expertSelectedIdx  = -1;
-let maxGuesses         = 12;
+let maxGuesses         = 20;
 let expertGuessCount   = 0;
 let expertCurrentLevel = 'family';
 let prevRevealedLevels = new Set();
@@ -1160,6 +1181,9 @@ function setDifficulty(diff) {
   ['easy','medium','hard'].forEach(d => {
     document.getElementById('diff' + d[0].toUpperCase() + d.slice(1)).classList.toggle('active', d === diff);
   });
+  currentPool = getPool();
+  buildDietPills(currentPool);
+  buildRangePills(currentPool);
   updateGuessCounter();
   renderHints();
 }
@@ -1802,10 +1826,11 @@ function renderHints(forceAll) {
 // ═══════════════════════════════════════════════════════
 // MINI-GUESS PANELS
 // ═══════════════════════════════════════════════════════
-function buildDietPills() {
-  const row = document.getElementById('dietPills');
+function buildDietPills(pool) {
+  const row  = document.getElementById('dietPills');
   row.innerHTML = '';
-  DIET_CATS.forEach(cat => {
+  const cats = pool ? getActiveDietCats(pool) : DIET_CATS;
+  cats.forEach(cat => {
     const pill = document.createElement('button');
     pill.className = 'pill';
     pill.textContent = cat.label;
@@ -1830,10 +1855,11 @@ function buildDietPills() {
   });
 }
 
-function buildRangePills() {
-  const row = document.getElementById('rangePills');
+function buildRangePills(pool) {
+  const row  = document.getElementById('rangePills');
   row.innerHTML = '';
-  RANGE_OPTS.forEach(region => {
+  const opts = pool ? getActiveRangeOpts(pool) : RANGE_OPTS;
+  opts.forEach(region => {
     const pill = document.createElement('button');
     pill.className = 'pill';
     pill.textContent = region;
@@ -2154,7 +2180,7 @@ function updateAutocomplete(query) {
   if (q.length < 1) { filteredList = []; list.classList.remove('open'); return; }
 
   const done = new Set(guesses.map(g => g.scientific_name.toLowerCase()));
-  const matched = animals.filter(a => {
+  const matched = currentPool.filter(a => {
     const cn  = a.common_name.toLowerCase();
     const sci = a.scientific_name.toLowerCase();
     return (cn.includes(q) || sci.includes(q)) && !done.has(sci);
@@ -2246,10 +2272,11 @@ function startPractice() {
   expertCurrentLevel = 'family';
   prevRevealedLevels = new Set();
 
-  // Pick a random animal different from today's daily
-  const dailyAnimal = pickDaily(animals);
-  const pool = animals.filter(a => a.scientific_name !== dailyAnimal.scientific_name);
-  target = pool[Math.floor(Math.random() * pool.length)];
+  // Pick a random animal different from today's daily, within current difficulty pool
+  currentPool = getPool();
+  const dailyAnimal = pickDaily(currentPool);
+  const practicePool = currentPool.filter(a => a.scientific_name !== dailyAnimal.scientific_name);
+  target = practicePool[Math.floor(Math.random() * practicePool.length)];
   fetchWiki(target);
 
   // Reset UI
@@ -2274,8 +2301,8 @@ function startPractice() {
   updateGuessCounter();
   renderSidebar();
   renderHints();
-  buildDietPills();
-  buildRangePills();
+  buildDietPills(currentPool);
+  buildRangePills(currentPool);
   updateExpertLevelPills();
 }
 
@@ -2364,18 +2391,19 @@ async function init() {
     return;
   }
 
-  // Build taxon index for expert autocomplete
+  // Build taxon index for taxonomist autocomplete (all animals, not pool-filtered)
   ['phylum','class','order','family','genus'].forEach(lv => {
     taxonIndex[lv] = [...new Set(animals.map(a => a[lv]).filter(Boolean))].sort();
   });
 
-  target = pickDaily(animals);
+  currentPool = getPool();
+  target = pickDaily(currentPool);
   fetchWiki(target); // pre-warm
 
   renderSidebar();
   renderHints();
-  buildDietPills();
-  buildRangePills();
+  buildDietPills(currentPool);
+  buildRangePills(currentPool);
   updateGuessCounter();
   updateExpertLevelPills();
   wireEvents();
