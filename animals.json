@@ -12774,15 +12774,15 @@
     "kingdom": "Animalia",
     "phylum": "Chordata",
     "class": "Reptilia",
-    "order": "",
-    "family": "",
+    "order": "Squamata",
+    "family": "Crotaphytidae",
     "genus": "Crotaphytus",
     "species": "collaris",
     "diet": "",
     "continents": [
       "North America"
     ],
-    "notes": "Collared lizard may refer to:Any member of the North America genus Crotaphytus\nCrotaphytidae, the family of collared lizards of which Crotaphytus is a member\nOplurus cuvieri, a species native to Madagascar"
+    "notes": "The common collared lizard, also commonly called eastern collared lizard, Oklahoma collared lizard, mountain boomer, yellow-headed collared lizard, and collared lizard, is a North American species of lizard in the family Crotaphytidae."
   },
   {
     "common_name": "Common death adder",
@@ -13210,7 +13210,7 @@
     "continents": [
       "Africa"
     ],
-    "notes": "Horned viper may refer to:Cerastes (genus), North African desert vipers, a group of small, venomous species found in the deserts and semi-deserts of northern North Africa eastward through Arabia and Iran\nBitis caudalis, ..."
+    "notes": "Cerastes cerastes, commonly known as the Saharan horned viper or the desert horned viper, is a species of viper native to the deserts of Northern Africa and parts of the Arabian Peninsula and Levant."
   },
   {
     "common_name": "Indian python",
@@ -15080,7 +15080,7 @@
       "Asia",
       "Europe"
     ],
-    "notes": "Cabbage white or cabbage butterfly may refer to:Pieris brassicae, or large white, a Palearctic butterfly\nPieris rapae, or small white, a Palearctic butterfly that has been introduced to many other parts of the world"
+    "notes": "Pieris brassicae, the large white, also called cabbage butterfly, cabbage white, cabbage moth (erroneously), or in India the large cabbage white, is a butterfly in the family Pieridae."
   },
   {
     "common_name": "Chinese mitten crab",
