@@ -958,9 +958,9 @@ const LEVELS       = ['kingdom','phylum','class','order','family','genus','speci
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
 
 const DIFFICULTIES = {
-  easy:   { maxGuesses: 20, dietUnlock: 1, rangeUnlock: 2, habitatUnlock: 3 },
+  easy:   { maxGuesses: 30, dietUnlock: 1, rangeUnlock: 2, habitatUnlock: 3 },
   medium: { maxGuesses: 20, dietUnlock: 2, rangeUnlock: 3, habitatUnlock: 5 },
-  hard:   { maxGuesses: 20, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 7 },
+  hard:   { maxGuesses: 12, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 7 },
 };
 let currentDifficulty = 'hard';
 let dietUnlock    = 3;
@@ -1097,9 +1097,60 @@ const RANGE_OPTS = [
 // ═══════════════════════════════════════════════════════
 // POOL HELPERS — filter animals by difficulty tier
 // ═══════════════════════════════════════════════════════
+
+// Tier 1: iconic, instantly recognisable animals (~90 curated).
+// Tier 2: any animal that has continent data (notable enough for Wikipedia range info).
+// Tier 3: everything else.
+const TIER1_NAMES = new Set([
+  // Big cats & felids
+  "Lion","Leopard","Cheetah","Snow leopard","Jaguar","Clouded leopard","Bengal tiger",
+  // Bears
+  "Polar bear","Giant panda","American black bear","Sun bear",
+  // Canids
+  "Red fox","Arctic fox","Coyote","Dingo","Ethiopian wolf",
+  // Great apes & primates
+  "Chimpanzee","Bonobo","Mountain gorilla","Bornean orangutan",
+  // African megafauna
+  "African bush elephant","Hippopotamus","White rhinoceros","Black rhinoceros",
+  "Reticulated giraffe","Burchell's zebra","Grevy's zebra",
+  "Wildebeest","Warthog","Meerkat","Aardvark",
+  // Other land mammals
+  "Red panda","Moose","Bison","Dromedary","Nine-banded armadillo",
+  "Sunda pangolin","Maned three-toed sloth","Common wombat",
+  // Marsupials & monotremes
+  "Koala","Platypus",
+  // Marine mammals
+  "Orca","Blue whale","Humpback whale","Sperm whale","Narwhal","Beluga",
+  "Bottle-nosed dolphin","Amazonian manatee","California sea lion","Leopard seal",
+  // Birds
+  "Emperor penguin","Bald eagle","Peregrine falcon","Ostrich",
+  "Greater flamingo","Indian peafowl","Toco toucan","Scarlet macaw",
+  "Barn owl","Great horned owl","Atlantic puffin","Wandering albatross",
+  "Giant hummingbird",
+  // Reptiles
+  "King cobra","Anaconda","African rock python","Boa constrictor",
+  "Komodo dragon","Green iguana","Veiled chameleon",
+  "Saltwater crocodile","Nile crocodile","American alligator",
+  "Galapagos tortoise",
+  // Amphibians
+  "Axolotl",
+  // Sharks & rays
+  "Great white shark","Whale shark","Smooth hammerhead","Manta ray",
+  // Other fish & sea life
+  "Piranha","Common octopus","Giant squid","Mantis shrimp",
+  // Invertebrates
+  "Monarch butterfly","Goliath beetle","Emperor scorpion","American lobster",
+]);
+
+function animalTier(a) {
+  if (TIER1_NAMES.has(a.common_name)) return 1;
+  if (a.continents && a.continents.length > 0) return 2;
+  return 3;
+}
+
 function getPool() {
-  if (currentDifficulty === 'easy')   return animals.filter(a => (a.tier || 3) === 1);
-  if (currentDifficulty === 'medium') return animals.filter(a => (a.tier || 3) <= 2);
+  if (currentDifficulty === 'easy')   return animals.filter(a => animalTier(a) === 1);
+  if (currentDifficulty === 'medium') return animals.filter(a => animalTier(a) <= 2);
   return animals;
 }
 
