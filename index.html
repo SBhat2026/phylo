@@ -878,7 +878,7 @@ header {
       The chain stops at the first mismatch. Use <em>Guess the Diet</em> and <em>Guess the Range</em>
       to unlock Field Notes early. Hover any guess card for its Wikipedia image and description.
       <br><br>
-      <strong>Expert Mode</strong> lets you guess individual taxonomic levels (family, order, etc.)
+      <strong>Taxonomist Mode</strong> lets you guess individual taxonomic levels (family, order, etc.)
       to reveal those levels in the tree without spending an animal guess.
       <br><br>
       <strong>Proximity %</strong> reflects relatedness weighted by taxonomic depth and group size.
@@ -958,14 +958,14 @@ const LEVELS       = ['kingdom','phylum','class','order','family','genus','speci
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
 
 const DIFFICULTIES = {
-  easy:   { maxGuesses: 30, dietUnlock: 1, rangeUnlock: 2, habitatUnlock: 3 },
-  medium: { maxGuesses: 20, dietUnlock: 2, rangeUnlock: 3, habitatUnlock: 5 },
-  hard:   { maxGuesses: 12, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 7 },
+  easy:   { maxGuesses: 30, dietUnlock: 2, rangeUnlock: 3, habitatUnlock: 4 },
+  medium: { maxGuesses: 20, dietUnlock: 3, rangeUnlock: 4, habitatUnlock: 5 },
+  hard:   { maxGuesses: 15, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 5 },
 };
 let currentDifficulty = 'hard';
 let dietUnlock    = 3;
 let rangeUnlock   = 5;
-let habitatUnlock = 7;
+let habitatUnlock = 5;
 
 const OCEAN_REGIONS = new Set([
   'Pacific Ocean','Atlantic Ocean','Indian Ocean','Arctic Ocean','Southern Ocean',
