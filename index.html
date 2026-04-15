@@ -1095,63 +1095,28 @@ const RANGE_OPTS = [
 ];
 
 // ═══════════════════════════════════════════════════════
-// POOL HELPERS — filter animals by difficulty tier
+// POOL HELPERS — keep easy / medium / hard on separate datasets
 // ═══════════════════════════════════════════════════════
 
-// Tier 1: iconic, instantly recognisable animals (~90 curated).
-// Tier 2: any animal that has continent data (notable enough for Wikipedia range info).
-// Tier 3: everything else.
-const TIER1_NAMES = new Set([
-  // Big cats & felids
-  "Lion","Leopard","Cheetah","Snow leopard","Jaguar","Clouded leopard","Bengal tiger",
-  // Bears
-  "Polar bear","Giant panda","American black bear","Sun bear",
-  // Canids
-  "Red fox","Arctic fox","Coyote","Dingo","Ethiopian wolf",
-  // Great apes & primates
-  "Chimpanzee","Bonobo","Mountain gorilla","Bornean orangutan",
-  // African megafauna
-  "African bush elephant","Hippopotamus","White rhinoceros","Black rhinoceros",
-  "Reticulated giraffe","Burchell's zebra","Grevy's zebra",
-  "Wildebeest","Warthog","Meerkat","Aardvark",
-  // Other land mammals
-  "Red panda","Moose","Bison","Dromedary","Nine-banded armadillo",
-  "Sunda pangolin","Maned three-toed sloth","Common wombat",
-  // Marsupials & monotremes
-  "Koala","Platypus",
-  // Marine mammals
-  "Orca","Blue whale","Humpback whale","Sperm whale","Narwhal","Beluga",
-  "Bottle-nosed dolphin","Amazonian manatee","California sea lion","Leopard seal",
-  // Birds
-  "Emperor penguin","Bald eagle","Peregrine falcon","Ostrich",
-  "Greater flamingo","Indian peafowl","Toco toucan","Scarlet macaw",
-  "Barn owl","Great horned owl","Atlantic puffin","Wandering albatross",
-  "Giant hummingbird",
-  // Reptiles
-  "King cobra","Anaconda","African rock python","Boa constrictor",
-  "Komodo dragon","Green iguana","Veiled chameleon",
-  "Saltwater crocodile","Nile crocodile","American alligator",
-  "Galapagos tortoise",
-  // Amphibians
-  "Axolotl",
-  // Sharks & rays
-  "Great white shark","Whale shark","Smooth hammerhead","Manta ray",
-  // Other fish & sea life
-  "Piranha","Common octopus","Giant squid","Mantis shrimp",
-  // Invertebrates
-  "Monarch butterfly","Goliath beetle","Emperor scorpion","American lobster",
-]);
+let difficultyPools = { easy: [], medium: [], hard: [] };
 
 function animalTier(a) {
-  if (TIER1_NAMES.has(a.common_name)) return 1;
+  const tier = Number(a.tier);
+  if ([1, 2, 3].includes(tier)) return tier;
   if (a.continents && a.continents.length > 0) return 2;
   return 3;
 }
 
+function buildDifficultyPools() {
+  return {
+    easy: animals.filter(a => animalTier(a) === 1),
+    medium: animals.filter(a => animalTier(a) === 2),
+    hard: animals.filter(a => animalTier(a) === 3),
+  };
+}
+
 function getPool() {
-  if (currentDifficulty === 'easy')   return animals.filter(a => animalTier(a) === 1);
-  if (currentDifficulty === 'medium') return animals.filter(a => animalTier(a) <= 2);
-  return animals;
+  return difficultyPools[currentDifficulty] || [];
 }
 
 // Diet categories that appear in the given pool
@@ -1211,6 +1176,66 @@ function pickDaily(arr) {
   return arr[Math.floor(rng() * arr.length)];
 }
 
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function resetRoundState() {
+  guesses = [];
+  revealedLevels = new Set();
+  gameOver = false;
+  dietGuessedCorrect  = false;
+  rangeGuessedCorrect = false;
+  dietWrongGuesses    = new Set();
+  rangeWrongGuesses   = new Set();
+  expertWrong         = new Set();
+  filteredList = [];
+  selectedIdx  = -1;
+  expertFilteredList = [];
+  expertSelectedIdx  = -1;
+  expertGuessCount   = 0;
+  expertCurrentLevel = 'family';
+  prevRevealedLevels = new Set();
+
+  document.getElementById('resultBanner').classList.remove('show');
+  document.getElementById('practiceBtn').style.display = 'none';
+  document.getElementById('guessList').innerHTML =
+    '<div class="empty-state">Hover a card to preview · Click to see full taxonomy tree.</div>';
+  document.getElementById('guessCounter').textContent = '0 guesses';
+  document.getElementById('flashMsg').textContent = '';
+  document.getElementById('expertResult').textContent = '';
+  document.getElementById('expertInput').value = '';
+  document.getElementById('expertAutocompleteList').classList.remove('open');
+  document.getElementById('autocompleteList').classList.remove('open');
+  document.getElementById('searchInput').value    = '';
+  document.getElementById('searchInput').disabled = false;
+  document.getElementById('guessBtn').disabled    = false;
+  document.getElementById('giveUpBtn').disabled   = false;
+
+  if (practiceMode) {
+    document.getElementById('dateBadge').innerHTML =
+      'Practice Mode &nbsp;<span class="practice-badge">Random Animal</span>';
+  } else {
+    document.getElementById('dateBadge').textContent =
+      new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  }
+
+  updateGuessCounter();
+  renderSidebar();
+  renderHints();
+  buildDietPills(currentPool);
+  buildRangePills(currentPool);
+  updateExpertLevelPills();
+}
+
+function startDailyRound() {
+  practiceMode = false;
+  currentPool = getPool();
+  target = pickDaily(currentPool);
+  fetchWiki(target);
+  resetRoundState();
+}
+
 // ═══════════════════════════════════════════════════════
 // GUESS COUNT HELPERS
 // ═══════════════════════════════════════════════════════
@@ -1222,7 +1247,6 @@ function updateGuessCounter() {
 }
 
 function setDifficulty(diff) {
-  if (gameOver) return; // don't change mid-game
   currentDifficulty = diff;
   const cfg = DIFFICULTIES[diff];
   maxGuesses    = cfg.maxGuesses;
@@ -1232,11 +1256,8 @@ function setDifficulty(diff) {
   ['easy','medium','hard'].forEach(d => {
     document.getElementById('diff' + d[0].toUpperCase() + d.slice(1)).classList.toggle('active', d === diff);
   });
-  currentPool = getPool();
-  buildDietPills(currentPool);
-  buildRangePills(currentPool);
-  updateGuessCounter();
-  renderHints();
+  if (practiceMode) startPractice();
+  else startDailyRound();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2306,55 +2327,17 @@ function updateExpertAutocomplete(query) {
 // PRACTICE MODE
 // ═══════════════════════════════════════════════════════
 function startPractice() {
-  guesses = [];
-  revealedLevels = new Set();
-  gameOver = false;
   practiceMode = true;
-  dietGuessedCorrect  = false;
-  rangeGuessedCorrect = false;
-  dietWrongGuesses    = new Set();
-  rangeWrongGuesses   = new Set();
-  expertWrong         = new Set();
-  filteredList = [];
-  selectedIdx  = -1;
-  expertFilteredList = [];
-  expertSelectedIdx  = -1;
-  expertGuessCount   = 0;
-  expertCurrentLevel = 'family';
-  prevRevealedLevels = new Set();
 
   // Pick a random animal different from today's daily, within current difficulty pool
   currentPool = getPool();
   const dailyAnimal = pickDaily(currentPool);
-  const practicePool = currentPool.filter(a => a.scientific_name !== dailyAnimal.scientific_name);
-  target = practicePool[Math.floor(Math.random() * practicePool.length)];
+  const practicePool = currentPool.length > 1
+    ? currentPool.filter(a => a.scientific_name !== dailyAnimal.scientific_name)
+    : currentPool;
+  target = pickRandom(practicePool);
   fetchWiki(target);
-
-  // Reset UI
-  document.getElementById('resultBanner').classList.remove('show');
-  document.getElementById('practiceBtn').style.display = 'none';
-  document.getElementById('guessList').innerHTML =
-    '<div class="empty-state">Hover a card to preview · Click to see full taxonomy tree.</div>';
-  document.getElementById('guessCounter').textContent = '0 guesses';
-  document.getElementById('flashMsg').textContent = '';
-  document.getElementById('expertResult').textContent = '';
-  document.getElementById('expertInput').value = '';
-  document.getElementById('expertAutocompleteList').classList.remove('open');
-  document.getElementById('autocompleteList').classList.remove('open');
-  document.getElementById('searchInput').value    = '';
-  document.getElementById('searchInput').disabled = false;
-  document.getElementById('guessBtn').disabled    = false;
-  document.getElementById('giveUpBtn').disabled   = false;
-
-  document.getElementById('dateBadge').innerHTML =
-    'Practice Mode &nbsp;<span class="practice-badge">Random Animal</span>';
-
-  updateGuessCounter();
-  renderSidebar();
-  renderHints();
-  buildDietPills(currentPool);
-  buildRangePills(currentPool);
-  updateExpertLevelPills();
+  resetRoundState();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2430,9 +2413,6 @@ function wireEvents() {
 // INIT
 // ═══════════════════════════════════════════════════════
 async function init() {
-  document.getElementById('dateBadge').textContent =
-    new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-
   try {
     const resp = await fetch('animals.json');
     animals = await resp.json();
@@ -2447,16 +2427,8 @@ async function init() {
     taxonIndex[lv] = [...new Set(animals.map(a => a[lv]).filter(Boolean))].sort();
   });
 
-  currentPool = getPool();
-  target = pickDaily(currentPool);
-  fetchWiki(target); // pre-warm
-
-  renderSidebar();
-  renderHints();
-  buildDietPills(currentPool);
-  buildRangePills(currentPool);
-  updateGuessCounter();
-  updateExpertLevelPills();
+  difficultyPools = buildDifficultyPools();
+  startDailyRound();
   wireEvents();
 }
 
