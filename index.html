@@ -1095,7 +1095,7 @@ const RANGE_OPTS = [
 ];
 
 // ═══════════════════════════════════════════════════════
-// POOL HELPERS — keep easy / medium / hard on separate datasets
+// POOL HELPERS — easy/medium are subsets, hard uses the full dataset
 // ═══════════════════════════════════════════════════════
 
 let difficultyPools = { easy: [], medium: [], hard: [] };
@@ -1110,8 +1110,8 @@ function animalTier(a) {
 function buildDifficultyPools() {
   return {
     easy: animals.filter(a => animalTier(a) === 1),
-    medium: animals.filter(a => animalTier(a) === 2),
-    hard: animals.filter(a => animalTier(a) === 3),
+    medium: animals.filter(a => animalTier(a) <= 2),
+    hard: animals,
   };
 }
 
