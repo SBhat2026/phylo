@@ -2854,8 +2854,8 @@
     "kingdom": "Animalia",
     "phylum": "Chordata",
     "class": "Mammalia",
-    "order": "",
-    "family": "",
+    "order": "Rodentia",
+    "family": "Octodontidae",
     "genus": "Spalacopus",
     "species": "cyanus",
     "diet": "Carnivore",
@@ -5351,8 +5351,8 @@
     "kingdom": "Animalia",
     "phylum": "Chordata",
     "class": "Mammalia",
-    "order": "",
-    "family": "",
+    "order": "Carnivora",
+    "family": "Mephitidae",
     "genus": "Mephitis",
     "species": "macroura",
     "diet": "Carnivore",
@@ -8187,7 +8187,7 @@
     "tier": 2
   },
   {
-    "common_name": "Przewalski's horse",
+    "common_name": "Wild horse",
     "scientific_name": "Equus ferus",
     "kingdom": "Animalia",
     "phylum": "Chordata",
@@ -8198,9 +8198,10 @@
     "species": "ferus",
     "diet": "",
     "continents": [
+      "Asia",
       "Europe"
     ],
-    "notes": "The wild horse is a species of the genus Equus, which includes as subspecies the modern domesticated horse as well as the endangered Przewalski's horse.",
+    "notes": "The wild horse is a species of the genus Equus that includes the endangered Przewalski's horse and the extinct tarpan.",
     "tier": 2
   },
   {
@@ -9224,8 +9225,8 @@
     "kingdom": "Animalia",
     "phylum": "Chordata",
     "class": "Mammalia",
-    "order": "",
-    "family": "",
+    "order": "Carnivora",
+    "family": "Mephitidae",
     "genus": "Spilogale",
     "species": "putorius",
     "diet": "Carnivore",
@@ -13815,23 +13816,6 @@
     "tier": 2
   },
   {
-    "common_name": "Frilled-neck lizard",
-    "scientific_name": "Chlamydosaurus kingii",
-    "kingdom": "Animalia",
-    "phylum": "Chordata",
-    "class": "Reptilia",
-    "order": "Squamata",
-    "family": "Amphibolurinae",
-    "genus": "Chlamydosaurus",
-    "species": "kingii",
-    "diet": "Carnivore",
-    "continents": [
-      "Australia"
-    ],
-    "notes": "The frilled lizard, also known commonly as the frilled agama, frillneck lizard, frill-necked lizard or frilled dragon, is a species of lizard in the family Agamidae.",
-    "tier": 2
-  },
-  {
     "common_name": "Gaboon adder",
     "scientific_name": "Bitis gabonica",
     "kingdom": "Animalia",
@@ -16937,23 +16921,6 @@
     "tier": 2
   },
   {
-    "common_name": "﻿Animals",
-    "scientific_name": "Animalia",
-    "kingdom": "Animalia",
-    "phylum": "",
-    "class": "",
-    "order": "",
-    "family": "",
-    "genus": "Animalia",
-    "species": "",
-    "diet": "",
-    "continents": [
-      "Africa"
-    ],
-    "notes": "Animals are multicellular, eukaryotic organisms belonging to the biological kingdom Animalia.",
-    "tier": 2
-  },
-  {
     "common_name": "Eld’s deer",
     "scientific_name": "Cercus eldii",
     "kingdom": "Animalia",
@@ -17556,13 +17523,13 @@
     "tier": 2
   },
   {
-    "common_name": "Przewalski’s horse",
+    "common_name": "Przewalski's horse",
     "scientific_name": "Equus ferus przewalskii",
     "kingdom": "Animalia",
     "phylum": "Chordata",
     "class": "Mammalia",
-    "order": "Hippomorpha",
-    "family": "Equinae",
+    "order": "Perissodactyla",
+    "family": "Equidae",
     "genus": "Equus",
     "species": "ferus",
     "diet": "",
@@ -35210,10 +35177,10 @@
     "phylum": "Chordata",
     "class": "Actinopterygii",
     "order": "Lophiiformes",
-    "family": "Ceratioidei",
-    "genus": "Melanocetidae",
-    "species": "Melanocetus",
-    "diet": "johnsonii",
+    "family": "Melanocetidae",
+    "genus": "Melanocetus",
+    "species": "johnsonii",
+    "diet": "",
     "continents": [],
     "notes": "The humpback anglerfish is a species of black seadevil in the family of Melanocetidae, which means \"black sea monster\".",
     "tier": 3
@@ -40037,9 +40004,9 @@
     "phylum": "Arthropoda",
     "class": "Malacostraca",
     "order": "Decapoda",
-    "family": "Blattellidae",
-    "genus": "Homarus ",
-    "species": "fungicamericanusola",
+    "family": "Nephropidae",
+    "genus": "Homarus",
+    "species": "americanus",
     "diet": "",
     "continents": [
       "North America"
@@ -40681,7 +40648,7 @@
     "class": "Anthozoa",
     "order": "Scleractinia",
     "family": "Pocilloporidae",
-    "genus": "Styllophora",
+    "genus": "Stylophora",
     "species": "pistillata",
     "diet": "",
     "continents": [
@@ -40895,21 +40862,6 @@
     "tier": 3
   },
   {
-    "common_name": "Crown-of-thorns starfish ",
-    "scientific_name": "Acanthaster planci",
-    "kingdom": "Animalia",
-    "phylum": "Echinodermata",
-    "class": "Asteroidea",
-    "order": "Valvatida",
-    "family": "Acanthasteridae",
-    "genus": "cAanthaster",
-    "species": "planci",
-    "diet": "",
-    "continents": [],
-    "notes": "The crown-of-thorns starfish is a large, multi-armed starfish which specializes in eating coral and is characterized by venomous, thorny spines",
-    "tier": 3
-  },
-  {
     "common_name": "Currant sawfly",
     "scientific_name": "Nematus ribesii",
     "kingdom": "Animalia",
@@ -41011,23 +40963,6 @@
     "tier": 3
   },
   {
-    "common_name": "Deep-sea vampire squid",
-    "scientific_name": "Vampyroteuthis infernalis",
-    "kingdom": "Animalia",
-    "phylum": "Rhabditophora",
-    "class": "Bilateria",
-    "order": "Tricladida",
-    "family": "Planariidae",
-    "genus": "Vampyroteuthis",
-    "species": "infernalis",
-    "diet": "",
-    "continents": [
-      "Europe"
-    ],
-    "notes": "The vampire squid uses its bioluminescent organs and its unique oxygen metabolism to thrive in the parts of the ocean with the lowest concentrations of oxygen.",
-    "tier": 2
-  },
-  {
     "common_name": "Devonshire cup coral",
     "scientific_name": "Caryophyllia smithii",
     "kingdom": "Animalia",
@@ -41046,7 +40981,7 @@
     "common_name": "Dew drop spider",
     "scientific_name": "Argyrodes antipodianus",
     "kingdom": "Animalia",
-    "phylum": "Chelicerata",
+    "phylum": "Arthropoda",
     "class": "Arachnida",
     "order": "Araneae",
     "family": "Theridiidae",
@@ -43122,14 +43057,14 @@
     "tier": 3
   },
   {
-    "common_name": "Megarian banded centipede ",
+    "common_name": "Megarian banded centipede",
     "scientific_name": "Scolopendra cingulata",
     "kingdom": "Animalia",
     "phylum": "Arthropoda",
     "class": "Chilopoda",
     "order": "Scolopendromorpha",
     "family": "Scolopendridae",
-    "genus": "Scolopendratoma",
+    "genus": "Scolopendra",
     "species": "cingulata",
     "diet": "",
     "continents": [
@@ -44768,7 +44703,7 @@
     "order": "Araneae",
     "family": "Araneidae",
     "genus": "Gasteracantha",
-    "species": "Gasteracantha versicolor",
+    "species": "",
     "diet": "Insectivore",
     "continents": [
       "Africa"
@@ -44878,7 +44813,7 @@
     "common_name": "Tropical tent-web spider",
     "scientific_name": "Cyrtophora citricola",
     "kingdom": "Animalia",
-    "phylum": "Chelicerata",
+    "phylum": "Arthropoda",
     "class": "Arachnida",
     "order": "Araneae",
     "family": "Araneidae",
@@ -45218,7 +45153,7 @@
     "tier": 3
   },
   {
-    "common_name": "Whip-spider",
+    "common_name": "Phrynichus whip-spider",
     "scientific_name": "Charinus milloti",
     "kingdom": "Animalia",
     "phylum": "Chelicerata",
@@ -45353,7 +45288,7 @@
     "class": "Malacostraca",
     "order": "Decapoda",
     "family": "Portunidae",
-    "genus": "Portunis",
+    "genus": "Achelous",
     "species": "xantusii",
     "diet": "",
     "continents": [],
