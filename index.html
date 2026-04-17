@@ -1098,6 +1098,37 @@ const RANGE_OPTS = [
 // POOL HELPERS — easy/medium are subsets, hard uses the full dataset
 // ═══════════════════════════════════════════════════════
 
+// ~100 universally recognisable animals; easy daily is drawn only from this set
+const EASY_ANIMALS = new Set([
+  'Lion','Bengal tiger','Siberian tiger','African bush elephant','African forest elephant',
+  'Asiatic elephant','Hippopotamus','White rhinoceros','Black rhinoceros',
+  'Reticulated giraffe','Southern giraffe',
+  'Cheetah','Leopard','Clouded leopard','Snow leopard','Jaguar','Puma','Ocelot','Eurasian lynx',
+  'Chimpanzee','Bonobo','Bornean orangutan','Sumatran orangutan',
+  'Mountain gorilla','Eastern lowland gorilla','Cross River gorilla',
+  'Mandrill','Olive baboon','Chacma baboon',
+  'Giant panda','Polar bear','European brown bear','American black bear','Sloth bear',
+  'Red fox','Gray wolf (Alaskan)','Coyote','Dingo','Meerkat',
+  'Striped hyena','Brown hyena','African wild dog',
+  'Raccoon','Striped skunk',
+  'Impala','Wildebeest','Springbok','Moose','Caribou','Roosevelt elk','White-tailed deer',
+  'Bison','Dromedary','Wild horse',
+  'Bald eagle','Emperor penguin','Greater flamingo','Ostrich',
+  'Great horned owl','Golden eagle','Peregrine falcon',
+  'Nile crocodile','American alligator','Saltwater crocodile',
+  'Komodo dragon','Anaconda','Boa constrictor','King cobra',
+  'Great white shark','Bull shark','Whale shark',
+  'Blue whale','Orca','Sperm whale','Humpback whale','Common dolphin','Bottle-nosed dolphin',
+  'Common seal','Gray seal','Sea otter','Giant otter',
+  'Platypus','Koala','Common wombat','Tasmanian devil','Eastern gray kangaroo',
+  'Giant anteater','Giant armadillo',
+  'Maned three-toed sloth','Pale-throated three-toed sloth',
+  'European rabbit','Eurasian red squirrel','Brown rat','House mouse',
+  'North American porcupine','Eurasian beaver','American badger',
+  'Western European hedgehog','Golden hamster','Egyptian fruit bat',
+  'Southern elephant seal',
+]);
+
 let difficultyPools = { easy: [], medium: [], hard: [] };
 
 function animalTier(a) {
@@ -1109,9 +1140,9 @@ function animalTier(a) {
 
 function buildDifficultyPools() {
   return {
-    easy: animals.filter(a => animalTier(a) === 1),
+    easy:   animals.filter(a => EASY_ANIMALS.has(a.common_name)),
     medium: animals.filter(a => animalTier(a) <= 2),
-    hard: animals,
+    hard:   animals,
   };
 }
 
@@ -1163,16 +1194,18 @@ let prevRevealedLevels = new Set();
 // ═══════════════════════════════════════════════════════
 // DAILY SEED
 // ═══════════════════════════════════════════════════════
-function dateToSeed() {
+const DIFF_SEED_OFFSET = { easy: 0, medium: 100000, hard: 200000 };
+function dateToSeed(diff) {
   const d = new Date();
-  return d.getFullYear() * 10000 + (d.getMonth()+1) * 100 + d.getDate();
+  const base = d.getFullYear() * 10000 + (d.getMonth()+1) * 100 + d.getDate();
+  return base + (DIFF_SEED_OFFSET[diff] || 0);
 }
 function seededRandom(seed) {
   let s = seed;
   return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
 }
-function pickDaily(arr) {
-  const rng = seededRandom(dateToSeed());
+function pickDaily(arr, diff) {
+  const rng = seededRandom(dateToSeed(diff || currentDifficulty));
   return arr[Math.floor(rng() * arr.length)];
 }
 
