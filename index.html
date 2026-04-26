@@ -860,6 +860,14 @@ header {
         <div class="mini-hint" id="rangeMiniHint">Where does this animal live?</div>
         <div class="pill-row" id="rangePills"></div>
       </div>
+
+      <!-- LETTER REVEAL -->
+      <div class="mini-section">
+        <div class="mini-title">Name Letters</div>
+        <div class="mini-hint" id="letterHint">Spend a guess to reveal a random letter.</div>
+        <div id="letterDisplay" style="font-size:1.15rem;letter-spacing:5px;font-weight:700;margin-bottom:10px;font-family:monospace;min-height:1.4em"></div>
+        <button class="pill" id="revealLetterBtn" onclick="revealLetter()">Reveal a Letter (−1 guess)</button>
+      </div>
     </div>
 
     <!-- GUESS HISTORY -->
@@ -958,9 +966,9 @@ const LEVELS       = ['kingdom','phylum','class','order','family','genus','speci
 const LEVEL_LABELS = ['Kingdom','Phylum','Class','Order','Family','Genus','Species'];
 
 const DIFFICULTIES = {
-  easy:   { maxGuesses: 30, dietUnlock: 2, rangeUnlock: 3, habitatUnlock: 4 },
-  medium: { maxGuesses: 20, dietUnlock: 3, rangeUnlock: 4, habitatUnlock: 5 },
-  hard:   { maxGuesses: 15, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 5 },
+  easy:   { maxGuesses: 40, dietUnlock: 2, rangeUnlock: 3, habitatUnlock: 4 },
+  medium: { maxGuesses: 28, dietUnlock: 3, rangeUnlock: 4, habitatUnlock: 5 },
+  hard:   { maxGuesses: 20, dietUnlock: 3, rangeUnlock: 5, habitatUnlock: 5 },
 };
 let currentDifficulty = 'hard';
 let dietUnlock    = 3;
@@ -1179,6 +1187,8 @@ let rangeGuessedCorrect = false;
 let dietWrongGuesses    = new Set();
 let rangeWrongGuesses   = new Set();
 let expertWrong         = new Set();
+let miniGuessCount      = 0;
+let revealedLetters     = new Set();
 
 const wikiCache     = new Map();
 const wikiTaxonCache = new Map();
@@ -1190,6 +1200,7 @@ let maxGuesses         = 20;
 let expertGuessCount   = 0;
 let expertCurrentLevel = 'family';
 let prevRevealedLevels = new Set();
+const savedModeStates  = { easy: null, medium: null, hard: null };
 
 // ═══════════════════════════════════════════════════════
 // DAILY SEED
@@ -1222,6 +1233,8 @@ function resetRoundState() {
   dietWrongGuesses    = new Set();
   rangeWrongGuesses   = new Set();
   expertWrong         = new Set();
+  miniGuessCount      = 0;
+  revealedLetters     = new Set();
   filteredList = [];
   selectedIdx  = -1;
   expertFilteredList = [];
@@ -1259,27 +1272,143 @@ function resetRoundState() {
   buildDietPills(currentPool);
   buildRangePills(currentPool);
   updateExpertLevelPills();
+  buildLetterDisplay();
 }
 
 function startDailyRound() {
   practiceMode = false;
   currentPool = getPool();
   target = pickDaily(currentPool);
-  fetchWiki(target);
   resetRoundState();
+  fetchWiki(target).then(wikiData => {
+    if (wikiData && typeof wikiData === 'object' && wikiData !== 'error' && wikiData !== 'loading') {
+      supplementRangeFromWiki(target, wikiData);
+      buildRangePills(currentPool);
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════════════
 // GUESS COUNT HELPERS
 // ═══════════════════════════════════════════════════════
-function totalGuesses() { return guesses.length + expertGuessCount; }
+function totalGuesses() { return guesses.length + expertGuessCount + miniGuessCount; }
 
 function updateGuessCounter() {
   document.getElementById('guessCounter').textContent =
     `${totalGuesses()} / ${maxGuesses} guess${totalGuesses() === 1 ? '' : 'es'}`;
 }
 
+function saveCurrentModeState() {
+  savedModeStates[currentDifficulty] = {
+    guesses: [...guesses],
+    target,
+    revealedLevels: new Set(revealedLevels),
+    gameOver,
+    dietGuessedCorrect,
+    rangeGuessedCorrect,
+    dietWrongGuesses: new Set(dietWrongGuesses),
+    rangeWrongGuesses: new Set(rangeWrongGuesses),
+    expertWrong: new Set(expertWrong),
+    expertGuessCount,
+    expertCurrentLevel,
+    prevRevealedLevels: new Set(prevRevealedLevels),
+    miniGuessCount,
+    revealedLetters: new Set(revealedLetters),
+    practiceMode,
+  };
+}
+
+function restoreModeState(state) {
+  guesses             = [...state.guesses];
+  target              = state.target;
+  revealedLevels      = new Set(state.revealedLevels);
+  gameOver            = state.gameOver;
+  dietGuessedCorrect  = state.dietGuessedCorrect;
+  rangeGuessedCorrect = state.rangeGuessedCorrect;
+  dietWrongGuesses    = new Set(state.dietWrongGuesses);
+  rangeWrongGuesses   = new Set(state.rangeWrongGuesses);
+  expertWrong         = new Set(state.expertWrong);
+  expertGuessCount    = state.expertGuessCount;
+  expertCurrentLevel  = state.expertCurrentLevel;
+  prevRevealedLevels  = new Set(state.prevRevealedLevels);
+  miniGuessCount      = state.miniGuessCount;
+  revealedLetters     = new Set(state.revealedLetters);
+  practiceMode        = state.practiceMode;
+}
+
+function renderRestoredState() {
+  filteredList = []; selectedIdx = -1;
+  expertFilteredList = []; expertSelectedIdx = -1;
+  document.getElementById('searchInput').value    = '';
+  document.getElementById('searchInput').disabled = gameOver;
+  document.getElementById('guessBtn').disabled    = gameOver;
+  document.getElementById('giveUpBtn').disabled   = gameOver;
+  document.getElementById('flashMsg').textContent = '';
+  document.getElementById('expertResult').textContent = '';
+  document.getElementById('expertInput').value = '';
+  document.getElementById('autocompleteList').classList.remove('open');
+  document.getElementById('expertAutocompleteList').classList.remove('open');
+
+  if (practiceMode) {
+    document.getElementById('dateBadge').innerHTML =
+      'Practice Mode &nbsp;<span class="practice-badge">Random Animal</span>';
+  } else {
+    document.getElementById('dateBadge').textContent =
+      new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  }
+
+  const list = document.getElementById('guessList');
+  if (guesses.length === 0) {
+    list.innerHTML = '<div class="empty-state">Hover a card to preview · Click to see full taxonomy tree.</div>';
+  } else {
+    list.innerHTML = '';
+    [...guesses].reverse().forEach(animal => {
+      const matchMap = levelMatchMap(animal, target);
+      const prox = calcProximity(animal, target, animals);
+      const card = renderGuessCard(animal, matchMap, prox);
+      list.appendChild(card);
+    });
+  }
+
+  updateGuessCounter();
+  renderSidebar();
+  renderHints(gameOver);
+  buildDietPills(currentPool);
+  buildRangePills(currentPool);
+  updateExpertLevelPills();
+  buildLetterDisplay();
+
+  const banner = document.getElementById('resultBanner');
+  if (gameOver) {
+    banner.classList.add('show');
+    document.getElementById('practiceBtn').style.display = 'block';
+    const total = totalGuesses();
+    const won = guesses.length > 0 &&
+      guesses[0].scientific_name.toLowerCase() === target.scientific_name.toLowerCase();
+    document.getElementById('resultTitle').textContent    = won ? '🎉 Correct!' : 'The answer was…';
+    document.getElementById('resultSubtitle').textContent = won
+      ? `Identified in ${total} guess${total === 1 ? '' : 'es'}.`
+      : `Better luck tomorrow.`;
+    document.getElementById('resultSci').textContent  = `${target.common_name} — ${target.scientific_name}`;
+    document.getElementById('resultFact').textContent = target.notes || '';
+    fetchWiki(target).then(wikiData => {
+      const wrap = document.getElementById('resultImgWrap');
+      if (wikiData && wikiData !== 'error' && wikiData !== 'loading' && wikiData.img) {
+        wrap.innerHTML = `<img src="${wikiData.img}" alt="${target.common_name}">`;
+      } else {
+        wrap.innerHTML = `<div class="no-img">🦎</div>`;
+      }
+    });
+  } else {
+    banner.classList.remove('show');
+    document.getElementById('practiceBtn').style.display = 'none';
+    document.getElementById('resultImgWrap').innerHTML = '';
+  }
+}
+
 function setDifficulty(diff) {
+  if (diff === currentDifficulty) return;
+  saveCurrentModeState();
   currentDifficulty = diff;
   const cfg = DIFFICULTIES[diff];
   maxGuesses    = cfg.maxGuesses;
@@ -1289,8 +1418,52 @@ function setDifficulty(diff) {
   ['easy','medium','hard'].forEach(d => {
     document.getElementById('diff' + d[0].toUpperCase() + d.slice(1)).classList.toggle('active', d === diff);
   });
-  if (practiceMode) startPractice();
-  else startDailyRound();
+  currentPool = getPool();
+  if (savedModeStates[diff]) {
+    restoreModeState(savedModeStates[diff]);
+    renderRestoredState();
+  } else if (practiceMode) {
+    startPractice();
+  } else {
+    startDailyRound();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RANGE FROM WIKIPEDIA
+// ═══════════════════════════════════════════════════════
+const WIKI_REGION_MAP = [
+  ['north america', 'North America'],
+  ['central america', 'Central America'],
+  ['south america', 'South America'],
+  ['sub-saharan africa', 'Africa'],
+  ['africa', 'Africa'],
+  ['europe', 'Europe'],
+  ['south asia', 'Asia'],
+  ['southeast asia', 'Asia'],
+  ['east asia', 'Asia'],
+  ['asia', 'Asia'],
+  ['australia', 'Australia'],
+  ['new zealand', 'Australia'],
+  ['oceania', 'Australia'],
+  ['antarctica', 'Antarctica'],
+  ['middle east', 'Middle East'],
+  ['pacific ocean', 'Pacific Ocean'],
+  ['atlantic ocean', 'Atlantic Ocean'],
+  ['indian ocean', 'Indian Ocean'],
+  ['arctic ocean', 'Arctic Ocean'],
+  ['arctic', 'Arctic Ocean'],
+  ['southern ocean', 'Southern Ocean'],
+];
+
+function supplementRangeFromWiki(animal, wikiData) {
+  if (!wikiData || typeof wikiData !== 'object') return;
+  const text = ((wikiData.text || '') + ' ' + (animal.notes || '')).toLowerCase();
+  const existing = new Set((animal.continents || []).map(c => c));
+  WIKI_REGION_MAP.forEach(([kw, region]) => {
+    if (text.includes(kw)) existing.add(region);
+  });
+  animal.continents = [...existing];
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1935,11 +2108,17 @@ function buildDietPills(pool) {
   const row  = document.getElementById('dietPills');
   row.innerHTML = '';
   const cats = pool ? getActiveDietCats(pool) : DIET_CATS;
+  const inferredDiet = target ? inferDiet(target) : '';
   cats.forEach(cat => {
     const pill = document.createElement('button');
     pill.className = 'pill';
     pill.textContent = cat.label;
-    if (gameOver) { pill.classList.add('locked'); pill.disabled = true; }
+    const isCorrect = dietGuessedCorrect && matchesDietCat(inferredDiet, cat);
+    const isWrong   = dietWrongGuesses.has(cat.label);
+    if (isCorrect) { pill.classList.add('correct'); }
+    else if (gameOver || (dietGuessedCorrect && !isCorrect) || isWrong) {
+      pill.classList.add('locked'); pill.disabled = true;
+    }
     pill.addEventListener('click', () => {
       if (gameOver || dietGuessedCorrect || pill.classList.contains('locked')) return;
       if (matchesDietCat(inferDiet(target), cat)) {
@@ -1951,13 +2130,19 @@ function buildDietPills(pool) {
       } else {
         if (dietWrongGuesses.has(cat.label)) return;
         dietWrongGuesses.add(cat.label);
+        miniGuessCount++;
+        updateGuessCounter();
         pill.classList.add('wrong');
         pill.disabled = true;
-        setTimeout(() => { pill.classList.remove('wrong'); }, 600);
+        setTimeout(() => { pill.classList.remove('wrong'); pill.classList.add('locked'); }, 600);
+        if (totalGuesses() >= maxGuesses) { endGame(false); return; }
       }
     });
     row.appendChild(pill);
   });
+  if (dietGuessedCorrect) {
+    document.getElementById('dietMiniHint').textContent = '✓ Correct! Diet hint unlocked.';
+  }
 }
 
 function buildRangePills(pool) {
@@ -1968,7 +2153,12 @@ function buildRangePills(pool) {
     const pill = document.createElement('button');
     pill.className = 'pill';
     pill.textContent = region;
-    if (gameOver) { pill.classList.add('locked'); pill.disabled = true; }
+    const isCorrect = rangeGuessedCorrect && matchesRange(region);
+    const isWrong   = rangeWrongGuesses.has(region);
+    if (isCorrect) { pill.classList.add('correct'); }
+    else if (gameOver || (rangeGuessedCorrect && !isCorrect) || isWrong) {
+      pill.classList.add('locked'); pill.disabled = true;
+    }
     pill.addEventListener('click', () => {
       if (gameOver || rangeGuessedCorrect || pill.classList.contains('locked')) return;
       if (matchesRange(region)) {
@@ -1980,13 +2170,19 @@ function buildRangePills(pool) {
       } else {
         if (rangeWrongGuesses.has(region)) return;
         rangeWrongGuesses.add(region);
+        miniGuessCount++;
+        updateGuessCounter();
         pill.classList.add('wrong');
         pill.disabled = true;
-        setTimeout(() => { pill.classList.remove('wrong'); }, 600);
+        setTimeout(() => { pill.classList.remove('wrong'); pill.classList.add('locked'); }, 600);
+        if (totalGuesses() >= maxGuesses) { endGame(false); return; }
       }
     });
     row.appendChild(pill);
   });
+  if (rangeGuessedCorrect) {
+    document.getElementById('rangeMiniHint').textContent = '✓ Correct! Range hint unlocked.';
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2146,7 +2342,7 @@ function showTaxPopup(animal, matchMap, prox) {
     row.appendChild(lvEl);
     row.appendChild(val);
 
-    if (!matched) {
+    if (!matched && gameOver) {
       const tgt = document.createElement('div');
       tgt.className = 'tax-popup-target';
       tgt.textContent = target[lv] || '?';
@@ -2237,6 +2433,7 @@ async function endGame(won) {
   LEVELS.forEach(lv => revealedLevels.add(lv));
   renderSidebar();
   renderHints(true);
+  buildLetterDisplay();
   document.querySelectorAll('.pill').forEach(p => { p.classList.add('locked'); p.disabled = true; });
 
   const wikiData = await fetchWiki(target);
@@ -2263,6 +2460,49 @@ async function endGame(won) {
   document.getElementById('giveUpBtn').disabled   = true;
   document.getElementById('practiceBtn').style.display = 'block';
   banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ═══════════════════════════════════════════════════════
+// LETTER REVEAL
+// ═══════════════════════════════════════════════════════
+function buildLetterDisplay() {
+  const el = document.getElementById('letterDisplay');
+  const btnEl = document.getElementById('revealLetterBtn');
+  if (!el || !target) return;
+  const name = target.common_name || '';
+  const chars = name.split('').map((c, i) => {
+    if (/[\s\-']/.test(c)) return `<span style="color:var(--label3);letter-spacing:0">${c}</span>`;
+    if (revealedLetters.has(i) || gameOver) return `<span style="color:var(--blue)">${c}</span>`;
+    return `<span style="color:var(--sep)">_</span>`;
+  });
+  el.innerHTML = chars.join('');
+  const unrevealed = name.split('').filter((c, i) => !/[\s\-']/.test(c) && !revealedLetters.has(i));
+  if (btnEl) {
+    if (gameOver || unrevealed.length === 0) {
+      btnEl.classList.add('locked'); btnEl.disabled = true;
+    } else {
+      btnEl.classList.remove('locked'); btnEl.disabled = false;
+    }
+  }
+}
+
+function revealLetter() {
+  if (gameOver) return;
+  const name = target.common_name || '';
+  const unrevealed = [];
+  name.split('').forEach((c, i) => {
+    if (!/[\s\-']/.test(c) && !revealedLetters.has(i)) unrevealed.push(i);
+  });
+  if (!unrevealed.length) {
+    document.getElementById('letterHint').textContent = 'All letters already revealed!';
+    return;
+  }
+  const idx = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+  revealedLetters.add(idx);
+  miniGuessCount++;
+  updateGuessCounter();
+  buildLetterDisplay();
+  if (totalGuesses() >= maxGuesses) { endGame(false); return; }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2369,8 +2609,13 @@ function startPractice() {
     ? currentPool.filter(a => a.scientific_name !== dailyAnimal.scientific_name)
     : currentPool;
   target = pickRandom(practicePool);
-  fetchWiki(target);
   resetRoundState();
+  fetchWiki(target).then(wikiData => {
+    if (wikiData && typeof wikiData === 'object' && wikiData !== 'error' && wikiData !== 'loading') {
+      supplementRangeFromWiki(target, wikiData);
+      buildRangePills(currentPool);
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════════════
