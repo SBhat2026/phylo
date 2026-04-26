@@ -1608,13 +1608,64 @@ const WIKI_REGION_MAP = [
   ['southern ocean', 'Southern Ocean'],
 ];
 
+// Words that, when found near a location keyword, indicate it's describing habitat/range
+const RANGE_CONTEXT = [
+  'native to','native of','found in','found across','found throughout',
+  'endemic to','endemic in','distributed','inhabits','inhabit','lives in',
+  'live in','occurs in','occur in','range','ranges','widespread in','widespread across',
+  'resident','breeds in','breed in','nests in','nest in','migrates to','migrates through',
+  'habitat','throughout','across','population','subspecies of','common in',
+  'originates from','originating','historically in','introduced to',
+  'species of','family of','order of','class of',
+];
+
+// Words that suggest a location mention is NOT about range
+const NON_RANGE_CONTEXT = [
+  'named after','named for','described by','described from','type specimen',
+  'museum','university','discovered by','fossil','first found','holotype',
+  'zoo','captive','studied','named in honour','named in honor',
+];
+
 function supplementRangeFromWiki(animal, wikiData) {
   if (!wikiData || typeof wikiData !== 'object') return;
-  const text = ((wikiData.text || '') + ' ' + (animal.notes || '')).toLowerCase();
+
+  // Use full extract + notes (not just first sentence)
+  const fullText = ((wikiData.extract || wikiData.text || '') + ' ' + (animal.notes || '')).toLowerCase();
   const existing = new Set((animal.continents || []).map(c => c));
+
   WIKI_REGION_MAP.forEach(([kw, region]) => {
-    if (text.includes(kw)) existing.add(region);
+    let searchFrom = 0;
+    while (searchFrom < fullText.length) {
+      const idx = fullText.indexOf(kw, searchFrom);
+      if (idx === -1) break;
+
+      // Extract a ±100-char window around this occurrence
+      const winStart = Math.max(0, idx - 100);
+      const winEnd   = Math.min(fullText.length, idx + kw.length + 100);
+      const window   = fullText.slice(winStart, winEnd);
+
+      // Reject if non-range context words dominate this window
+      const hasNonRange = NON_RANGE_CONTEXT.some(w => window.includes(w));
+      if (!hasNonRange) {
+        // Accept if range context words appear in the window
+        const hasRange = RANGE_CONTEXT.some(w => window.includes(w));
+        if (hasRange) {
+          existing.add(region);
+          break; // found a valid hit for this region, move to next
+        }
+
+        // Also accept if the keyword appears in the first 200 chars (intro sentence
+        // almost always describes range even without explicit range words)
+        if (idx < 200) {
+          existing.add(region);
+          break;
+        }
+      }
+
+      searchFrom = idx + 1;
+    }
   });
+
   animal.continents = [...existing];
 }
 
@@ -1882,8 +1933,9 @@ async function fetchWiki(animal) {
   if (!data) { wikiCache.set(key, 'error'); return 'error'; }
 
   const result = {
-    img:  data.thumbnail ? data.thumbnail.source : null,
-    text: data.extract   ? data.extract.split('.')[0] + '.' : '',
+    img:     data.thumbnail ? data.thumbnail.source : null,
+    text:    data.extract   ? data.extract.split('.')[0] + '.' : '',
+    extract: data.extract   || '',
   };
   wikiCache.set(key, result);
   return result;
