@@ -774,6 +774,123 @@ header {
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--sep); border-radius: 3px; }
+
+/* ── STATS MODAL ── */
+.stats-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(30,24,16,0.55);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.stats-overlay.open { display: flex; }
+.stats-popup {
+  background: var(--card);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--sep);
+  max-width: 400px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 22px 24px 24px;
+  position: relative;
+  animation: slide-in .18s ease;
+}
+.stats-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--label);
+  margin-bottom: 14px;
+  padding-right: 28px;
+}
+.stats-mode-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.stats-mode-tab {
+  font-family: var(--font);
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 4px 13px;
+  border-radius: 14px;
+  border: 1.5px solid var(--sep);
+  background: var(--card);
+  color: var(--label2);
+  cursor: pointer;
+  transition: all .12s;
+}
+.stats-mode-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stats-cell {
+  background: var(--fill);
+  border-radius: var(--r-sm);
+  padding: 10px 8px;
+  text-align: center;
+}
+.stats-num {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--label);
+  line-height: 1;
+}
+.stats-lbl {
+  font-size: 0.62rem;
+  color: var(--label3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: 3px;
+}
+.stats-dist-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--label3);
+  margin-bottom: 8px;
+}
+.stats-dist { display: flex; flex-direction: column; gap: 5px; }
+.dist-row { display: flex; align-items: center; gap: 8px; }
+.dist-key { font-size: 0.72rem; font-weight: 600; color: var(--label2); width: 22px; text-align: right; flex-shrink: 0; }
+.dist-bar-wrap { flex: 1; background: var(--fill); border-radius: 4px; height: 18px; overflow: hidden; }
+.dist-bar { height: 100%; background: var(--blue); border-radius: 4px; min-width: 18px; transition: width .4s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 5px; }
+.dist-bar.current { background: var(--green); }
+.dist-count { font-size: 0.66rem; font-weight: 700; color: #fff; }
+.stats-empty { color: var(--label3); font-size: 0.82rem; font-style: italic; text-align: center; padding: 12px 0; }
+
+/* ── EXPLORER ── */
+.explorer-section { margin-bottom: 12px; }
+.explorer-lv-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--label3);
+  margin-bottom: 5px;
+}
+.explorer-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  padding: 2px 9px 3px;
+  background: var(--fill2);
+  border-radius: 6px;
+  color: var(--label2);
+  border: 1px solid var(--sep-lt);
+  margin: 2px;
+}
+.explorer-pill .epcount { color: var(--label3); font-size: 0.62rem; }
 </style>
 </head>
 <body>
@@ -788,6 +905,7 @@ header {
     <button class="mode-btn diff-btn" id="diffMedium" onclick="setDifficulty('medium')">Medium</button>
     <button class="mode-btn diff-btn active" id="diffHard" onclick="setDifficulty('hard')">Hard</button>
     <button class="mode-btn" id="expertToggle" onclick="toggleExpert()">Taxonomist Mode</button>
+    <button class="mode-btn" onclick="openStats()">Stats</button>
     <button class="mode-btn" id="giveUpBtn" onclick="giveUp()" style="border-color:var(--red);color:var(--red)">Give Up</button>
   </div>
 </header>
@@ -868,6 +986,14 @@ header {
         <div id="letterDisplay" style="font-size:1.15rem;letter-spacing:5px;font-weight:700;margin-bottom:10px;font-family:monospace;min-height:1.4em"></div>
         <button class="pill" id="revealLetterBtn" onclick="revealLetter()">Reveal a Letter (−1 guess)</button>
       </div>
+
+      <!-- IMAGE HINT -->
+      <div class="mini-section">
+        <div class="mini-title">Image Hint</div>
+        <div class="mini-hint" id="imageHintMsg">Spend a guess to see a pixelated image of this animal.</div>
+        <div id="imageHintContent" style="margin-bottom:8px"></div>
+        <button class="pill" id="revealImageBtn" onclick="revealImageHint()">Reveal Image (−1 guess)</button>
+      </div>
     </div>
 
     <!-- GUESS HISTORY -->
@@ -903,10 +1029,12 @@ header {
         <div class="sidebar-tabs">
           <button class="sidebar-tab active" id="tabTaxonomy"  onclick="switchSidebarTab('taxonomy')">Taxonomy</button>
           <button class="sidebar-tab"        id="tabPhylogeny" onclick="switchSidebarTab('phylogeny')">Phylogeny</button>
+          <button class="sidebar-tab"        id="tabExplore"   onclick="switchSidebarTab('explore')">Explore</button>
         </div>
       </div>
-      <div id="treeContainer"  style="padding:8px 4px 12px"></div>
-      <div id="phyloContainer" style="padding:8px 4px 12px; display:none"></div>
+      <div id="treeContainer"     style="padding:8px 4px 12px"></div>
+      <div id="phyloContainer"    style="padding:8px 4px 12px; display:none"></div>
+      <div id="explorerContainer" style="padding:8px 4px 12px; display:none"></div>
     </div>
 
     <!-- FIELD NOTES -->
@@ -955,6 +1083,22 @@ header {
     <div class="tax-popup-sci"  id="taxPopSci"></div>
     <div class="tax-popup-tree" id="taxPopTree"></div>
     <div class="tax-popup-prox" id="taxPopProx"></div>
+  </div>
+</div>
+
+<!-- STATS MODAL -->
+<div class="stats-overlay" id="statsOverlay">
+  <div class="stats-popup">
+    <button class="tax-popup-close" onclick="closeStats()">×</button>
+    <div class="stats-title">Statistics</div>
+    <div class="stats-mode-tabs" id="statsModeTabs">
+      <button class="stats-mode-tab active" data-diff="hard"   onclick="switchStatTab('hard')">Hard</button>
+      <button class="stats-mode-tab"        data-diff="medium" onclick="switchStatTab('medium')">Medium</button>
+      <button class="stats-mode-tab"        data-diff="easy"   onclick="switchStatTab('easy')">Easy</button>
+    </div>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="stats-dist-title">Guess Distribution</div>
+    <div class="stats-dist" id="statsDist"></div>
   </div>
 </div>
 
@@ -1235,6 +1379,7 @@ function resetRoundState() {
   expertWrong         = new Set();
   miniGuessCount      = 0;
   revealedLetters     = new Set();
+  imageHintRevealed   = false;
   filteredList = [];
   selectedIdx  = -1;
   expertFilteredList = [];
@@ -1273,6 +1418,7 @@ function resetRoundState() {
   buildRangePills(currentPool);
   updateExpertLevelPills();
   buildLetterDisplay();
+  buildImageHint();
 }
 
 function startDailyRound() {
@@ -1314,6 +1460,7 @@ function saveCurrentModeState() {
     prevRevealedLevels: new Set(prevRevealedLevels),
     miniGuessCount,
     revealedLetters: new Set(revealedLetters),
+    imageHintRevealed,
     practiceMode,
   };
 }
@@ -1333,6 +1480,7 @@ function restoreModeState(state) {
   prevRevealedLevels  = new Set(state.prevRevealedLevels);
   miniGuessCount      = state.miniGuessCount;
   revealedLetters     = new Set(state.revealedLetters);
+  imageHintRevealed   = state.imageHintRevealed;
   practiceMode        = state.practiceMode;
 }
 
@@ -1377,6 +1525,7 @@ function renderRestoredState() {
   buildRangePills(currentPool);
   updateExpertLevelPills();
   buildLetterDisplay();
+  buildImageHint();
 
   const banner = document.getElementById('resultBanner');
   if (gameOver) {
@@ -1934,6 +2083,7 @@ function renderBranchTree() {
 function renderSidebar() {
   renderBranchTree();
   if (sidebarTab === 'phylogeny') renderPhylogeny();
+  if (sidebarTab === 'explore')   renderTaxonExplorer();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1945,9 +2095,12 @@ function switchSidebarTab(tab) {
   sidebarTab = tab;
   document.getElementById('tabTaxonomy').classList.toggle('active',  tab === 'taxonomy');
   document.getElementById('tabPhylogeny').classList.toggle('active', tab === 'phylogeny');
-  document.getElementById('treeContainer').style.display  = tab === 'taxonomy'  ? '' : 'none';
-  document.getElementById('phyloContainer').style.display = tab === 'phylogeny' ? '' : 'none';
+  document.getElementById('tabExplore').classList.toggle('active',   tab === 'explore');
+  document.getElementById('treeContainer').style.display     = tab === 'taxonomy'  ? '' : 'none';
+  document.getElementById('phyloContainer').style.display    = tab === 'phylogeny' ? '' : 'none';
+  document.getElementById('explorerContainer').style.display = tab === 'explore'   ? '' : 'none';
   if (tab === 'phylogeny') renderPhylogeny();
+  if (tab === 'explore')   renderTaxonExplorer();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2434,6 +2587,8 @@ async function endGame(won) {
   renderSidebar();
   renderHints(true);
   buildLetterDisplay();
+  buildImageHint();
+  updateStats(currentDifficulty, won, totalGuesses());
   document.querySelectorAll('.pill').forEach(p => { p.classList.add('locked'); p.disabled = true; });
 
   const wikiData = await fetchWiki(target);
@@ -2460,6 +2615,226 @@ async function endGame(won) {
   document.getElementById('giveUpBtn').disabled   = true;
   document.getElementById('practiceBtn').style.display = 'block';
   banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ═══════════════════════════════════════════════════════
+// TAXON EXPLORER
+// ═══════════════════════════════════════════════════════
+function renderTaxonExplorer() {
+  const el = document.getElementById('explorerContainer');
+  if (!el || !target) return;
+
+  if (!revealedLevels.size) {
+    el.innerHTML = '<div class="phylo-empty">Make a guess to explore possibilities.</div>';
+    return;
+  }
+
+  // Deepest *consecutive* revealed level
+  let deepestIdx = -1;
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (revealedLevels.has(LEVELS[i])) deepestIdx = i;
+    else break;
+  }
+
+  // Animals in current pool that match all revealed levels
+  const matching = currentPool.filter(a => {
+    for (let i = 0; i <= deepestIdx; i++) {
+      if ((a[LEVELS[i]] || '').toLowerCase() !== (target[LEVELS[i]] || '').toLowerCase()) return false;
+    }
+    return true;
+  });
+
+  if (!matching.length) {
+    el.innerHTML = '<div class="phylo-empty">No animals match revealed levels.</div>';
+    return;
+  }
+
+  const parts = [`<div style="padding:6px 10px 12px">`];
+  parts.push(`<div style="font-size:0.72rem;color:var(--label3);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">${matching.length} possible animal${matching.length === 1 ? '' : 's'}</div>`);
+
+  // Show possible values for each unrevealed level (skip species)
+  for (let i = deepestIdx + 1; i < LEVELS.length - 1; i++) {
+    const lv  = LEVELS[i];
+    const lbl = LEVEL_LABELS[i];
+    const counts = {};
+    matching.forEach(a => { const v = a[lv] || '(unknown)'; counts[v] = (counts[v] || 0) + 1; });
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    parts.push(`<div class="explorer-section">`);
+    parts.push(`<div class="explorer-lv-label">${lbl}</div>`);
+    parts.push(`<div>`);
+    sorted.forEach(([val, cnt]) => {
+      parts.push(`<span class="explorer-pill">${val}<span class="epcount">${cnt}</span></span>`);
+    });
+    parts.push(`</div></div>`);
+  }
+
+  parts.push('</div>');
+  el.innerHTML = parts.join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════
+function defaultStats() {
+  return { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastDate: null, dist: {} };
+}
+function loadStats(diff) {
+  try { const s = localStorage.getItem('taxondle_stats_' + diff); return s ? JSON.parse(s) : defaultStats(); }
+  catch { return defaultStats(); }
+}
+function saveStats(diff, stats) {
+  try { localStorage.setItem('taxondle_stats_' + diff, JSON.stringify(stats)); } catch {}
+}
+function updateStats(diff, won, guessCount) {
+  if (practiceMode) return;
+  const stats = loadStats(diff);
+  const today = new Date().toISOString().slice(0, 10);
+  if (stats.lastDate === today) return;
+  stats.played++;
+  if (won) {
+    stats.won++;
+    const key = String(guessCount);
+    stats.dist[key] = (stats.dist[key] || 0) + 1;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    stats.currentStreak = (stats.lastDate === yesterday) ? stats.currentStreak + 1 : 1;
+    stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
+  } else {
+    stats.currentStreak = 0;
+  }
+  stats.lastDate = today;
+  saveStats(diff, stats);
+}
+
+let statsCurrentDiff = 'hard';
+function openStats() {
+  statsCurrentDiff = currentDifficulty;
+  renderStatsModal(statsCurrentDiff);
+  document.getElementById('statsOverlay').classList.add('open');
+}
+function closeStats() {
+  document.getElementById('statsOverlay').classList.remove('open');
+}
+function switchStatTab(diff) {
+  statsCurrentDiff = diff;
+  document.querySelectorAll('.stats-mode-tab').forEach(b => b.classList.toggle('active', b.dataset.diff === diff));
+  renderStatsModal(diff);
+}
+function renderStatsModal(diff) {
+  const stats = loadStats(diff);
+  const winPct = stats.played ? Math.round(100 * stats.won / stats.played) : 0;
+  document.getElementById('statsGrid').innerHTML = `
+    <div class="stats-cell"><div class="stats-num">${stats.played}</div><div class="stats-lbl">Played</div></div>
+    <div class="stats-cell"><div class="stats-num">${winPct}%</div><div class="stats-lbl">Win Rate</div></div>
+    <div class="stats-cell"><div class="stats-num">${stats.currentStreak}</div><div class="stats-lbl">Streak</div></div>
+    <div class="stats-cell"><div class="stats-num">${stats.maxStreak}</div><div class="stats-lbl">Best Streak</div></div>
+    <div class="stats-cell"><div class="stats-num">${stats.won}</div><div class="stats-lbl">Wins</div></div>
+    <div class="stats-cell"><div class="stats-num">${stats.played - stats.won}</div><div class="stats-lbl">Losses</div></div>`;
+
+  const distEl = document.getElementById('statsDist');
+  const entries = Object.entries(stats.dist).sort((a, b) => Number(a[0]) - Number(b[0]));
+  if (!entries.length) { distEl.innerHTML = '<div class="stats-empty">No wins yet.</div>'; return; }
+  const maxVal = Math.max(...entries.map(([, v]) => v));
+  const curGuesses = !practiceMode ? String(totalGuesses()) : null;
+  distEl.innerHTML = entries.map(([k, v]) => {
+    const pct = Math.max(12, Math.round(100 * v / maxVal));
+    const isCur = curGuesses === k;
+    return `<div class="dist-row">
+      <span class="dist-key">${k}</span>
+      <div class="dist-bar-wrap">
+        <div class="dist-bar${isCur ? ' current' : ''}" style="width:${pct}%">
+          <span class="dist-count">${v}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('statsOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('statsOverlay')) closeStats();
+});
+
+// ═══════════════════════════════════════════════════════
+// IMAGE HINT
+// ═══════════════════════════════════════════════════════
+let imageHintRevealed = false;
+
+function buildImageHint() {
+  const content = document.getElementById('imageHintContent');
+  const btn     = document.getElementById('revealImageBtn');
+  const msg     = document.getElementById('imageHintMsg');
+  if (!content || !target) return;
+
+  if (!imageHintRevealed && !gameOver) {
+    content.innerHTML = '';
+    if (btn) { btn.classList.remove('locked'); btn.disabled = false; }
+    return;
+  }
+  if (btn) { btn.classList.add('locked'); btn.disabled = true; }
+  if (msg && gameOver && imageHintRevealed) msg.textContent = 'Full image revealed after game ends.';
+  if (msg && gameOver && !imageHintRevealed) msg.textContent = 'Spend a guess to see a pixelated image.';
+
+  const cached = wikiCache.get(target.scientific_name);
+  if (!cached || cached === 'loading' || cached === 'error' || !cached.img) {
+    content.innerHTML = `<div style="padding:12px;background:var(--fill);border-radius:var(--r-sm);
+      color:var(--label3);font-size:0.82rem;text-align:center;font-style:italic;border:1px dashed var(--sep)">
+      No image available for this animal.</div>`;
+    return;
+  }
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const DISPLAY_W = 220;
+    const aspect   = img.naturalHeight / img.naturalWidth;
+    const dw = DISPLAY_W;
+    const dh = Math.round(DISPLAY_W * aspect);
+
+    const canvas = document.createElement('canvas');
+    canvas.width  = dw;
+    canvas.height = dh;
+    canvas.style.cssText = 'border-radius:var(--r-sm);display:block;max-width:100%;';
+
+    const ctx = canvas.getContext('2d');
+    if (gameOver) {
+      ctx.drawImage(img, 0, 0, dw, dh);
+    } else {
+      // Block size scales with natural image width so large/small images are equally hard
+      const blockSize = Math.max(6, Math.floor(img.naturalWidth / 12));
+      const sw = Math.max(1, Math.floor(dw / blockSize));
+      const sh = Math.max(1, Math.floor(dh / blockSize));
+      // Draw tiny then stretch with nearest-neighbour
+      const tmp = document.createElement('canvas');
+      tmp.width = sw; tmp.height = sh;
+      tmp.getContext('2d').drawImage(img, 0, 0, sw, sh);
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(tmp, 0, 0, sw, sh, 0, 0, dw, dh);
+    }
+    content.innerHTML = '';
+    content.appendChild(canvas);
+  };
+  img.onerror = () => {
+    content.innerHTML = `<div style="padding:12px;background:var(--fill);border-radius:var(--r-sm);
+      color:var(--label3);font-size:0.82rem;text-align:center;font-style:italic">
+      Image failed to load.</div>`;
+  };
+  img.src = cached.img;
+}
+
+function revealImageHint() {
+  if (gameOver || imageHintRevealed) return;
+  imageHintRevealed = true;
+  miniGuessCount++;
+  updateGuessCounter();
+  const btn = document.getElementById('revealImageBtn');
+  if (btn) { btn.classList.add('locked'); btn.disabled = true; }
+  const cached = wikiCache.get(target.scientific_name);
+  if (!cached || cached === 'loading') {
+    document.getElementById('imageHintContent').innerHTML =
+      '<div style="padding:8px;color:var(--label3);font-size:0.8rem;text-align:center">Loading image…</div>';
+    fetchWiki(target).then(() => buildImageHint());
+  } else {
+    buildImageHint();
+  }
+  if (totalGuesses() >= maxGuesses) { endGame(false); return; }
 }
 
 // ═══════════════════════════════════════════════════════
