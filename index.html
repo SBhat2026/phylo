@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Taxondle — The Animal Classification Game</title>
+<title>Phylo — The Animal Classification Game</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -897,7 +897,7 @@ header {
 <div class="page-wrap">
 
 <header>
-  <div class="title">Taxon<span>dle</span></div>
+  <div class="title">Phy<span>lo</span></div>
   <div class="subtitle">Identify today's animal through the tree of life</div>
   <div class="date-badge" id="dateBadge"></div>
   <div class="header-actions">
@@ -2735,11 +2735,11 @@ function defaultStats() {
   return { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastDate: null, dist: {} };
 }
 function loadStats(diff) {
-  try { const s = localStorage.getItem('taxondle_stats_' + diff); return s ? JSON.parse(s) : defaultStats(); }
+  try { const s = localStorage.getItem('phylo_stats_' + diff); return s ? JSON.parse(s) : defaultStats(); }
   catch { return defaultStats(); }
 }
 function saveStats(diff, stats) {
-  try { localStorage.setItem('taxondle_stats_' + diff, JSON.stringify(stats)); } catch {}
+  try { localStorage.setItem('phylo_stats_' + diff, JSON.stringify(stats)); } catch {}
 }
 function updateStats(diff, won, guessCount) {
   if (practiceMode) return;
