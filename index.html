@@ -62,54 +62,71 @@ body {
   gap: 16px;
   align-items: start;
 }
+/* ── MOBILE LAYOUT (touch-primary devices only) ── */
+/* mobileTreeMount is always hidden; JS un-hides it on touch devices */
+.mobile-tree-mount { display: none; }
+body.is-touch .mobile-tree-mount { display: block; }
+
+/* On touch devices, hide sidebar (tree card was JS-moved to mobileTreeMount) */
+body.is-touch .sidebar { display: none !important; }
+
+/* Header: show ⋯ menu and hide individual buttons on touch */
+body.is-touch .btn-taxonomist,
+body.is-touch .btn-stats,
+body.is-touch .btn-giveup { display: none; }
+body.is-touch .overflow-menu-wrap { display: block; }
+
+/* Notes tab only appears on touch */
+body.is-touch .mobile-notes-tab { display: inline-block; }
+
+/* Sidebar tabs: larger tap targets on touch */
+body.is-touch .sidebar-tabs { gap: 4px; }
+body.is-touch .sidebar-tab  { padding: 9px 14px; font-size: 0.72rem; min-height: 38px; }
+
+/* ── WIDTH-BASED COLLAPSES (desktop narrow windows too) ── */
 @media (max-width: 860px) {
+  /* Sidebar is shown unless body.is-touch overrides above */
   .game-layout { grid-template-columns: 1fr; }
   .sidebar { position: static !important; }
-  .mobile-tree-mount { display: block; }
-  /* tree card gets JS-moved into mobileTreeMount; hide sidebar tree slot */
-  .sidebar-tree-placeholder { display: none; }
-}
-@media (min-width: 861px) {
-  .mobile-tree-mount { display: none; }
 }
 @media (max-width: 680px) {
   .sidebar { position: static !important; }
 }
+/* ── NARROW-SCREEN ERGONOMICS (applies to any narrow window, touch or not) ── */
 @media (max-width: 520px) {
   .page-wrap { padding: 0 max(10px, env(safe-area-inset-right)) max(60px, calc(env(safe-area-inset-bottom) + 48px)) max(10px, env(safe-area-inset-left)); }
   .title { font-size: 1.8rem; letter-spacing: -1px; }
-  /* header-actions: diff pills stay visible; overflow menu handles the rest */
-  .header-actions { gap: 6px; flex-wrap: wrap; justify-content: center; }
-  .mode-btn { font-size: 0.78rem; padding: 8px 14px; min-height: 36px; }
-  .diff-group { display: flex; border: 1.5px solid var(--sep); border-radius: 20px; overflow: hidden; gap: 0; }
-  .diff-group .mode-btn { border: none; border-radius: 0; border-right: 1px solid var(--sep); padding: 8px 14px; }
-  .diff-group .mode-btn:last-child { border-right: none; }
-  .mode-select { font-size: 0.72rem; padding: 4px 8px; }
-  .search-input { font-size: 1rem; padding: 11px 13px; }  /* ≥16px prevents iOS zoom */
-  .primary-btn { padding: 11px 14px; font-size: 0.85rem; min-height: 44px; }
-  .card-body, .guess-list { padding: 12px 12px; }
-  .hint-item { padding: 9px 12px; }
-  .mini-section { padding: 10px 12px; }
-  .howto { padding: 12px 12px; font-size: 0.8rem; }
-  .pill { font-size: 0.72rem; padding: 9px 14px; min-height: 36px; }
-  .pill-row { gap: 8px; }
-  .expert-panel { padding: 10px 12px; }
-  .expert-levels { gap: 6px; flex-wrap: wrap; }
-  .expert-lvl-pill { font-size: 0.72rem; padding: 8px 12px; min-height: 36px; }
-  .expert-input { font-size: 1rem; padding: 9px 12px; }  /* ≥16px prevents iOS zoom */
-  .expert-check-btn { padding: 9px 13px; font-size: 0.82rem; min-height: 40px; }
+  .header-actions { gap: 6px; }
   .guess-name { font-size: 0.85rem; }
   .tax-chip { font-size: 0.62rem; padding: 2px 6px 2px; }
   .result-banner h2 { font-size: 1.2rem; }
-  .result-img-wrap img, .result-img-wrap .no-img { width: 56px; height: 56px; }
-  /* sidebar tabs enlarged for touch */
-  .sidebar-tab { padding: 10px 14px; font-size: 0.72rem; min-height: 38px; }
-  /* autocomplete items */
-  .autocomplete-item { padding: 11px 14px; min-height: 44px; }
-  /* tax-popup close — bigger hit area */
-  .tax-popup-close { padding: 8px 12px; font-size: 1.4rem; }
+  .howto { padding: 12px 12px; font-size: 0.8rem; }
+  .card-body, .guess-list { padding: 12px 12px; }
+  .hint-item { padding: 9px 12px; }
+  .mini-section { padding: 10px 12px; }
 }
-/* ── OVERFLOW MENU (mobile-only: Taxonomist, Stats, Give Up) ── */
+
+/* ── TOUCH-SPECIFIC ERGONOMICS (phone tap targets, iOS quirks) ── */
+body.is-touch .search-input  { font-size: 1rem;  padding: 11px 13px; } /* ≥16px → no iOS zoom */
+body.is-touch .expert-input  { font-size: 1rem;  padding: 9px 12px;  }
+body.is-touch .primary-btn   { padding: 11px 14px; font-size: 0.85rem; min-height: 44px; }
+body.is-touch .mode-btn      { font-size: 0.78rem; padding: 8px 14px;  min-height: 36px; }
+body.is-touch .pill          { font-size: 0.72rem; padding: 9px 14px;  min-height: 36px; }
+body.is-touch .pill-row      { gap: 8px; }
+body.is-touch .expert-lvl-pill   { font-size: 0.72rem; padding: 8px 12px;  min-height: 36px; }
+body.is-touch .expert-check-btn  { padding: 9px 13px;  font-size: 0.82rem; min-height: 40px; }
+body.is-touch .autocomplete-item { padding: 11px 14px;  min-height: 44px; }
+body.is-touch .tax-popup-close   { padding: 8px 12px;   font-size: 1.4rem; }
+body.is-touch .expert-panel  { padding: 10px 12px; }
+body.is-touch .expert-levels { gap: 6px; flex-wrap: wrap; }
+body.is-touch .result-img-wrap img,
+body.is-touch .result-img-wrap .no-img { width: 56px; height: 56px; }
+/* Segmented difficulty control on touch */
+body.is-touch .diff-group { border: 1.5px solid var(--sep); border-radius: 20px; overflow: hidden; gap: 0; }
+body.is-touch .diff-group .mode-btn { border: none; border-radius: 0; border-right: 1px solid var(--sep); }
+body.is-touch .diff-group .mode-btn:last-child { border-right: none; }
+
+/* ── OVERFLOW MENU (touch-primary only: Taxonomist, Stats, Give Up) ── */
 .overflow-menu-wrap { position: relative; display: none; }
 .overflow-btn { font-family: var(--font); font-size: 1.1rem; font-weight: 700; padding: 5px 11px; border-radius: 20px; border: 1.5px solid var(--sep); background: var(--card); color: var(--label2); cursor: pointer; line-height: 1; min-height: 36px; }
 .overflow-menu-wrap .overflow-dropdown { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: var(--card); border: 1px solid var(--sep); border-radius: var(--r); box-shadow: var(--shadow-md); z-index: 500; min-width: 160px; overflow: hidden; }
@@ -118,10 +135,6 @@ body {
 .overflow-menu-wrap .overflow-item:last-child { border-bottom: none; }
 .overflow-menu-wrap .overflow-item:hover { background: var(--fill); }
 .overflow-menu-wrap .overflow-item.danger { color: var(--red); }
-@media (max-width: 520px) {
-  .overflow-menu-wrap { display: block; }
-  .btn-taxonomist, .btn-stats, .btn-giveup { display: none; }
-}
 
 /* ── HEADER ── */
 header {
@@ -1208,12 +1221,15 @@ function closeOverflowMenu() {
   document.getElementById('overflowMenu').classList.remove('open');
 }
 
-// Re-parent the sidebar tree card into mobileTreeMount at narrow widths
+// Re-parent the sidebar tree card into mobileTreeMount on touch-primary devices
 let _lastMobileLayout = null;
 function applyMobileLayout() {
-  const isMobile = window.matchMedia('(max-width: 860px)').matches;
+  const isMobile = isTouchDevice();
   if (isMobile === _lastMobileLayout) return;
   _lastMobileLayout = isMobile;
+
+  // body.is-touch drives all touch-specific CSS
+  document.body.classList.toggle('is-touch', isMobile);
 
   // The tree card is identified by whether it contains sidebar-tabs
   const treeCard = document.querySelector('.sidebar-tabs')?.closest('.card');
@@ -3372,7 +3388,7 @@ function wireEvents() {
     if (!e.target.closest('#overflowMenu')) closeOverflowMenu();
   });
 
-  // Apply mobile layout and re-apply on orientation/resize
+  // Apply mobile layout immediately; re-check on resize (orientation change can alter hover capability)
   applyMobileLayout();
   let _resizeTimer;
   window.addEventListener('resize', () => {
@@ -3380,7 +3396,12 @@ function wireEvents() {
     _resizeTimer = setTimeout(() => {
       applyMobileLayout();
       renderSidebar();
-    }, 120);
+    }, 150);
+  });
+  // Also listen for pointer/hover capability changes (rare but possible on hybrid devices)
+  window.matchMedia('(hover: none)').addEventListener('change', () => {
+    _lastMobileLayout = null;  // force re-evaluation
+    applyMobileLayout();
   });
 
   // Update empty state hint based on device
