@@ -282,6 +282,15 @@ header {
   margin-top: 8px;
 }
 .flash-msg { color: var(--red); font-weight: 500; font-size: 0.75rem; }
+.filter-toggle-btn {
+  font-family: var(--font); font-size: 0.72rem; font-weight: 600;
+  padding: 4px 10px; border-radius: 20px; cursor: pointer;
+  border: 1.5px solid var(--sep); background: var(--fill);
+  color: var(--label2); white-space: nowrap; flex-shrink: 0;
+  touch-action: manipulation; transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.filter-toggle-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+.filter-toggle-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
 .guess-count { font-weight: 500; }
 
 /* ── AUTOCOMPLETE ── */
@@ -1119,8 +1128,11 @@ header {
           <button class="primary-btn" id="guessBtn">Guess</button>
           <div class="autocomplete-list" id="autocompleteList"></div>
         </div>
-        <div class="stat-row">
-          <span id="flashMsg" class="flash-msg"></span>
+        <div class="stat-row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="flashMsg" class="flash-msg" style="flex:1;min-width:0;"></span>
+          <button id="taxonFilterBtn" class="filter-toggle-btn" onclick="toggleTaxonFilter()" title="Filter search to animals matching revealed taxonomy" style="display:none;">
+            <span id="taxonFilterIcon">🔬</span> Filter by taxonomy
+          </button>
         </div>
 
         <!-- EXPERT MODE PANEL -->
@@ -1587,6 +1599,7 @@ let filteredList = [];
 let revealedLevels = new Set();
 let gameOver     = false;
 let expertMode   = false;
+let taxonFilterEnabled = false;  // when true, autocomplete restricts to revealed taxonomy
 
 let dietGuessedCorrect  = false;
 let rangeGuessedCorrect = false;
@@ -1609,21 +1622,40 @@ let prevRevealedLevels = new Set();
 const savedModeStates  = { easy: null, medium: null, hard: null };
 
 // ═══════════════════════════════════════════════════════
-// DAILY SEED
+// DAILY SEED  — shuffle-based, no repeats within pool
 // ═══════════════════════════════════════════════════════
-const DIFF_SEED_OFFSET = { easy: 0, medium: 100000, hard: 200000 };
-function dateToSeed(diff) {
-  const d = new Date();
-  const base = d.getFullYear() * 10000 + (d.getMonth()+1) * 100 + d.getDate();
-  return base + (DIFF_SEED_OFFSET[diff] || 0);
+// Prime offsets keep easy/medium/hard picking different animals same day
+const DIFF_PRIME_OFFSET = { easy: 0, medium: 7919, hard: 15641 };
+
+function absoluteDayNumber() {
+  // Days since 2025-01-01 (arbitrary fixed epoch)
+  const epoch = Date.UTC(2025, 0, 1);
+  return Math.floor((Date.now() - epoch) / 86400000);
 }
+
 function seededRandom(seed) {
-  let s = seed;
-  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
+  let s = seed >>> 0;
+  return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 0x100000000; };
 }
+
+function seededShuffle(arr, seed) {
+  const a = arr.slice();
+  const rand = seededRandom(seed);
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
 function pickDaily(arr, diff) {
-  const rng = seededRandom(dateToSeed(diff || currentDifficulty));
-  return arr[Math.floor(rng() * arr.length)];
+  const offset  = DIFF_PRIME_OFFSET[diff || currentDifficulty] || 0;
+  const dayNum  = absoluteDayNumber() + offset;
+  const cycle   = Math.floor(dayNum / arr.length);
+  const idx     = dayNum % arr.length;
+  // New shuffle each full cycle so the order changes after exhausting the pool
+  const shuffled = seededShuffle(arr, cycle * 1000003 + offset);
+  return shuffled[idx];
 }
 
 function pickRandom(arr) {
@@ -1650,6 +1682,9 @@ function resetRoundState() {
   expertGuessCount   = 0;
   expertCurrentLevel = 'family';
   prevRevealedLevels = new Set();
+  taxonFilterEnabled = false;
+  const fBtn = document.getElementById('taxonFilterBtn');
+  if (fBtn) { fBtn.classList.remove('active'); fBtn.style.display = 'none'; }
 
   document.getElementById('resultBanner').classList.remove('show');
   document.getElementById('practiceBtn').style.display = 'none';
@@ -2780,6 +2815,7 @@ function submitExpert() {
   }
 
   updateExpertLevelPills();
+  updateTaxonFilterBtnVisibility();
   if (totalGuesses() >= maxGuesses) { endGame(false); return; }
 }
 
@@ -2931,6 +2967,7 @@ function submitGuess(animal) {
   renderSidebar();
   renderHints();
   updateImageHintForProx(prox);
+  updateTaxonFilterBtnVisibility();
 
   if (animal.scientific_name.toLowerCase() === target.scientific_name.toLowerCase()) {
     endGame(true); return;
@@ -3363,13 +3400,25 @@ function scoreMatch(a, q) {
   return 3;
 }
 
+function animalMatchesRevealedTaxonomy(a) {
+  if (!revealedLevels.size || !target) return true;
+  const TAXON_LEVELS = ['kingdom','phylum','class','order','family','genus'];
+  for (const lv of TAXON_LEVELS) {
+    if (revealedLevels.has(lv) && target[lv] && a[lv] !== target[lv]) return false;
+  }
+  return true;
+}
+
 function updateAutocomplete(query) {
   const q    = query.trim().toLowerCase();
   const list = document.getElementById('autocompleteList');
   if (q.length < 1) { filteredList = []; list.classList.remove('open'); return; }
 
   const done = new Set(guesses.map(g => g.scientific_name.toLowerCase()));
-  const matched = currentPool.filter(a => {
+  // Search all animals (not just currentPool) so users can always guess any animal
+  // Apply taxonomic filter only when user has explicitly enabled it
+  const searchPool = taxonFilterEnabled ? animals.filter(animalMatchesRevealedTaxonomy) : animals;
+  const matched = searchPool.filter(a => {
     const cn  = a.common_name.toLowerCase();
     const sci = a.scientific_name.toLowerCase();
     return (cn.includes(q) || sci.includes(q)) && !done.has(sci);
@@ -3378,7 +3427,7 @@ function updateAutocomplete(query) {
     const d = scoreMatch(a, q) - scoreMatch(b, q);
     return d !== 0 ? d : a.common_name.localeCompare(b.common_name);
   });
-  filteredList = matched.slice(0, 10);
+  filteredList = matched.slice(0, 12);
 
   list.innerHTML = '';
   if (!filteredList.length) { list.classList.remove('open'); return; }
@@ -3438,6 +3487,27 @@ function updateExpertAutocomplete(query) {
   });
   list.classList.add('open');
   expertSelectedIdx = -1;
+}
+
+// ═══════════════════════════════════════════════════════
+// TAXONOMY FILTER
+// ═══════════════════════════════════════════════════════
+function toggleTaxonFilter() {
+  taxonFilterEnabled = !taxonFilterEnabled;
+  const btn = document.getElementById('taxonFilterBtn');
+  if (btn) btn.classList.toggle('active', taxonFilterEnabled);
+  // Re-run autocomplete with current input value
+  const input = document.getElementById('searchInput');
+  if (input && input.value) updateAutocomplete(input.value);
+}
+
+function updateTaxonFilterBtnVisibility() {
+  const btn = document.getElementById('taxonFilterBtn');
+  if (!btn) return;
+  // Show filter button once at least one non-trivial level is revealed
+  const useful = ['class','order','family','genus'];
+  const hasReveal = useful.some(lv => revealedLevels.has(lv));
+  btn.style.display = hasReveal ? 'inline-flex' : 'none';
 }
 
 // ═══════════════════════════════════════════════════════
