@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Phylo — The Animal Classification Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f5694">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Phylo — A Naturalist's Daily Puzzle</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500;1,6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ── TOKENS ── */
 :root {
@@ -41,43 +45,82 @@ body {
   font-family: var(--font);
   font-size: 15px;
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: contain;
 }
 
 /* ── LAYOUT ── */
-.page-wrap { max-width: 900px; margin: 0 auto; padding: 0 16px 80px; }
+.page-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 max(16px, env(safe-area-inset-right)) max(80px, calc(env(safe-area-inset-bottom) + 60px)) max(16px, env(safe-area-inset-left));
+}
 .game-layout {
   display: grid;
   grid-template-columns: 1fr 280px;
   gap: 16px;
   align-items: start;
 }
-@media (max-width: 680px) {
+@media (max-width: 860px) {
   .game-layout { grid-template-columns: 1fr; }
+  .sidebar { position: static !important; }
+  .mobile-tree-mount { display: block; }
+  /* tree card gets JS-moved into mobileTreeMount; hide sidebar tree slot */
+  .sidebar-tree-placeholder { display: none; }
+}
+@media (min-width: 861px) {
+  .mobile-tree-mount { display: none; }
+}
+@media (max-width: 680px) {
   .sidebar { position: static !important; }
 }
 @media (max-width: 520px) {
-  .page-wrap { padding: 0 10px 60px; }
+  .page-wrap { padding: 0 max(10px, env(safe-area-inset-right)) max(60px, calc(env(safe-area-inset-bottom) + 48px)) max(10px, env(safe-area-inset-left)); }
   .title { font-size: 1.8rem; letter-spacing: -1px; }
-  .header-actions { gap: 5px; flex-wrap: wrap; justify-content: center; }
-  .mode-btn { font-size: 0.72rem; padding: 5px 12px; }
+  /* header-actions: diff pills stay visible; overflow menu handles the rest */
+  .header-actions { gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .mode-btn { font-size: 0.78rem; padding: 8px 14px; min-height: 36px; }
+  .diff-group { display: flex; border: 1.5px solid var(--sep); border-radius: 20px; overflow: hidden; gap: 0; }
+  .diff-group .mode-btn { border: none; border-radius: 0; border-right: 1px solid var(--sep); padding: 8px 14px; }
+  .diff-group .mode-btn:last-child { border-right: none; }
   .mode-select { font-size: 0.72rem; padding: 4px 8px; }
-  .search-input { font-size: 0.88rem; padding: 9px 11px; }
-  .primary-btn { padding: 9px 14px; font-size: 0.82rem; }
+  .search-input { font-size: 1rem; padding: 11px 13px; }  /* ≥16px prevents iOS zoom */
+  .primary-btn { padding: 11px 14px; font-size: 0.85rem; min-height: 44px; }
   .card-body, .guess-list { padding: 12px 12px; }
   .hint-item { padding: 9px 12px; }
   .mini-section { padding: 10px 12px; }
   .howto { padding: 12px 12px; font-size: 0.8rem; }
-  .pill { font-size: 0.68rem; padding: 4px 10px; }
+  .pill { font-size: 0.72rem; padding: 9px 14px; min-height: 36px; }
+  .pill-row { gap: 8px; }
   .expert-panel { padding: 10px 12px; }
-  .expert-levels { gap: 4px; }
-  .expert-lvl-pill { font-size: 0.65rem; padding: 3px 9px; }
-  .expert-input { font-size: 0.82rem; padding: 7px 10px; }
-  .expert-check-btn { padding: 7px 11px; font-size: 0.78rem; }
+  .expert-levels { gap: 6px; flex-wrap: wrap; }
+  .expert-lvl-pill { font-size: 0.72rem; padding: 8px 12px; min-height: 36px; }
+  .expert-input { font-size: 1rem; padding: 9px 12px; }  /* ≥16px prevents iOS zoom */
+  .expert-check-btn { padding: 9px 13px; font-size: 0.82rem; min-height: 40px; }
   .guess-name { font-size: 0.85rem; }
   .tax-chip { font-size: 0.62rem; padding: 2px 6px 2px; }
   .result-banner h2 { font-size: 1.2rem; }
-  .result-img-wrap img, .result-img-wrap .no-img { width: 70px; height: 70px; }
+  .result-img-wrap img, .result-img-wrap .no-img { width: 56px; height: 56px; }
+  /* sidebar tabs enlarged for touch */
+  .sidebar-tab { padding: 10px 14px; font-size: 0.72rem; min-height: 38px; }
+  /* autocomplete items */
+  .autocomplete-item { padding: 11px 14px; min-height: 44px; }
+  /* tax-popup close — bigger hit area */
+  .tax-popup-close { padding: 8px 12px; font-size: 1.4rem; }
+}
+/* ── OVERFLOW MENU (mobile-only: Taxonomist, Stats, Give Up) ── */
+.overflow-menu-wrap { position: relative; display: none; }
+.overflow-btn { font-family: var(--font); font-size: 1.1rem; font-weight: 700; padding: 5px 11px; border-radius: 20px; border: 1.5px solid var(--sep); background: var(--card); color: var(--label2); cursor: pointer; line-height: 1; min-height: 36px; }
+.overflow-menu-wrap .overflow-dropdown { display: none; position: absolute; top: calc(100% + 6px); right: 0; background: var(--card); border: 1px solid var(--sep); border-radius: var(--r); box-shadow: var(--shadow-md); z-index: 500; min-width: 160px; overflow: hidden; }
+.overflow-menu-wrap.open .overflow-dropdown { display: block; }
+.overflow-menu-wrap .overflow-item { display: block; width: 100%; text-align: left; font-family: var(--font); font-size: 0.85rem; font-weight: 500; padding: 12px 16px; background: none; border: none; color: var(--label2); cursor: pointer; border-bottom: 1px solid var(--sep-lt); }
+.overflow-menu-wrap .overflow-item:last-child { border-bottom: none; }
+.overflow-menu-wrap .overflow-item:hover { background: var(--fill); }
+.overflow-menu-wrap .overflow-item.danger { color: var(--red); }
+@media (max-width: 520px) {
+  .overflow-menu-wrap { display: block; }
+  .btn-taxonomist, .btn-stats, .btn-giveup { display: none; }
 }
 
 /* ── HEADER ── */
@@ -111,7 +154,10 @@ header {
   justify-content: center;
   gap: 8px;
   margin-top: 14px;
+  flex-wrap: wrap;
+  align-items: center;
 }
+.diff-group { display: flex; gap: 8px; }
 .mode-btn {
   font-family: var(--font);
   font-size: 0.78rem;
@@ -123,6 +169,7 @@ header {
   color: var(--label2);
   cursor: pointer;
   transition: all .15s;
+  touch-action: manipulation;
 }
 .mode-btn:hover { border-color: var(--blue); color: var(--blue); }
 .mode-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
@@ -206,6 +253,7 @@ header {
   cursor: pointer;
   transition: opacity .15s;
   white-space: nowrap;
+  touch-action: manipulation;
 }
 .primary-btn:hover:not(:disabled) { opacity: .85; }
 .primary-btn:disabled { opacity: .4; cursor: default; }
@@ -238,7 +286,8 @@ header {
 }
 .autocomplete-list.open { display: block; }
 .autocomplete-item {
-  padding: 9px 14px;
+  padding: 11px 14px;
+  min-height: 44px;
   cursor: pointer;
   font-size: 0.88rem;
   display: flex;
@@ -247,6 +296,7 @@ header {
   gap: 8px;
   border-bottom: 1px solid var(--sep-lt);
   transition: background .08s;
+  touch-action: manipulation;
 }
 .autocomplete-item:last-child { border-bottom: none; }
 .autocomplete-item:hover, .autocomplete-item.selected { background: var(--fill); }
@@ -361,7 +411,7 @@ header {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-@media (min-width: 769px) {
+@media (min-width: 769px) and (prefers-reduced-motion: no-preference) {
   .tree-branch-new {
     stroke-dasharray: 36;
     animation: tree-branch-draw .35s ease-out forwards;
@@ -408,6 +458,7 @@ header {
   cursor: pointer;
   transition: all .12s;
   user-select: none;
+  touch-action: manipulation;
 }
 .pill:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-lt); }
 .pill.correct { background: var(--green-lt); border-color: var(--green); color: #1a7a36; cursor: default; }
@@ -526,18 +577,31 @@ header {
 /* ── BRANCH TREE ── */
 #treeContainer { padding: 8px 0; }
 .tree-svg text { font-family: 'Inter', sans-serif; }
+/* Notes tab only shows up when re-mounted on mobile */
+.mobile-notes-tab { display: none; }
+@media (max-width: 860px) {
+  .mobile-notes-tab { display: inline-block; }
+}
 
 /* ── SIDEBAR TABS ── */
 .sidebar-tabs {
   display: flex;
   gap: 3px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.sidebar-tabs::-webkit-scrollbar { display: none; }
+@media (max-width: 860px) {
+  .sidebar-tabs { gap: 4px; }
+  .sidebar-tab { padding: 9px 14px; font-size: 0.72rem; min-height: 38px; }
 }
 .sidebar-tab {
   font-size: 0.70rem;
   font-weight: 600;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  padding: 3px 10px;
+  padding: 6px 10px;
   border-radius: 5px;
   border: none;
   cursor: pointer;
@@ -545,6 +609,7 @@ header {
   color: var(--label3);
   transition: background 0.12s, color 0.12s;
   font-family: var(--font);
+  touch-action: manipulation;
 }
 .sidebar-tab.active {
   background: var(--fill2);
@@ -688,7 +753,7 @@ header {
   z-index: 2000;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: max(16px, env(safe-area-inset-top)) 16px 16px;
 }
 .tax-overlay.open { display: flex; }
 .tax-popup {
@@ -698,22 +763,25 @@ header {
   border: 1px solid var(--sep);
   max-width: 480px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 85dvh;
+  max-height: 85vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 22px 24px 24px;
   position: relative;
   animation: slide-in .18s ease;
 }
 .tax-popup-close {
   position: absolute;
-  top: 12px; right: 14px;
+  top: 8px; right: 10px;
   background: none;
   border: none;
   font-size: 1.3rem;
   color: var(--label3);
   cursor: pointer;
   line-height: 1;
-  padding: 2px 6px;
+  padding: 8px 10px;
+  touch-action: manipulation;
 }
 .tax-popup-close:hover { color: var(--label); }
 .tax-popup-name {
@@ -784,7 +852,7 @@ header {
   z-index: 2000;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: max(16px, env(safe-area-inset-top)) 16px 16px;
 }
 .stats-overlay.open { display: flex; }
 .stats-popup {
@@ -794,8 +862,10 @@ header {
   border: 1px solid var(--sep);
   max-width: 400px;
   width: 100%;
-  max-height: 90vh;
+  max-height: 85dvh;
+  max-height: 85vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 22px 24px 24px;
   position: relative;
   animation: slide-in .18s ease;
@@ -901,12 +971,22 @@ header {
   <div class="subtitle">Identify today's animal through the tree of life</div>
   <div class="date-badge" id="dateBadge"></div>
   <div class="header-actions">
-    <button class="mode-btn diff-btn" id="diffEasy"   onclick="setDifficulty('easy')">Easy</button>
-    <button class="mode-btn diff-btn" id="diffMedium" onclick="setDifficulty('medium')">Medium</button>
-    <button class="mode-btn diff-btn active" id="diffHard" onclick="setDifficulty('hard')">Hard</button>
-    <button class="mode-btn" id="expertToggle" onclick="toggleExpert()">Taxonomist Mode</button>
-    <button class="mode-btn" onclick="openStats()">Stats</button>
-    <button class="mode-btn" id="giveUpBtn" onclick="giveUp()" style="border-color:var(--red);color:var(--red)">Give Up</button>
+    <div class="diff-group">
+      <button class="mode-btn diff-btn" id="diffEasy"   onclick="setDifficulty('easy')">Easy</button>
+      <button class="mode-btn diff-btn" id="diffMedium" onclick="setDifficulty('medium')">Medium</button>
+      <button class="mode-btn diff-btn active" id="diffHard" onclick="setDifficulty('hard')">Hard</button>
+    </div>
+    <button class="mode-btn btn-taxonomist" id="expertToggle" onclick="toggleExpert()">Taxonomist Mode</button>
+    <button class="mode-btn btn-stats" onclick="openStats()">Stats</button>
+    <button class="mode-btn btn-giveup" id="giveUpBtn" onclick="giveUp()" style="border-color:var(--red);color:var(--red)">Give Up</button>
+    <div class="overflow-menu-wrap" id="overflowMenu">
+      <button class="overflow-btn" id="overflowBtn" onclick="toggleOverflowMenu()" aria-label="More options">⋯</button>
+      <div class="overflow-dropdown">
+        <button class="overflow-item" onclick="toggleExpert(); closeOverflowMenu()" id="overflowTaxonomist">Taxonomist Mode</button>
+        <button class="overflow-item" onclick="openStats(); closeOverflowMenu()">Stats</button>
+        <button class="overflow-item danger" id="overflowGiveUp" onclick="giveUp(); closeOverflowMenu()">Give Up</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -936,7 +1016,9 @@ header {
       <div class="card-body">
         <div class="search-wrap">
           <input type="text" class="search-input" id="searchInput"
-                 placeholder="Common or scientific name…" autocomplete="off"/>
+                 placeholder="Common or scientific name…" autocomplete="off"
+                 inputmode="search" enterkeyhint="search"
+                 autocapitalize="off" autocorrect="off" spellcheck="false"/>
           <button class="primary-btn" id="guessBtn">Guess</button>
           <div class="autocomplete-list" id="autocompleteList"></div>
         </div>
@@ -956,7 +1038,9 @@ header {
           </div>
           <div class="expert-input-row">
             <div class="expert-input-wrap">
-              <input type="text" class="expert-input" id="expertInput" placeholder="e.g. Felidae…" autocomplete="off"/>
+              <input type="text" class="expert-input" id="expertInput" placeholder="e.g. Felidae…" autocomplete="off"
+                     inputmode="text" enterkeyhint="done"
+                     autocapitalize="off" autocorrect="off" spellcheck="false"/>
               <div class="autocomplete-list" id="expertAutocompleteList"></div>
             </div>
             <button class="expert-check-btn" onclick="submitExpert()">Check</button>
@@ -1002,9 +1086,12 @@ header {
         <span class="card-title">Guess History</span>
       </div>
       <div class="guess-list" id="guessList">
-        <div class="empty-state">Hover a card to preview · Click to see full taxonomy tree.</div>
+        <div class="empty-state" id="guessEmptyState">Tap a card to preview · Tap again for full taxonomy tree.</div>
       </div>
     </div>
+
+    <!-- MOBILE TREE MOUNT — sidebar card re-parented here at ≤860px -->
+    <div class="mobile-tree-mount" id="mobileTreeMount"></div>
 
     <div class="howto">
       <strong>How to play:</strong> Search for any animal to compare it to today's target.
@@ -1030,11 +1117,14 @@ header {
           <button class="sidebar-tab active" id="tabTaxonomy"  onclick="switchSidebarTab('taxonomy')">Taxonomy</button>
           <button class="sidebar-tab"        id="tabPhylogeny" onclick="switchSidebarTab('phylogeny')">Phylogeny</button>
           <button class="sidebar-tab"        id="tabExplore"   onclick="switchSidebarTab('explore')">Explore</button>
+          <button class="sidebar-tab mobile-notes-tab" id="tabNotes" onclick="switchSidebarTab('notes')">Notes</button>
         </div>
       </div>
       <div id="treeContainer"     style="padding:8px 4px 12px"></div>
       <div id="phyloContainer"    style="padding:8px 4px 12px; display:none"></div>
       <div id="explorerContainer" style="padding:8px 4px 12px; display:none"></div>
+      <!-- Notes tab content — shown on mobile only when Notes tab is active -->
+      <div id="notesTabContainer" style="display:none; padding:0 0 8px"></div>
     </div>
 
     <!-- FIELD NOTES -->
@@ -1103,6 +1193,41 @@ header {
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════
+// MOBILE UTILITIES
+// ═══════════════════════════════════════════════════════
+function isTouchDevice() {
+  return window.matchMedia('(hover: none)').matches;
+}
+
+// Overflow ("⋯") menu
+function toggleOverflowMenu() {
+  document.getElementById('overflowMenu').classList.toggle('open');
+}
+function closeOverflowMenu() {
+  document.getElementById('overflowMenu').classList.remove('open');
+}
+
+// Re-parent the sidebar tree card into mobileTreeMount at narrow widths
+let _lastMobileLayout = null;
+function applyMobileLayout() {
+  const isMobile = window.matchMedia('(max-width: 860px)').matches;
+  if (isMobile === _lastMobileLayout) return;
+  _lastMobileLayout = isMobile;
+
+  // The tree card is identified by whether it contains sidebar-tabs
+  const treeCard = document.querySelector('.sidebar-tabs')?.closest('.card');
+  const sidebar  = document.querySelector('.sidebar');
+  const mount    = document.getElementById('mobileTreeMount');
+  if (!treeCard || !mount || !sidebar) return;
+
+  if (isMobile) {
+    mount.appendChild(treeCard);
+  } else {
+    sidebar.insertBefore(treeCard, sidebar.firstChild);
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════
@@ -2009,12 +2134,21 @@ function positionTooltip(el) {
   const vh   = window.innerHeight;
   const tw   = Math.min(320, tooltip.offsetWidth || 280);
   const th   = tooltip.offsetHeight || 300;
-  let left = rect.right + 10;
-  if (left + tw > vw - 8) left = rect.left - tw - 10;
-  if (left < 8) left = 8;
-  let top = rect.top;
-  if (top + th > vh - 8) top = vh - th - 8;
-  if (top < 8) top = 8;
+  let left, top;
+  if (isTouchDevice()) {
+    // Center below card on touch
+    left = Math.max(8, Math.min(rect.left + rect.width / 2 - tw / 2, vw - tw - 8));
+    top  = rect.bottom + 8;
+    if (top + th > vh - 8) top = rect.top - th - 8;
+    if (top < 8) top = 8;
+  } else {
+    left = rect.right + 10;
+    if (left + tw > vw - 8) left = rect.left - tw - 10;
+    if (left < 8) left = 8;
+    top = rect.top;
+    if (top + th > vh - 8) top = vh - th - 8;
+    if (top < 8) top = 8;
+  }
   tooltip.style.left = left + 'px';
   tooltip.style.top  = top  + 'px';
 }
@@ -2124,13 +2258,22 @@ function renderBranchTree() {
   // Wire taxon wiki tooltips on revealed nodes
   document.getElementById('treeContainer').querySelectorAll('.tree-hover-target').forEach(el => {
     let hoverTimer;
-    el.addEventListener('mouseenter', () => {
-      const taxon = el.getAttribute('data-taxon');
-      const level = el.getAttribute('data-level');
-      hoverTimer = setTimeout(() => showTaxonTooltip(taxon, level, el), 250);
-    });
-    el.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); hideTooltip(); });
-    el.addEventListener('mousemove', () => positionTooltip(el));
+    if (isTouchDevice()) {
+      el.addEventListener('click', e => {
+        const taxon = el.getAttribute('data-taxon');
+        const level = el.getAttribute('data-level');
+        e.stopPropagation();
+        showTaxonTooltip(taxon, level, el);
+      });
+    } else {
+      el.addEventListener('mouseenter', () => {
+        const taxon = el.getAttribute('data-taxon');
+        const level = el.getAttribute('data-level');
+        hoverTimer = setTimeout(() => showTaxonTooltip(taxon, level, el), 250);
+      });
+      el.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); hideTooltip(); });
+      el.addEventListener('mousemove', () => positionTooltip(el));
+    }
   });
 }
 
@@ -2151,11 +2294,26 @@ function switchSidebarTab(tab) {
   document.getElementById('tabTaxonomy').classList.toggle('active',  tab === 'taxonomy');
   document.getElementById('tabPhylogeny').classList.toggle('active', tab === 'phylogeny');
   document.getElementById('tabExplore').classList.toggle('active',   tab === 'explore');
-  document.getElementById('treeContainer').style.display     = tab === 'taxonomy'  ? '' : 'none';
-  document.getElementById('phyloContainer').style.display    = tab === 'phylogeny' ? '' : 'none';
-  document.getElementById('explorerContainer').style.display = tab === 'explore'   ? '' : 'none';
+  const tabNotes = document.getElementById('tabNotes');
+  if (tabNotes) tabNotes.classList.toggle('active', tab === 'notes');
+  document.getElementById('treeContainer').style.display       = tab === 'taxonomy'  ? '' : 'none';
+  document.getElementById('phyloContainer').style.display      = tab === 'phylogeny' ? '' : 'none';
+  document.getElementById('explorerContainer').style.display   = tab === 'explore'   ? '' : 'none';
+  document.getElementById('notesTabContainer').style.display   = tab === 'notes'     ? '' : 'none';
   if (tab === 'phylogeny') renderPhylogeny();
   if (tab === 'explore')   renderTaxonExplorer();
+  if (tab === 'notes')     syncNotesTab();
+}
+
+function syncNotesTab() {
+  const dest = document.getElementById('notesTabContainer');
+  if (!dest) return;
+  // Render a read-only snapshot of the current field notes
+  const hints = document.getElementById('hintsContainer');
+  const note  = document.getElementById('hintNote');
+  dest.innerHTML = '';
+  if (hints) dest.appendChild(hints.cloneNode(true));
+  if (note)  dest.appendChild(note.cloneNode(true));
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2219,11 +2377,11 @@ function renderPhylogeny() {
     return;
   }
 
-  const SVG_W  = 256;
+  const SVG_W  = Math.min(480, Math.max(240, el.clientWidth || 256));
   const PAD_L  = 10;   // left of root line
   const PAD_R  = 6;
-  const LABEL_W = 88;  // right-side leaf label column
-  const TREE_W  = SVG_W - PAD_L - LABEL_W - PAD_R;  // ~152px for the 7 rank columns
+  const LABEL_W = Math.round(SVG_W * 0.34);  // ~34% for leaf label column
+  const TREE_W  = SVG_W - PAD_L - LABEL_W - PAD_R;
   const ROW_H   = 24;
 
   const root = buildPhyloTrie(guesses);
@@ -2437,9 +2595,11 @@ function toggleExpert() {
   expertMode = !expertMode;
   document.getElementById('expertPanel').classList.toggle('open', expertMode);
   document.getElementById('expertToggle').classList.toggle('active', expertMode);
+  const overflowTax = document.getElementById('overflowTaxonomist');
+  if (overflowTax) overflowTax.textContent = expertMode ? 'Taxonomist Mode ✓' : 'Taxonomist Mode';
   if (expertMode) {
     updateExpertLevelPills();
-    document.getElementById('expertInput').focus();
+    if (!isTouchDevice()) document.getElementById('expertInput').focus();
   }
 }
 
@@ -2516,11 +2676,28 @@ function renderGuessCard(animal, matchMap, prox) {
     </div>
     <div class="tax-row">${chips.join('')}</div>`;
 
-  let hoverTimer;
-  card.addEventListener('mouseenter', () => { hoverTimer = setTimeout(() => showTooltip(animal, card), 250); });
-  card.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); hideTooltip(); });
-  card.addEventListener('mousemove',  () => positionTooltip(card));
-  card.addEventListener('click', () => { clearTimeout(hoverTimer); hideTooltip(); showTaxPopup(animal, matchMap, prox); });
+  if (isTouchDevice()) {
+    // First tap → preview tooltip; second tap → full popup
+    card.addEventListener('click', e => {
+      const tooltip = document.getElementById('wikiTooltip');
+      const isVisible = tooltip && tooltip.classList.contains('visible');
+      const isThisCard = tooltip && tooltip._sourceCard === card;
+      if (isVisible && isThisCard) {
+        hideTooltip();
+        showTaxPopup(animal, matchMap, prox);
+      } else {
+        hideTooltip();
+        showTooltip(animal, card);
+        if (tooltip) tooltip._sourceCard = card;
+      }
+    });
+  } else {
+    let hoverTimer;
+    card.addEventListener('mouseenter', () => { hoverTimer = setTimeout(() => showTooltip(animal, card), 250); });
+    card.addEventListener('mouseleave', () => { clearTimeout(hoverTimer); hideTooltip(); });
+    card.addEventListener('mousemove',  () => positionTooltip(card));
+    card.addEventListener('click', () => { clearTimeout(hoverTimer); hideTooltip(); showTaxPopup(animal, matchMap, prox); });
+  }
 
   return card;
 }
@@ -2564,10 +2741,12 @@ function showTaxPopup(animal, matchMap, prox) {
     `Proximity: <strong class="${proxClass}">${prox}%</strong>`;
 
   document.getElementById('taxOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeTaxPopup() {
   document.getElementById('taxOverlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 document.getElementById('taxOverlay').addEventListener('click', e => {
@@ -2625,6 +2804,7 @@ function submitGuess(animal) {
   document.getElementById('searchInput').value = '';
   document.getElementById('autocompleteList').classList.remove('open');
   filteredList = []; selectedIdx = -1;
+  if (!isTouchDevice()) document.getElementById('searchInput').focus();
   fetchWiki(animal);
 }
 
@@ -2634,6 +2814,8 @@ function submitGuess(animal) {
 function giveUp() {
   if (gameOver) return;
   document.getElementById('giveUpBtn').disabled = true;
+  const og = document.getElementById('overflowGiveUp');
+  if (og) og.disabled = true;
   endGame(false);
 }
 
@@ -2766,9 +2948,11 @@ function openStats() {
   statsCurrentDiff = currentDifficulty;
   renderStatsModal(statsCurrentDiff);
   document.getElementById('statsOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
 function closeStats() {
   document.getElementById('statsOverlay').classList.remove('open');
+  document.body.style.overflow = '';
 }
 function switchStatTab(diff) {
   statsCurrentDiff = diff;
@@ -3185,7 +3369,27 @@ function wireEvents() {
     if (!e.target.closest('.expert-input-wrap') && !e.target.closest('.expert-lvl-pill')) {
       expertList.classList.remove('open');
     }
+    if (!e.target.closest('#overflowMenu')) closeOverflowMenu();
   });
+
+  // Apply mobile layout and re-apply on orientation/resize
+  applyMobileLayout();
+  let _resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+      applyMobileLayout();
+      renderSidebar();
+    }, 120);
+  });
+
+  // Update empty state hint based on device
+  const emptyState = document.getElementById('guessEmptyState');
+  if (emptyState) {
+    emptyState.textContent = isTouchDevice()
+      ? 'Tap a card to preview · Tap again for full taxonomy tree.'
+      : 'Hover a card to preview · Click to see full taxonomy tree.';
+  }
 }
 
 // ═══════════════════════════════════════════════════════
