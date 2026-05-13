@@ -72,6 +72,7 @@ body.is-touch .sidebar { display: none !important; }
 
 /* Header: show ⋯ menu and hide individual buttons on touch */
 body.is-touch .btn-taxonomist,
+body.is-touch .btn-howto,
 body.is-touch .btn-stats,
 body.is-touch .btn-giveup { display: none; }
 body.is-touch .overflow-menu-wrap { display: block; }
@@ -683,18 +684,99 @@ header {
 .pip-land  { background: #e4f7ea; color: #1a7a36; }
 .pip-ocean { background: var(--blue-lt); color: var(--blue); }
 
-/* ── HOW TO PLAY ── */
-.howto {
-  margin-top: 12px;
-  padding: 14px 18px;
+/* ── TUTORIAL MODAL ── */
+.tutorial-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(30,24,16,0.55);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px 16px;
+}
+.tutorial-overlay.open { display: flex; }
+.tutorial-popup {
   background: var(--card);
   border-radius: var(--r);
-  box-shadow: var(--shadow);
-  font-size: 0.83rem;
-  color: var(--label3);
-  line-height: 1.6;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--sep);
+  max-width: 520px;
+  width: 100%;
+  max-height: 85dvh;
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 28px 28px 28px;
+  position: relative;
+  animation: slide-in .18s ease;
 }
-.howto strong { color: var(--label2); font-weight: 600; }
+.tutorial-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--label);
+  margin-bottom: 4px;
+  padding-right: 32px;
+}
+.tutorial-subtitle {
+  font-size: 0.82rem;
+  color: var(--label3);
+  margin-bottom: 22px;
+}
+.tutorial-section {
+  margin-bottom: 20px;
+}
+.tutorial-section:last-child { margin-bottom: 0; }
+.tutorial-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 8px;
+}
+.tutorial-section p {
+  font-size: 0.88rem;
+  color: var(--label2);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+.tutorial-section p:last-child { margin-bottom: 0; }
+.tutorial-section strong { font-weight: 600; color: var(--label); }
+.tutorial-chip-demo {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+.tutorial-chip {
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 2px 8px 3px;
+  border-radius: 6px;
+}
+.tutorial-chip.match   { background: var(--green-lt); color: #1a7a36; }
+.tutorial-chip.nomatch { background: var(--red-lt);   color: var(--red); }
+.tutorial-sep { color: var(--sep); font-size: 0.9rem; user-select: none; }
+.tutorial-chip .tlabel { font-size: 0.55rem; opacity: .65; display: block; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600; }
+.tutorial-got-it {
+  display: block;
+  width: 100%;
+  margin-top: 24px;
+  padding: 12px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity .15s;
+}
+.tutorial-got-it:hover { opacity: .85; }
 
 /* ── WIKI TOOLTIP ── */
 #wikiTooltip {
@@ -990,11 +1072,13 @@ header {
       <button class="mode-btn diff-btn active" id="diffHard" onclick="setDifficulty('hard')">Hard</button>
     </div>
     <button class="mode-btn btn-taxonomist" id="expertToggle" onclick="toggleExpert()">Taxonomist Mode</button>
-    <button class="mode-btn btn-stats" onclick="openStats()">Stats</button>
+    <button class="mode-btn btn-howto"  onclick="openTutorial()">How to Play</button>
+    <button class="mode-btn btn-stats"  onclick="openStats()">Stats</button>
     <button class="mode-btn btn-giveup" id="giveUpBtn" onclick="giveUp()" style="border-color:var(--red);color:var(--red)">Give Up</button>
     <div class="overflow-menu-wrap" id="overflowMenu">
       <button class="overflow-btn" id="overflowBtn" onclick="toggleOverflowMenu()" aria-label="More options">⋯</button>
       <div class="overflow-dropdown">
+        <button class="overflow-item" onclick="openTutorial(); closeOverflowMenu()">How to Play</button>
         <button class="overflow-item" onclick="toggleExpert(); closeOverflowMenu()" id="overflowTaxonomist">Taxonomist Mode</button>
         <button class="overflow-item" onclick="openStats(); closeOverflowMenu()">Stats</button>
         <button class="overflow-item danger" id="overflowGiveUp" onclick="giveUp(); closeOverflowMenu()">Give Up</button>
@@ -1103,20 +1187,8 @@ header {
       </div>
     </div>
 
-    <!-- MOBILE TREE MOUNT — sidebar card re-parented here at ≤860px -->
+    <!-- MOBILE TREE MOUNT — sidebar card re-parented here on touch devices -->
     <div class="mobile-tree-mount" id="mobileTreeMount"></div>
-
-    <div class="howto">
-      <strong>How to play:</strong> Search for any animal to compare it to today's target.
-      Taxonomy chips trace the tree of life — green = match, red = where it diverges.
-      The chain stops at the first mismatch. Use <em>Guess the Diet</em> and <em>Guess the Range</em>
-      to unlock Field Notes early. Hover any guess card for its Wikipedia image and description.
-      <br><br>
-      <strong>Taxonomist Mode</strong> lets you guess individual taxonomic levels (family, order, etc.)
-      to reveal those levels in the tree without spending an animal guess.
-      <br><br>
-      <strong>Proximity %</strong> reflects relatedness weighted by taxonomic depth and group size.
-    </div>
 
   </div><!-- /left -->
 
@@ -1202,6 +1274,55 @@ header {
     <div class="stats-grid" id="statsGrid"></div>
     <div class="stats-dist-title">Guess Distribution</div>
     <div class="stats-dist" id="statsDist"></div>
+  </div>
+</div>
+
+<!-- TUTORIAL MODAL -->
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-popup">
+    <button class="tax-popup-close" onclick="closeTutorial()">×</button>
+    <div class="tutorial-title">How to Play Phylo</div>
+    <div class="tutorial-subtitle">Identify today's mystery animal through the tree of life.</div>
+
+    <div class="tutorial-section">
+      <div class="tutorial-section-title">The Basics</div>
+      <p>Search for any animal by its common or scientific name. Each guess reveals how closely related it is to the target by tracing the <strong>taxonomic tree</strong> — Kingdom → Phylum → Class → Order → Family → Genus → Species.</p>
+      <p>Green chips = matching levels. Red = where your guess diverges from the target. The chain stops at the first mismatch.</p>
+      <div class="tutorial-chip-demo">
+        <span class="tutorial-chip match"><span class="tlabel">Kingdom</span>Animalia</span>
+        <span class="tutorial-sep">›</span>
+        <span class="tutorial-chip match"><span class="tlabel">Phylum</span>Chordata</span>
+        <span class="tutorial-sep">›</span>
+        <span class="tutorial-chip match"><span class="tlabel">Class</span>Mammalia</span>
+        <span class="tutorial-sep">›</span>
+        <span class="tutorial-chip nomatch"><span class="tlabel">Order</span>Carnivora</span>
+      </div>
+    </div>
+
+    <div class="tutorial-section">
+      <div class="tutorial-section-title">Proximity %</div>
+      <p>The badge on each guess card shows how <strong>related</strong> that animal is to the target, weighted by taxonomic depth. 100% means you guessed it. Higher is warmer.</p>
+    </div>
+
+    <div class="tutorial-section">
+      <div class="tutorial-section-title">Bonus Guesses</div>
+      <p><strong>Guess the Diet</strong> and <strong>Guess the Range</strong> let you spend a guess to unlock Field Notes (diet, continents, habitat) earlier than they'd normally reveal.</p>
+      <p><strong>Reveal a Letter</strong> and <strong>Reveal Image</strong> each cost one guess in exchange for a letter of the animal's name or a pixelated image hint.</p>
+    </div>
+
+    <div class="tutorial-section">
+      <div class="tutorial-section-title">Taxonomist Mode</div>
+      <p>Advanced option: guess a specific <strong>taxonomic rank</strong> (e.g. "Felidae" for Family) to reveal that level in the tree without using an animal guess.</p>
+    </div>
+
+    <div class="tutorial-section">
+      <div class="tutorial-section-title">Difficulty</div>
+      <p><strong>Easy</strong> — 40 guesses, pool of ~100 well-known animals.<br>
+         <strong>Medium</strong> — 28 guesses, broader pool.<br>
+         <strong>Hard</strong> — 20 guesses, full dataset of 5000+ species.</p>
+    </div>
+
+    <button class="tutorial-got-it" onclick="closeTutorial()">Got it — let's play!</button>
   </div>
 </div>
 
@@ -2970,6 +3091,28 @@ function closeStats() {
   document.getElementById('statsOverlay').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+// ═══════════════════════════════════════════════════════
+// TUTORIAL
+// ═══════════════════════════════════════════════════════
+const TUTORIAL_KEY = 'phylo_seen_tutorial';
+
+function openTutorial() {
+  document.getElementById('tutorialOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeTutorial() {
+  document.getElementById('tutorialOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  localStorage.setItem(TUTORIAL_KEY, '1');
+}
+function maybeAutoOpenTutorial() {
+  if (!localStorage.getItem(TUTORIAL_KEY)) openTutorial();
+}
+
+document.getElementById('tutorialOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('tutorialOverlay')) closeTutorial();
+});
 function switchStatTab(diff) {
   statsCurrentDiff = diff;
   document.querySelectorAll('.stats-mode-tab').forEach(b => b.classList.toggle('active', b.dataset.diff === diff));
@@ -3434,6 +3577,7 @@ async function init() {
   difficultyPools = buildDifficultyPools();
   startDailyRound();
   wireEvents();
+  maybeAutoOpenTutorial();
 }
 
 init();
