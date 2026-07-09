@@ -28,23 +28,30 @@ Branch: `ux-cinematic-tree`. Nothing pushed. Serve locally with
   "tigr"→tiger. Only surfaces when exact hits are scarce.
 - One precomputed index (`buildSearchIndex`), ~a few ms once at load.
 
+### 3. Interactive first-run coach (self-teaching onboarding) — LIVE
+- New visitors now get a 4-step spotlight tour on the real board instead
+  of the text wall: (1) guess any animal you know → (2) watch its branch
+  grow on the Tree of Life → (3) the ❔ mystery blooms to a ⭐ on a win →
+  (4) the % readout. Advances on the player's first real guess.
+- Dims the page, spotlights each element, auto-scrolls off-screen anchors
+  into view, clamps the tip to the viewport (desktop + narrow). Vanilla
+  JS/CSS, honors `prefers-reduced-motion`. `Skip tour` always available.
+- The "How to Play" text modal is kept for returning users / on demand.
+- Key: `phylo_coach_v1`. See `startCoach`/`COACH_STEPS`/`coachOnGuess`.
+
 ## 🔜 Recommended next (biggest lever → smallest)
 
-1. **Self-teaching first run.** The tutorial is a wall of text. Replace
-   with a 3-step interactive coach on the live board (guess any animal →
-   watch its branch grow → "warmer branches climb higher"). Keep the
-   text modal behind a "?".
-2. **Warmth coaching line.** After each guess, one plain sentence:
+1. **Warmth coaching line.** After each guess, one plain sentence:
    "Same class (Reptilia) — getting warm!" / "Different phylum — cold."
    Turns the % into something a non-biologist feels.
-3. **Friendly rank labels.** Show "Group / Family / Kind" style hints
+2. **Friendly rank labels.** Show "Group / Family / Kind" style hints
    alongside Kingdom/Phylum/... on hover or first exposure.
-4. **Share card.** Wordle-style emoji grid of your warmth path + the
+3. **Share card.** Wordle-style emoji grid of your warmth path + the
    tree image. This is the #1 growth driver for daily puzzles.
-5. **Gamification, kept chill:** streak flames, "first try / top 10%"
+4. **Gamification, kept chill:** streak flames, "first try / top 10%"
    badges, a daily "how the world did" bar, gentle end-of-round confetti
    tied to the ⭐ bloom.
-6. **Onboarding difficulty.** Default new visitors to **Easy** (curated
+5. **Onboarding difficulty.** Default new visitors to **Easy** (curated
    ~100 well-known animals); today it defaults to Hard (full 2,760).
 
 ## ♿ Accessibility backlog
