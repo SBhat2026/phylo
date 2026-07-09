@@ -841,6 +841,106 @@ header {
 }
 .tutorial-got-it:hover { opacity: .85; }
 
+/* ── INTERACTIVE COACH (first-run onboarding) ── */
+.coach-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  pointer-events: none;   /* let the real board stay usable; only the tip catches events */
+  display: none;
+}
+.coach-overlay.open { display: block; }
+.coach-spot {
+  position: fixed;
+  border-radius: 12px;
+  box-shadow: 0 0 0 4px rgba(201,137,43,.85), 0 0 0 9999px rgba(38,30,16,.55);
+  transition: top .28s ease, left .28s ease, width .28s ease, height .28s ease, opacity .2s;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .coach-spot { transition: opacity .2s; }
+}
+.coach-tip {
+  position: fixed;
+  max-width: 300px;
+  background: var(--card);
+  border: 1.5px solid var(--sep);
+  border-radius: var(--r);
+  box-shadow: 0 10px 34px rgba(38,30,16,.34);
+  padding: 15px 16px 14px;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .25s, transform .25s;
+  font-family: var(--font);
+}
+.coach-tip.show { opacity: 1; transform: translateY(0); }
+.coach-tip-step {
+  font-size: 0.62rem;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: 5px;
+}
+.coach-tip-body {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--label);
+}
+.coach-tip-body strong { color: var(--green); font-weight: 700; }
+.coach-tip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 13px;
+}
+.coach-skip {
+  background: none;
+  border: none;
+  color: var(--muted, #8a7a5a);
+  font-family: var(--font);
+  font-size: 0.76rem;
+  cursor: pointer;
+  padding: 4px 2px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.coach-skip:hover { color: var(--label); }
+.coach-next {
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: opacity .15s;
+}
+.coach-next:hover { opacity: .88; }
+.coach-wait {
+  font-size: 0.8rem;
+  color: var(--orange);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.coach-wait::before {
+  content: '';
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .coach-wait::before { animation: coach-blink 1.1s ease-in-out infinite; }
+}
+@keyframes coach-blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+
 /* ── WIKI TOOLTIP ── */
 #wikiTooltip {
   position: fixed;
@@ -3295,6 +3395,7 @@ function submitGuess(animal) {
   filteredList = []; selectedIdx = -1;
   if (!isTouchDevice()) document.getElementById('searchInput').focus();
   fetchWiki(animal);
+  coachOnGuess();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3459,12 +3560,192 @@ function closeTutorial() {
   localStorage.setItem(TUTORIAL_KEY, '1');
 }
 function maybeAutoOpenTutorial() {
-  if (!localStorage.getItem(TUTORIAL_KEY)) openTutorial();
+  // First-time visitors get the interactive coach (teaches on the live board).
+  // Returning users, or anyone who opens "How to Play", get the text modal.
+  if (localStorage.getItem(TUTORIAL_KEY) || localStorage.getItem(COACH_KEY)) return;
+  startCoach();
 }
 
 document.getElementById('tutorialOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('tutorialOverlay')) closeTutorial();
 });
+
+// ═══════════════════════════════════════════════════════
+// INTERACTIVE COACH — self-teaching first run
+// ═══════════════════════════════════════════════════════
+const COACH_KEY = 'phylo_coach_v1';
+
+// Each step spotlights a real element and explains it in plain language.
+// mode 'guess'  → waits for the player's first guess to advance.
+// mode 'next'   → shows a Next button.
+// mode 'finish' → shows a Done button and ends the tour.
+const COACH_STEPS = [
+  {
+    label: 'Step 1 of 4',
+    anchor: () => document.getElementById('searchInput'),
+    body: 'Welcome to <strong>Phylo</strong>! Your goal is to find today’s mystery animal. ' +
+          'Start simple — type in <strong>any animal you know</strong> (a dog, a shark, a penguin) and guess it.',
+    mode: 'guess',
+    place: 'below',
+  },
+  {
+    label: 'Step 2 of 4',
+    anchor: () => document.querySelector('.sidebar-tabs')?.closest('.card'),
+    body: 'Watch the <strong>Tree of Life</strong>. Your guess just grew a branch off the glowing ' +
+          'gold trunk — the mystery’s lineage. The closer your branch clings to the trunk, the more you share.',
+    mode: 'next',
+    place: 'left',
+  },
+  {
+    label: 'Step 3 of 4',
+    anchor: () => document.querySelector('.sidebar-tabs')?.closest('.card'),
+    body: 'The <strong>❔ Mystery</strong> sits at the tip. Warmer guesses branch closer to it, and ' +
+          'when you finally nail it the crown blooms into a <strong>⭐</strong>.',
+    mode: 'next',
+    place: 'left',
+  },
+  {
+    label: 'Step 4 of 4',
+    anchor: () => document.querySelector('#guessList .guess-card .prox-badge'),
+    body: 'Every guess also gets a <strong>%</strong> — how related it is to the mystery. ' +
+          'Higher is warmer. Keep guessing to zero in. That’s it — have fun exploring!',
+    mode: 'finish',
+    place: 'below',
+  },
+];
+
+let _coach = null; // { idx, overlay, spot, tip } when active
+
+function startCoach() {
+  if (_coach) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'coach-overlay';
+  overlay.id = 'coachOverlay';
+  const spot = document.createElement('div');
+  spot.className = 'coach-spot';
+  const tip = document.createElement('div');
+  tip.className = 'coach-tip';
+  overlay.appendChild(spot);
+  overlay.appendChild(tip);
+  document.body.appendChild(overlay);
+  _coach = { idx: 0, overlay, spot, tip };
+  requestAnimationFrame(() => {
+    overlay.classList.add('open');
+    coachRender();
+  });
+  window.addEventListener('resize', coachReposition);
+  window.addEventListener('scroll', coachReposition, true);
+}
+
+function coachRender() {
+  if (!_coach) return;
+  const step = COACH_STEPS[_coach.idx];
+  const el = step.anchor();
+  // If the anchor isn't on screen (e.g. step 2 before a guess exists), skip ahead gracefully.
+  if (!el) {
+    if (step.mode === 'next') { coachAdvance(); return; }
+  }
+  // Bring an off-screen anchor into view before spotlighting it.
+  if (el) {
+    const r0 = el.getBoundingClientRect();
+    if (r0.top < 60 || r0.bottom > window.innerHeight - 60) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+    }
+  }
+  const btn = step.mode === 'guess'
+    ? '<span class="coach-wait">Waiting for your first guess…</span>'
+    : step.mode === 'finish'
+      ? '<button class="coach-next" onclick="endCoach()">Let’s play!</button>'
+      : '<button class="coach-next" onclick="coachAdvance()">Next</button>';
+  _coach.tip.innerHTML =
+    `<div class="coach-tip-step">${step.label}</div>` +
+    `<div class="coach-tip-body">${step.body}</div>` +
+    `<div class="coach-tip-row">` +
+      `<button class="coach-skip" onclick="endCoach()">Skip tour</button>` +
+      btn +
+    `</div>`;
+  _coach.tip.classList.remove('show');
+  coachReposition();
+  requestAnimationFrame(() => _coach && _coach.tip.classList.add('show'));
+}
+
+function coachReposition() {
+  if (!_coach) return;
+  const step = COACH_STEPS[_coach.idx];
+  const el = step.anchor();
+  const pad = 8;
+  if (el) {
+    const r = el.getBoundingClientRect();
+    Object.assign(_coach.spot.style, {
+      opacity: '1',
+      top: (r.top - pad) + 'px',
+      left: (r.left - pad) + 'px',
+      width: (r.width + pad * 2) + 'px',
+      height: (r.height + pad * 2) + 'px',
+    });
+    positionCoachTip(r, step.place);
+  } else {
+    // No anchor: dim everything, center the tip.
+    _coach.spot.style.opacity = '0';
+    const t = _coach.tip;
+    t.style.left = Math.max(12, (window.innerWidth - t.offsetWidth) / 2) + 'px';
+    t.style.top = Math.max(12, (window.innerHeight - t.offsetHeight) / 2) + 'px';
+  }
+}
+
+function positionCoachTip(r, place) {
+  const t = _coach.tip;
+  const tw = t.offsetWidth || 300, th = t.offsetHeight || 120;
+  const vw = window.innerWidth, vh = window.innerHeight, gap = 14;
+  let top, left;
+  const preferLeft = place === 'left' && r.left > tw + gap + 12;
+  const preferAbove = place === 'above' || (place === 'below' && r.bottom + gap + th > vh);
+  if (preferLeft) {
+    left = r.left - tw - gap;
+    top = r.top;
+  } else if (preferAbove) {
+    left = r.left;
+    top = r.top - th - gap;
+  } else {
+    // default: below
+    left = r.left;
+    top = r.bottom + gap;
+  }
+  // clamp to viewport
+  left = Math.min(Math.max(12, left), vw - tw - 12);
+  top = Math.min(Math.max(12, top), vh - th - 12);
+  t.style.left = left + 'px';
+  t.style.top = top + 'px';
+}
+
+function coachAdvance() {
+  if (!_coach) return;
+  if (_coach.idx >= COACH_STEPS.length - 1) { endCoach(); return; }
+  _coach.idx++;
+  coachRender();
+}
+
+// Called from submitGuess after the first guess renders.
+function coachOnGuess() {
+  if (!_coach) return;
+  if (COACH_STEPS[_coach.idx].mode === 'guess') {
+    // let the guess card + tree paint, then advance
+    setTimeout(coachAdvance, 480);
+  }
+}
+
+function endCoach() {
+  if (!_coach) return;
+  window.removeEventListener('resize', coachReposition);
+  window.removeEventListener('scroll', coachReposition, true);
+  _coach.overlay.classList.remove('open');
+  const ov = _coach.overlay;
+  setTimeout(() => ov.remove(), 200);
+  _coach = null;
+  localStorage.setItem(COACH_KEY, '1');
+  localStorage.setItem(TUTORIAL_KEY, '1'); // don't also pop the text modal
+}
 function switchStatTab(diff) {
   statsCurrentDiff = diff;
   document.querySelectorAll('.stats-mode-tab').forEach(b => b.classList.toggle('active', b.dataset.diff === diff));
