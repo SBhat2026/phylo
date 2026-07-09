@@ -324,6 +324,11 @@ header {
 .autocomplete-item:last-child { border-bottom: none; }
 .autocomplete-item:hover, .autocomplete-item.selected { background: var(--fill); }
 .autocomplete-item .sci { font-style: italic; color: var(--label3); font-size: 0.78rem; white-space: nowrap; }
+.autocomplete-item .ac-reason {
+  font-size: 0.66rem; font-weight: 600; color: var(--blue);
+  background: var(--blue-lt); border-radius: 10px; padding: 2px 8px;
+  white-space: nowrap; flex-shrink: 0; text-transform: lowercase;
+}
 .autocomplete-item .cn  { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── EXPERT MODE ── */
@@ -652,6 +657,55 @@ header {
   font-style: italic;
 }
 .phylo-svg text { font-family: 'Inter', sans-serif; }
+
+/* ── TREE OF LIFE (unified, cinematic) ── */
+#treeContainer { padding: 6px 2px 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.life-svg { display: block; width: 100%; height: auto; }
+.life-svg text { font-family: 'Inter', sans-serif; }
+.life-empty {
+  text-align: center;
+  padding: 20px 14px;
+  color: var(--label3);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+.life-axis {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 8px 8px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: var(--label3);
+}
+.life-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 12px;
+  padding: 8px 10px 2px; font-size: 0.62rem;
+  color: var(--label3); font-weight: 600;
+}
+.life-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.life-legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+@keyframes life-draw    { from { stroke-dashoffset: var(--len, 160); } to { stroke-dashoffset: 0; } }
+@keyframes life-leaf-pop{ from { opacity: 0; transform: scale(0); } 60% { transform: scale(1.4); } to { opacity: 1; transform: scale(1); } }
+@keyframes life-bloom   { 0% { opacity: 0; transform: scale(0.3); } 55% { opacity: 1; transform: scale(1.28); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes life-pulse   { 0%,100% { opacity: 0.9; } 50% { opacity: 0.4; } }
+@media (prefers-reduced-motion: no-preference) {
+  .life-branch-new {
+    stroke-dasharray: var(--len, 160);
+    animation: life-draw 0.55s ease-out forwards;
+  }
+  .life-leaf-new {
+    transform-box: fill-box; transform-origin: center;
+    animation: life-leaf-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .life-ring { animation: life-pulse 2.4s ease-in-out infinite; }
+  .life-bloom {
+    transform-box: fill-box; transform-origin: center;
+    animation: life-bloom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+}
 
 /* ── FIELD NOTES ── */
 .hint-item {
@@ -1211,9 +1265,8 @@ header {
     <div class="card">
       <div class="card-header">
         <div class="sidebar-tabs">
-          <button class="sidebar-tab active" id="tabTaxonomy"  onclick="switchSidebarTab('taxonomy')">Taxonomy</button>
-          <button class="sidebar-tab"        id="tabPhylogeny" onclick="switchSidebarTab('phylogeny')">Phylogeny</button>
-          <button class="sidebar-tab"        id="tabExplore"   onclick="switchSidebarTab('explore')">Explore</button>
+          <button class="sidebar-tab active" id="tabTree"    onclick="switchSidebarTab('tree')">Tree of Life</button>
+          <button class="sidebar-tab"        id="tabExplore" onclick="switchSidebarTab('explore')">Explore</button>
           <button class="sidebar-tab mobile-notes-tab" id="tabNotes" onclick="switchSidebarTab('notes')">Notes</button>
         </div>
       </div>
@@ -1970,6 +2023,10 @@ function supplementRangeFromWiki(animal, wikiData) {
 // HABITAT INFERENCE
 // ═══════════════════════════════════════════════════════
 function inferHabitat(animal) {
+  if (animal.habitat && animal.habitat.trim()) {
+    const h = animal.habitat.trim();
+    return h[0].toUpperCase() + h.slice(1);
+  }
   const n   = (animal.notes  || '').toLowerCase();
   const cls = (animal.class  || '').toLowerCase();
   const ord = (animal.order  || '').toLowerCase();
@@ -2212,6 +2269,17 @@ async function fetchWiki(animal) {
   if (wikiCache.has(key)) return wikiCache.get(key);
   wikiCache.set(key, 'loading');
 
+  // Prefer stored image_url from animals.json — avoids a live Wikipedia call
+  if (animal.image_url) {
+    const result = {
+      img:     animal.image_url,
+      text:    animal.notes ? animal.notes.split('.')[0] + '.' : '',
+      extract: animal.notes || '',
+    };
+    wikiCache.set(key, result);
+    return result;
+  }
+
   const tryFetch = async (title) => {
     const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
     try {
@@ -2451,30 +2519,27 @@ function renderBranchTree() {
 
 // Render whichever sidebar view is currently active.
 function renderSidebar() {
-  renderBranchTree();
-  if (sidebarTab === 'phylogeny') renderPhylogeny();
+  renderTreeOfLife();
   if (sidebarTab === 'explore')   renderTaxonExplorer();
 }
 
 // ═══════════════════════════════════════════════════════
 // SIDEBAR TAB SWITCHING
 // ═══════════════════════════════════════════════════════
-let sidebarTab = 'taxonomy';
+let sidebarTab = 'tree';
 
 function switchSidebarTab(tab) {
   sidebarTab = tab;
-  document.getElementById('tabTaxonomy').classList.toggle('active',  tab === 'taxonomy');
-  document.getElementById('tabPhylogeny').classList.toggle('active', tab === 'phylogeny');
-  document.getElementById('tabExplore').classList.toggle('active',   tab === 'explore');
+  document.getElementById('tabTree').classList.toggle('active',    tab === 'tree');
+  document.getElementById('tabExplore').classList.toggle('active', tab === 'explore');
   const tabNotes = document.getElementById('tabNotes');
   if (tabNotes) tabNotes.classList.toggle('active', tab === 'notes');
-  document.getElementById('treeContainer').style.display       = tab === 'taxonomy'  ? '' : 'none';
-  document.getElementById('phyloContainer').style.display      = tab === 'phylogeny' ? '' : 'none';
-  document.getElementById('explorerContainer').style.display   = tab === 'explore'   ? '' : 'none';
-  document.getElementById('notesTabContainer').style.display   = tab === 'notes'     ? '' : 'none';
-  if (tab === 'phylogeny') renderPhylogeny();
-  if (tab === 'explore')   renderTaxonExplorer();
-  if (tab === 'notes')     syncNotesTab();
+  document.getElementById('treeContainer').style.display       = tab === 'tree'    ? '' : 'none';
+  document.getElementById('explorerContainer').style.display   = tab === 'explore' ? '' : 'none';
+  document.getElementById('notesTabContainer').style.display   = tab === 'notes'   ? '' : 'none';
+  if (tab === 'tree')    renderTreeOfLife();
+  if (tab === 'explore') renderTaxonExplorer();
+  if (tab === 'notes')   syncNotesTab();
 }
 
 function syncNotesTab() {
@@ -2614,6 +2679,248 @@ function renderPhylogeny() {
 }
 
 // ═══════════════════════════════════════════════════════
+// TREE OF LIFE — unified cinematic tree
+// Merges the target "trunk" (revealed ranks) with every guess
+// as a branch that follows the trunk as far as it matches, then
+// curves away. Warmer guesses diverge closer to the mystery tip.
+// ═══════════════════════════════════════════════════════
+const LIFE = {
+  gold:  '#c9892b', goldSoft: '#e8c987',
+  green: '#2e7d4f', amber: '#c07820', red: '#b0503f',
+  tan:   '#c9b385', faint: '#ddcfa8',
+  label: '#1e1810', label3: '#7a6a50', mystery: '#b07d1e'
+};
+
+// Deepest consecutively-revealed rank index (kingdom-anchored).
+function deepestRevealedIdx() {
+  let d = -1;
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (revealedLevels.has(LEVELS[i])) d = i; else break;
+  }
+  return d;
+}
+
+function warmthColor(prox) {
+  return prox >= 70 ? LIFE.green : prox >= 40 ? LIFE.amber : LIFE.red;
+}
+
+// Build a shared trie of all guesses + a synthetic "mystery" lineage.
+// The mystery path uses the target's real values only up to the deepest
+// revealed rank (so it merges with matching guesses on the confirmed
+// trunk); beyond that it uses unique sentinels so nothing else leaks.
+function buildLifeTrie(guessList, newest) {
+  const root = { level: null, value: null, children: [], leaf: null, onMystery: true };
+  function insert(animal, opts) {
+    let node = root;
+    for (const lv of LEVELS) {
+      const raw = (animal[lv] || '').trim();
+      let child = node.children.find(c => c.level === lv && c.value === raw);
+      if (!child) {
+        child = { level: lv, value: raw, children: [], leaf: null, onMystery: false, isNew: opts.isNew };
+        node.children.push(child);
+      }
+      if (opts.mystery) child.onMystery = true;
+      node = child;
+    }
+    node.leaf = animal;
+    if (opts.mystery) { node.isMystery = true; }
+    node.prox = opts.prox;
+    node.isNew = opts.isNew;
+    return node;
+  }
+
+  // Guesses (newest first in `guesses`; insert so structure is stable)
+  for (const g of guessList) {
+    insert(g, { prox: calcProximity(g, target, animals), isNew: g === newest, mystery: false });
+  }
+
+  // Mystery lineage
+  const dRev = deepestRevealedIdx();
+  let node = root;
+  for (let i = 0; i <= dRev; i++) {
+    const lv = LEVELS[i];
+    const raw = (target[lv] || '').trim();
+    let child = node.children.find(c => c.level === lv && c.value === raw);
+    if (!child) {
+      child = { level: lv, value: raw, children: [], leaf: null, onMystery: false };
+      node.children.push(child);
+    }
+    child.onMystery = true;
+    node = child;
+  }
+  // Only float a separate mystery tip while the answer is still unknown.
+  // Once guessed, the answer's own leaf becomes the celebratory champion.
+  const targetGuessed = guessList.some(g => g.scientific_name === target.scientific_name);
+  if (!targetGuessed) {
+    const tip = {
+      level: 'species', value: 'MYSTERY', children: [], onMystery: true,
+      isMysteryLeaf: true, prox: 100,
+      leaf: { isMystery: true, common_name: gameOver ? (target.common_name || 'Mystery') : '???' }
+    };
+    node.children.push(tip);
+  }
+  return { root, dRev };
+}
+
+function layoutLifeTrie(root, rowH) {
+  const leaves = [];
+  (function collect(n) { if (n.leaf) { leaves.push(n); return; } n.children.forEach(collect); })(root);
+  leaves.forEach((n, i) => { n.y = i * rowH + rowH / 2; });
+  (function prop(n) {
+    if (n.leaf) return;
+    n.children.forEach(prop);
+    n.y = (n.children[0].y + n.children[n.children.length - 1].y) / 2;
+  })(root);
+  return leaves.length;
+}
+
+function renderTreeOfLife() {
+  const el = document.getElementById('treeContainer');
+  if (!el) return;
+
+  const hasGuesses = guesses.length > 0;
+
+  // Geometry
+  const SVG_W   = Math.min(460, Math.max(240, el.clientWidth || 264));
+  const PAD_L   = 10;
+  const PAD_R   = 6;
+  const LABEL_W = Math.round(SVG_W * 0.40);
+  const TREE_W  = SVG_W - PAD_L - LABEL_W - PAD_R;
+  const ROW_H   = 30;
+
+  const newest = guesses[0] || null;
+  const { root, dRev } = buildLifeTrie(guesses, newest);
+  const leafCount = Math.max(layoutLifeTrie(root, ROW_H), 1);
+  const SVG_H = leafCount * ROW_H + 14;
+
+  function levelX(lv) {
+    const i = LEVELS.indexOf(lv);
+    return PAD_L + (i + 1) / LEVELS.length * TREE_W;
+  }
+  function taper(lv) {
+    const i = LEVELS.indexOf(lv);
+    return Math.max(1.5, 5.2 - i * 0.55);
+  }
+  function curve(px, py, cx, cy) {
+    const mx = px + (cx - px) * 0.55;
+    return `M${px.toFixed(1)},${py.toFixed(1)} C${mx.toFixed(1)},${py.toFixed(1)} ${mx.toFixed(1)},${cy.toFixed(1)} ${cx.toFixed(1)},${cy.toFixed(1)}`;
+  }
+
+  const parts = [
+    `<svg class="life-svg" width="${SVG_W}" height="${SVG_H}" viewBox="0 0 ${SVG_W} ${SVG_H}" role="img" aria-label="Tree of life showing your guesses branching toward today's mystery animal">`,
+    `<defs><filter id="lifeGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`
+  ];
+
+  // Root seed
+  parts.push(`<circle cx="${PAD_L}" cy="${root.y.toFixed(1)}" r="3.5" fill="${LIFE.mystery}"/>`);
+
+  const hoverNodes = [];
+
+  function branchColor(node) {
+    if (node.onMystery) return LIFE.gold;
+    if (node.level && revealedLevels.has(node.level) &&
+        (target[node.level] || '').toLowerCase() === (node.value || '').toLowerCase()) return LIFE.green;
+    return LIFE.tan;
+  }
+
+  function draw(node, parentX) {
+    if (!node.level) { node.children.forEach(c => draw(c, PAD_L)); return; }
+    const x  = node.leaf ? levelX('species') : levelX(node.level);
+    const col = branchColor(node);
+    const w   = node.onMystery ? taper(node.level) + 1.1 : taper(node.level);
+    const dash = node.onMystery && LEVELS.indexOf(node.level) > dRev ? ' stroke-dasharray="1 5" stroke-linecap="round"' : '';
+    const newCls = node.isNew ? ' class="life-branch-new"' : '';
+    const len = Math.abs(x - parentX) + Math.abs(node.y - (node.parentYref ?? node.y)) + 40;
+    const style = node.isNew ? ` style="--len:${len.toFixed(0)}"` : '';
+    const glow = node.onMystery ? ' filter="url(#lifeGlow)"' : '';
+
+    parts.push(`<path${newCls}${style} d="${curve(parentX, node.parentYref ?? node.y, x, node.y)}" fill="none" stroke="${col}" stroke-width="${w.toFixed(1)}"${dash}${glow} stroke-linejoin="round"/>`);
+
+    const isChampion = gameOver && node.leaf && node.leaf.scientific_name &&
+                       target && node.leaf.scientific_name === target.scientific_name;
+    if (node.leaf) {
+      if (node.isMysteryLeaf || node.leaf.isMystery || isChampion) {
+        // Mystery tip / champion: pulsing halo + star (blooms on game over)
+        const solved = gameOver;
+        const bloomCls = solved ? ' life-bloom' : '';
+        parts.push(`<circle class="life-ring" cx="${x}" cy="${node.y}" r="9" fill="none" stroke="${LIFE.gold}" stroke-width="1.4" opacity="0.7"/>`);
+        parts.push(`<text class="${'life-star' + bloomCls}" x="${x}" y="${(node.y + 5).toFixed(1)}" text-anchor="middle" font-size="15" filter="url(#lifeGlow)">${solved ? '⭐' : '❔'}</text>`);
+        const nm = isChampion ? (node.leaf.common_name || target.common_name)
+                 : gameOver ? (target.common_name || 'Mystery') : 'Mystery';
+        const disp = nm.length > 13 ? nm.slice(0, 12) + '…' : nm;
+        parts.push(`<text x="${x + 12}" y="${(node.y + 4).toFixed(1)}" font-size="11" font-weight="700" fill="${LIFE.mystery}">${disp}</text>`);
+      } else {
+        const prox = node.prox ?? 0;
+        const c = warmthColor(prox);
+        const rNew = node.isNew ? ' class="life-leaf-new"' : '';
+        parts.push(`<circle${rNew} cx="${x}" cy="${node.y}" r="3.4" fill="${c}"/>`);
+        const nm = node.leaf.common_name || '';
+        const disp = nm.length > 13 ? nm.slice(0, 12) + '…' : nm;
+        parts.push(`<text x="${x + 8}" y="${(node.y + 3.5).toFixed(1)}" font-size="10" fill="${c}">${disp}</text>`);
+      }
+    } else {
+      // Internal node: small mark; recurse. Children curve from this node's center.
+      if (node.onMystery && node.level && revealedLevels.has(node.level)) {
+        parts.push(`<circle cx="${x}" cy="${node.y}" r="3" fill="${LIFE.gold}"/>`);
+        // wiki hover target on confirmed trunk ranks
+        if (node.level !== 'kingdom' && node.level !== 'species') {
+          hoverNodes.push({ x, y: node.y, taxon: node.value, level: node.level });
+        }
+      } else {
+        parts.push(`<circle cx="${x}" cy="${node.y}" r="2.2" fill="${col}"/>`);
+      }
+      node.children.forEach(child => { child.parentYref = node.y; draw(child, x); });
+    }
+  }
+  root.children.forEach(child => { child.parentYref = root.y; draw(child, PAD_L); });
+
+  parts.push('</svg>');
+
+  // Axis caption + legend teach the layout in plain language
+  const axis = `<div class="life-axis"><span>◀ broad groups</span><span>species ▶</span></div>`;
+  const legend = hasGuesses
+    ? `<div class="life-legend">
+         <span><i style="background:${LIFE.gold}"></i>answer's path</span>
+         <span><i style="background:${LIFE.green}"></i>very close</span>
+         <span><i style="background:${LIFE.amber}"></i>getting warm</span>
+         <span><i style="background:${LIFE.red}"></i>far off</span>
+       </div>`
+    : '';
+
+  if (!hasGuesses && !gameOver) {
+    el.innerHTML = `<div class="life-empty"><div style="font-size:1.6rem;margin-bottom:6px">🌱</div>
+      Every guess grows a branch.<br>The closer you get, the higher it climbs toward today's mystery animal.</div>` + parts.join('') + axis;
+  } else {
+    el.innerHTML = parts.join('') + axis + legend;
+  }
+
+  // Wire wiki tooltips on confirmed trunk ranks
+  wireLifeHovers(el, hoverNodes, SVG_W, SVG_H);
+}
+
+function wireLifeHovers(el, nodes, W, H) {
+  const svg = el.querySelector('.life-svg');
+  if (!svg || !nodes.length) return;
+  nodes.forEach(n => {
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', n.x - 6); rect.setAttribute('y', n.y - 12);
+    rect.setAttribute('width', 120); rect.setAttribute('height', 22);
+    rect.setAttribute('fill', 'transparent');
+    rect.style.cursor = 'pointer';
+    rect.setAttribute('pointer-events', 'all');
+    let t;
+    if (isTouchDevice()) {
+      rect.addEventListener('click', e => { e.stopPropagation(); showTaxonTooltip(n.taxon, n.level, rect); });
+    } else {
+      rect.addEventListener('mouseenter', () => { t = setTimeout(() => showTaxonTooltip(n.taxon, n.level, rect), 250); });
+      rect.addEventListener('mouseleave', () => { clearTimeout(t); hideTooltip(); });
+      rect.addEventListener('mousemove', () => positionTooltip(rect));
+    }
+    svg.appendChild(rect);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
 // FIELD NOTES
 // ═══════════════════════════════════════════════════════
 function renderHints(forceAll) {
@@ -2629,7 +2936,15 @@ function renderHints(forceAll) {
 
   const dietLabel = inferDiet(target);
   dietEl.innerHTML    = showDiet    ? `<strong>${dietLabel}</strong>` : '<span class="hint-locked">———</span>';
-  contEl.innerHTML    = showRange   ? renderRangePips(target.continents)             : '<span class="hint-locked">———</span>';
+  if (showRange) {
+    let rangeHtml = renderRangePips(target.continents);
+    if (target.range_text) {
+      rangeHtml += `<div style="font-size:0.78rem;color:var(--label2);margin-top:4px;font-style:italic">${target.range_text}</div>`;
+    }
+    contEl.innerHTML = rangeHtml;
+  } else {
+    contEl.innerHTML = '<span class="hint-locked">———</span>';
+  }
   habitatEl.innerHTML = showHabitat ? `<strong>${inferHabitat(target)}</strong>`     : '<span class="hint-locked">———</span>';
 
   const parts = [];
@@ -3387,6 +3702,79 @@ function revealLetter() {
 }
 
 // ═══════════════════════════════════════════════════════
+// SMART SEARCH — understands casual words, descriptions & typos
+// ═══════════════════════════════════════════════════════
+// Casual-word → group tests. Lets people who don't know exact
+// animal names search by what they mean ("big cat", "shark", "bird").
+const GROUP_TERMS = [
+  { terms: ['cat','cats','kitty','feline','big cat','wildcat'], label: 'cat family', test: a => a.family === 'Felidae' },
+  { terms: ['dog','dogs','puppy','canine','wolf','fox'],        label: 'dog family', test: a => a.family === 'Canidae' },
+  { terms: ['bear','bears'],            label: 'bear',        test: a => a.family === 'Ursidae' },
+  { terms: ['monkey','ape','primate','monkeys','apes'], label: 'primate', test: a => a.order === 'Primates' },
+  { terms: ['bird','birds'],            label: 'bird',        test: a => a.class === 'Aves' },
+  { terms: ['owl','hawk','eagle','raptor','bird of prey','falcon'], label: 'bird of prey', test: a => /owl|hawk|eagle|falcon|kite|vulture|osprey/.test(a._name) },
+  { terms: ['fish','fishes'],           label: 'fish',        test: a => a.class === 'Actinopterygii' || a.class === 'Sarcopterygii' },
+  { terms: ['shark','sharks'],          label: 'shark',       test: a => /shark/.test(a._name) || a.class === 'Chondrichthyes' },
+  { terms: ['whale','dolphin','porpoise','cetacean','orca'], label: 'whale / dolphin', test: a => /whale|dolphin|porpoise|orca/.test(a._name) },
+  { terms: ['snake','snakes','serpent'],label: 'snake',       test: a => /snake|python|viper|cobra|boa|adder|mamba/.test(a._name) },
+  { terms: ['lizard','lizards','gecko','iguana'], label: 'lizard', test: a => /lizard|gecko|iguana|skink|monitor|chameleon/.test(a._name) },
+  { terms: ['frog','toad','amphibian'], label: 'amphibian',   test: a => a.class === 'Amphibia' },
+  { terms: ['turtle','tortoise'],       label: 'turtle',      test: a => /turtle|tortoise|terrapin/.test(a._name) },
+  { terms: ['spider','arachnid'],       label: 'arachnid',    test: a => a.class === 'Arachnida' },
+  { terms: ['insect','bug','beetle'],   label: 'insect',      test: a => a.class === 'Insecta' },
+  { terms: ['deer','elk','moose'],      label: 'deer family', test: a => a.family === 'Cervidae' },
+  { terms: ['horse','pony','equine'],   label: 'horse family',test: a => a.family === 'Equidae' },
+  { terms: ['rabbit','bunny','hare'],   label: 'rabbit / hare',test: a => a.family === 'Leporidae' },
+  { terms: ['rodent','mouse','mice','rat','rats'], label: 'rodent', test: a => a.order === 'Rodentia' },
+  { terms: ['crab','lobster','shrimp','crustacean'], label: 'crustacean', test: a => a.class === 'Malacostraca' },
+];
+
+// Precompute a lowercase search blob per animal, once, at load.
+function buildSearchIndex() {
+  for (const a of animals) {
+    a._name = (a.common_name || '').toLowerCase();
+    a._sci  = (a.scientific_name || '').toLowerCase();
+    const bits = [
+      a._name, a._sci,
+      (a.class || '').toLowerCase(), (a.order || '').toLowerCase(),
+      (a.family || '').toLowerCase(), (a.diet || '').toLowerCase(),
+      (a.continents || []).join(' ').toLowerCase(),
+      (a.notes || '').toLowerCase()
+    ];
+    a._blob = bits.join(' · ');
+  }
+}
+
+// Cheap bounded edit distance (early-exits above `max`).
+function editDist(x, y, max) {
+  const n = x.length, m = y.length;
+  if (Math.abs(n - m) > max) return max + 1;
+  let prev = Array.from({ length: m + 1 }, (_, i) => i);
+  for (let i = 1; i <= n; i++) {
+    let cur = [i]; let best = i;
+    for (let j = 1; j <= m; j++) {
+      const cost = x[i - 1] === y[j - 1] ? 0 : 1;
+      const v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+      cur[j] = v; if (v < best) best = v;
+    }
+    if (best > max) return max + 1;
+    prev = cur;
+  }
+  return prev[m];
+}
+
+// Why did a non-name match surface? Keep it short and human.
+function matchReason(a, q) {
+  if ((a.diet || '').toLowerCase().includes(q)) return 'eats ' + a.diet.toLowerCase();
+  const cont = (a.continents || []).find(c => c.toLowerCase().includes(q));
+  if (cont) return 'lives in ' + cont;
+  for (const lv of ['family','order','class']) {
+    if ((a[lv] || '').toLowerCase().includes(q)) return a[lv];
+  }
+  return 'in description';
+}
+
+// ═══════════════════════════════════════════════════════
 // AUTOCOMPLETE
 // ═══════════════════════════════════════════════════════
 function scoreMatch(a, q) {
@@ -3415,26 +3803,63 @@ function updateAutocomplete(query) {
   if (q.length < 1) { filteredList = []; list.classList.remove('open'); return; }
 
   const done = new Set(guesses.map(g => g.scientific_name.toLowerCase()));
-  // Search all animals (not just currentPool) so users can always guess any animal
-  // Apply taxonomic filter only when user has explicitly enabled it
-  const searchPool = taxonFilterEnabled ? animals.filter(animalMatchesRevealedTaxonomy) : animals;
-  const matched = searchPool.filter(a => {
-    const cn  = a.common_name.toLowerCase();
-    const sci = a.scientific_name.toLowerCase();
-    return (cn.includes(q) || sci.includes(q)) && !done.has(sci);
-  });
-  matched.sort((a, b) => {
-    const d = scoreMatch(a, q) - scoreMatch(b, q);
-    return d !== 0 ? d : a.common_name.localeCompare(b.common_name);
-  });
-  filteredList = matched.slice(0, 12);
+  // Search all animals (not just currentPool) so users can always guess any animal.
+  const pool = taxonFilterEnabled ? animals.filter(animalMatchesRevealedTaxonomy) : animals;
+
+  // Merge signals into one ranked set. Lower score = better match.
+  const seen = new Map(); // sci -> { a, score, reason }
+  const consider = (a, score, reason) => {
+    if (done.has(a._sci)) return;
+    const prev = seen.get(a._sci);
+    if (!prev || score < prev.score) seen.set(a._sci, { a, score, reason });
+  };
+
+  // 1) Direct name matches (exact / prefix / word-prefix / substring)
+  for (const a of pool) {
+    if (a._name.includes(q) || a._sci.includes(q)) consider(a, scoreMatch(a, q), null);
+  }
+
+  // 2) Typo tolerance on names — a strong signal, so it ranks just under
+  //    direct hits. Only kicks in when exact hits are scarce.
+  const strong = [...seen.values()].filter(r => r.score <= 3).length;
+  if (q.length >= 4 && strong < 5) {
+    const maxD = q.length >= 6 ? 2 : 1;
+    for (const a of pool) {
+      if (seen.has(a._sci)) continue;
+      const cands = [a._name, ...a._name.split(/[\s\-]+/)];
+      if (cands.some(w => w.length >= 4 && editDist(w, q, maxD) <= maxD))
+        consider(a, 15, 'did you mean?');
+    }
+  }
+
+  // 3) Casual group words — "big cat", "shark", "bird", "monkey"…
+  const qStem = q.replace(/s$/, '');
+  for (const g of GROUP_TERMS) {
+    if (!g.terms.some(t => t === q || t === qStem || q.includes(t))) continue;
+    for (const a of pool) { if (g.test(a)) consider(a, 30, g.label); }
+  }
+
+  // 4) Description / trait / place matches (diet, range, notes, taxonomy)
+  if (q.length >= 3) {
+    for (const a of pool) {
+      if (seen.has(a._sci)) continue;
+      if (a._blob.includes(q)) consider(a, 50, matchReason(a, q));
+    }
+  }
+
+  const results = [...seen.values()].sort((x, y) =>
+    x.score - y.score || x.a.common_name.localeCompare(y.a.common_name)).slice(0, 12);
+  filteredList = results.map(r => r.a);
 
   list.innerHTML = '';
   if (!filteredList.length) { list.classList.remove('open'); return; }
-  filteredList.forEach(a => {
+  results.forEach(({ a, reason }) => {
     const item = document.createElement('div');
     item.className = 'autocomplete-item';
-    item.innerHTML = `<span class="cn">${a.common_name}</span><span class="sci">${a.scientific_name}</span>`;
+    const right = reason
+      ? `<span class="ac-reason">${reason}</span>`
+      : `<span class="sci">${a.scientific_name}</span>`;
+    item.innerHTML = `<span class="cn">${a.common_name}</span>${right}`;
     item.addEventListener('mousedown', e => { e.preventDefault(); submitGuess(a); });
     list.appendChild(item);
   });
@@ -3643,6 +4068,9 @@ async function init() {
   ['phylum','class','order','family','genus'].forEach(lv => {
     taxonIndex[lv] = [...new Set(animals.map(a => a[lv]).filter(Boolean))].sort();
   });
+
+  // Precompute the smart-search index once (casual words, traits, typos)
+  buildSearchIndex();
 
   difficultyPools = buildDifficultyPools();
   startDailyRound();
